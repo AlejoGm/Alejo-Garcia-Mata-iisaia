@@ -143,7 +143,7 @@
             border-radius: 8px; font-size: 0.95rem; color: #991b1b;
         }
 
-        /* Paso: Addons */
+        /* Paso: Addons (3x5) */
         .addons-dashboard { display: flex; flex-direction: column; gap: 1rem; }
         .addons-header-info {
             display: flex;
@@ -234,9 +234,7 @@
         const addonsCatalogo = [
             { name: "Blockchain", price: 34 }, { name: "Feng Shui", price: 7 }, { name: "Karaoke", price: 19 }, { name: "Antivirus", price: 23 }, { name: "Riego", price: 5 },
             { name: "Tarot", price: 16 }, { name: "Dark Mode", price: 3 }, { name: "Veterinaria", price: 28 }, { name: "Fax", price: 9 }, { name: "Quantum", price: 37 },
-            { name: "Sommelier", price: 14 }, { name: "Backup", price: 21 }, { name: "Astrología", price: 6 }, { name: "CDN", price: 31 }, { name: "Yoga", price: 11 },
-            { name: "Metaverso", price: 26 }, { name: "Cerrajería", price: 8 }, { name: "Webhooks", price: 18 }, { name: "Drones", price: 33 }, { name: "Hipnosis", price: 4 },
-            { name: "Contaduría", price: 24 }, { name: "Ajedrez", price: 13 }, { name: "Clima", price: 29 }, { name: "Podcast", price: 15 }, { name: "Exorcismo", price: 22 }
+            { name: "Sommelier", price: 14 }, { name: "Exorcismo", price: 22 }, { name: "Astrología", price: 6 }, { name: "CDN", price: 31 }, { name: "Drones", price: 33 }
         ];
 
         // --- 2. Estado Global ---
@@ -248,7 +246,7 @@
             password: '',
             reglasVisibles: 1,
             passwordVisible: false,
-            addons: Array(25).fill(false)
+            addons: Array(15).fill(false)
         };
 
         let eyeTimeout = null;
@@ -260,7 +258,7 @@
             confirmado: '¡Cuenta confirmada!'
         };
 
-        // --- 3. Lógica del juego Lights Out para Addons ---
+        // --- 3. Lógica del juego Lights Out para Addons (3 filas x 5 columnas) ---
         function toggleAddonCell(index) {
             const row = Math.floor(index / 5);
             const col = index % 5;
@@ -277,7 +275,7 @@
             ];
 
             vecinos.forEach(v => {
-                if (v.r >= 0 && v.r < 5 && v.c >= 0 && v.c < 5) {
+                if (v.r >= 0 && v.r < 3 && v.c >= 0 && v.c < 5) {
                     const vIndex = v.r * 5 + v.c;
                     estado.addons[vIndex] = !estado.addons[vIndex];
                 }
@@ -287,12 +285,12 @@
         function inicializarAddons() {
             do {
                 estado.addons.fill(false);
-                // Aplicar 10 clicks al azar
-                for (let i = 0; i < 10; i++) {
-                    const randomIndex = Math.floor(Math.random() * 25);
+                // Aplicar 4 clicks al azar
+                for (let i = 0; i < 4; i++) {
+                    const randomIndex = Math.floor(Math.random() * 15);
                     toggleAddonCell(randomIndex);
                 }
-                // Repetir si quedaron todas en false (evita grillas vacías sin puzzle)
+                // Repetir si quedaron todas en false
             } while (estado.addons.every(val => !val));
         }
 
@@ -421,7 +419,7 @@
                     if (contratado) totalMensual += addonsCatalogo[idx].price;
                 });
 
-                const isOverBudget = totalMensual > 0; // Saldo disponible es fijo en $0, por lo que cualquier gasto > 0 supera el saldo y se pone en rojo
+                const isOverBudget = totalMensual > 0;
 
                 html += `<div class="addons-dashboard">`;
                 html += `<div class="addons-header-info">`;
@@ -441,7 +439,6 @@
                 });
                 html += `</div></div>`;
 
-                // Se habilita cuando el total es $0
                 disableBtn = (totalMensual !== 0);
 
             } else {
@@ -540,7 +537,7 @@
                 render();
             } else if (estado.paso === 'password') {
                 estado.paso = 'addons';
-                inicializarAddons(); // Inicializamos el puzzle de addons al entrar al paso
+                inicializarAddons();
                 render();
             } else if (estado.paso === 'addons') {
                 estado.paso = 'confirmado';

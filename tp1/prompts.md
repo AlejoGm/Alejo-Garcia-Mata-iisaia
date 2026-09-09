@@ -211,3 +211,23 @@ Continuar se habilita cuando el total es $0, y pasa `estado.paso` a
 **Por qué el párrafo de la generación:** en una grilla de 5x5 solo una de cada cuatro configuraciones de Lights Out tiene solución. Generada al azar, tarde o temprano le toca a alguien un plan gratis inalcanzable, y eso no es bad UI: es un bug. Generarla aplicando clicks sobre la grilla apagada garantiza que el camino de vuelta existe, porque es el mismo camino.
 
 **Qué devolvió:** el paso completo y andando. Generé 300 grillas y verifiqué con un solver que las 300 tuvieran solución, y que ninguna arrancara ya resuelta. El flujo entero cierra: la contraseña abre un plan de $253 con nueve addons puestos por la página, que se apaga en seis clicks.
+
+---
+
+## 5 — Bajar la dificultad del puzzle
+
+```
+Achicá la grilla de addons a 3 filas por 5 columnas, 15 addons. Dejá
+estos, en este orden:
+
+Blockchain $34   Feng Shui $7    Karaoke $19     Antivirus $23   Riego $5
+Tarot $16        Dark Mode $3    Veterinaria $28 Fax $9          Quantum $37
+Sommelier $14    Exorcismo $22   Astrología $6   CDN $31         Drones $33
+
+Y en la generación del estado inicial, bajá de 10 clicks aleatorios
+a 4. El resto de la mecánica no cambia.
+```
+
+**Qué intentaba lograr:** el 5x5 era injugable. Antes de tocarlo medí de dónde venía la dificultad y no era el tamaño: era la generación. Con 10 clicks la solución mínima era de 8, y con 4 baja a 4 sin importar si la grilla es de 15 o de 25 celdas. Achiqué igual porque escanear 25 celdas abruma, y de paso la grilla entra en pantalla junto con el botón.
+
+**Qué devolvió:** los tres cambios, sin tocar el resto. Generé 150 grillas y las verifiqué con un solver exhaustivo: todas resolubles, ninguna arranca resuelta, entre 2 y 4 clicks. El recorrido completo cierra: la contraseña abre un plan de $132 que se apaga en cuatro clicks.
