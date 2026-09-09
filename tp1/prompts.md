@@ -92,3 +92,49 @@ pase `estado.paso` a "password".
 **Qué intentaba lograr:** cerrar el paso 1 con la transición al 2 ya cableada, y tapar el `undefined` que había quedado del prompt anterior.
 
 **Qué devolvió:** las dos correcciones. Probé los cuatro casos del botón: incompleto, dígito primero, espacio primero y letra primera. Solo el último lo habilita.
+
+---
+
+## 2 — El paso password (Patrón 2: iterar sobre el estado)
+
+```
+Agregale el paso password.
+
+Estado nuevo: `password` (string) y `reglasVisibles` (número, arranca
+en 1). Un <input type="text"> y debajo la lista de reglas visibles,
+cada una tachada cuando se cumple.
+
+Cuando todas las reglas visibles se cumplen a la vez, `reglasVisibles`
+sube en 1 y aparece la siguiente. Una regla revelada no se oculta más.
+
+Las 10 reglas en orden:
+1. Empieza con una letra.
+2. Mínimo 15 caracteres.
+3. Al menos un símbolo de !@#$%^&*()-
+4. Más de 7 dígitos en total.
+5. No puede tener dos consonantes seguidas (sin distinguir mayúsculas;
+   la "y" cuenta como consonante).
+6. No puede tener dos caracteres iguales seguidos.
+7. No puede tener dos dígitos consecutivos en valor uno al lado del
+   otro: ni "12" ni "21", ni "89" ni "98".
+8. No puede tener una corrida de exactamente 3 dígitos seguidos.
+   Corridas de 1, 2, 4 o más están permitidas.
+9. Termina con un dígito que aparece una sola vez en toda la
+   contraseña.
+10. La cantidad de caracteres de la contraseña tiene que aparecer
+    dentro de ella como una corrida de dígitos aislada. Si la
+    contraseña mide 17, tiene que haber un "17" con no-dígitos a
+    ambos lados (o contra el borde).
+
+Con las 10 cumplidas, Continuar se habilita y pasa `estado.paso` a
+"addons".
+Sólo mostrar la regla cuando no se cumple
+```
+
+**Qué intentaba lograr:** que las reglas se revelen de a una y que la última sea auto-referencial — al agregar un carácter para cumplirla, la longitud cambia y la regla se rompe sola.
+
+**Por qué escribí las reglas así de explícitas:** antes de mandar el prompt verifiqué en Python que el set tuviera solución. Una versión anterior era irresoluble: pedía que la longitud apareciera como corrida aislada mientras otra regla prohibía las corridas de exactamente 2 dígitos, y como toda longitud entre 15 y 99 tiene dos dígitos, no había contraseña posible. Una bad UI sin solución no es bad UI, es un bug.
+
+**Qué devolvió:** las diez reglas implementadas y el paso funcionando. Guardó y restauró la posición del cursor en cada render, que no le pedí y sin lo cual escribir sería imposible, porque el `innerHTML` destruye el input en cada tecla.
+
+Probé escribiendo `f51at28g26*ul0&17` carácter por carácter: las diez reglas se revelan en orden y el botón se habilita. Encontré un agujero: el regex de consonantes no incluye la `ñ`, así que `bñcñdñf` pasa la regla 5 usando la `ñ` como separador. Mi prompt aclaró la `y` y se olvidó de la `ñ`.
