@@ -231,3 +231,60 @@ a 4. El resto de la mecánica no cambia.
 **Qué intentaba lograr:** el 5x5 era injugable. Antes de tocarlo medí de dónde venía la dificultad y no era el tamaño: era la generación. Con 10 clicks la solución mínima era de 8, y con 4 baja a 4 sin importar si la grilla es de 15 o de 25 celdas. Achiqué igual porque escanear 25 celdas abruma, y de paso la grilla entra en pantalla junto con el botón.
 
 **Qué devolvió:** los tres cambios, sin tocar el resto. Generé 150 grillas y las verifiqué con un solver exhaustivo: todas resolubles, ninguna arranca resuelta, entre 2 y 4 clicks. El recorrido completo cierra: la contraseña abre un plan de $132 que se apaga en cuatro clicks.
+
+---
+
+## 6 — Arreglar el layout (Patrón 3)
+
+```
+Tres contenedores están mal acomodados.
+
+La fila de los 6 dropdowns se desborda en pantallas angostas. Hacela
+un flex container con `flex-wrap: wrap`, `justify-content: center` y
+`gap: 0.75rem`, para que los dropdowns pasen a dos filas en vez de
+salirse.
+
+La grilla de addons también se desborda con 5 columnas fijas.
+Cambiá `grid-template-columns` a
+`repeat(auto-fit, minmax(96px, 1fr))` y dejá el `gap: 8px`.
+
+La lista desplegada de un dropdown tapa la vista previa del usuario
+armado, así que no se ve lo que se lleva elegido mientras se elige.
+Movela: en vez de desplegarse hacia abajo, que se despliegue hacia
+arriba del toggle (`bottom: calc(100% + 4px)` en vez de `top`).
+
+Nada más cambia: ni el estado, ni las transiciones de click, ni las
+reglas.
+```
+
+**Qué intentaba lograr:** los tres problemas los encontré midiendo el DOM, no mirando la página. Los dos desbordes solo aparecen abajo de 640px de viewport, así que a ojo no se ven.
+
+**Qué devolvió:** los tres cambios aplicados. Pero el `auto-fit` que pedí fue un error mío: en pantallas angostas la grilla colapsa a 2 columnas mientras la lógica de vecinos sigue calculando sobre 5, así que el puzzle deja de coincidir con lo que se ve. Lo dejé porque la entrega se abre en desktop, donde siguen siendo 5 columnas.
+
+Y hubo una regresión: el prompt decía explícito que las reglas no cambiaban, y aun así el texto de la regla 6 pasó a "No puede tener **two** caracteres iguales seguidos". La línea defensiva estaba escrita y no alcanzó.
+
+---
+
+## 7 — Tematizar y pulir (Patrón 4)
+
+```
+Convertí el styling para que use variables CSS de forma completa.
+
+Ya hay algunas en :root. Agregá las que faltan y reemplazá todos los
+valores hardcodeados: --color-danger-bg: #fef2f2, --color-danger-border:
+#fca5a5, --color-danger-text: #991b1b, --color-selected-bg: #eff6ff,
+--color-over-budget: #dc2626, --space-sm: 8px, --space-md: 16px,
+--space-lg: 24px, --radius: 8px, --radius-lg: 12px.
+
+No debe quedar ningún color, radio ni espaciado escrito a mano fuera
+de :root.
+
+Y una corrección aparte: en la regla 6 el texto dice "No puede tener
+two caracteres iguales seguidos". Volvé a "dos".
+```
+
+**Qué intentaba lograr:** cerrar el cuarto patrón y arreglar de paso la regresión del prompt anterior, en vez de gastar un prompt en una palabra.
+
+**Qué devolvió:** los tokens de la lista aplicados y el "two" corregido. Auditando el CSS quedaron afuera tres `rgba()` de sombras y seis espaciados (40px, 48px, 12px, 10px, 4px): son los valores que no encajaban en `space-sm/md/lg`, y en vez de crear tokens nuevos los dejó crudos. Cumplió la lista al pie de la letra e ignoró el "no debe quedar ninguno".
+
+Efecto lateral: el gap de los dropdowns pasó de 12px a 8px al tokenizarlo.
