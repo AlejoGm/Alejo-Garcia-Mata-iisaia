@@ -73,3 +73,22 @@ como "␣".
 **Por qué las tres líneas de click:** son la ida y **dos** vueltas — completar la selección y cancelarla. Nombrar solo la ida deja al modelo inventando cómo se sale del estado, y lo normal es que no haya forma de cerrar sin quedarte con un carácter que no querías.
 
 **Qué devolvió:** el estado consolidado, las tres transiciones correctas, y los dropdowns hechos con divs en lugar de `<select>` — tenía un prompt escrito para forzar eso y no hizo falta. Verifiqué que los seis órdenes fueran independientes: la "A" cayó en las posiciones 74, 64, 19, 54, 62 y 85. Se adelantó al prompt siguiente habilitando el botón "Continuar", a medias y sin handler.
+
+---
+
+## 1c — Cerrar el paso usuario
+
+```
+Dos cosas.
+
+`titulos` no cubre "confirmado" y ahí el título renderiza undefined.
+Que los cuatro valores de `paso` tengan título.
+
+El botón Continuar se habilita pero no hace nada. Que además de los 6
+caracteres pida que el primero sea letra (A-Z o a-z), y que al click
+pase `estado.paso` a "password".
+```
+
+**Qué intentaba lograr:** cerrar el paso 1 con la transición al 2 ya cableada, y tapar el `undefined` que había quedado del prompt anterior.
+
+**Qué devolvió:** las dos correcciones. Probé los cuatro casos del botón: incompleto, dígito primero, espacio primero y letra primera. Solo el último lo habilita.
