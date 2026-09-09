@@ -5,15 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nimbus - Registro</title>
     <style>
-        /* Variables de color y tipografía para un estilo SaaS moderno */
+        /* Variables de estilo SaaS */
         :root {
             --primary-blue: #2563eb;
+            --primary-hover: #1d4ed8;
             --text-dark: #111827;
             --text-muted: #6b7280;
             --bg-body: #f3f4f6;
             --bg-surface: #ffffff;
+            --bg-hover: #f9fafb;
             --border-color: #e5e7eb;
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         }
 
         body {
@@ -29,7 +32,6 @@
             box-sizing: border-box;
         }
 
-        /* Contenedor principal centrado de 640px */
         .container {
             width: 100%;
             max-width: 640px;
@@ -42,26 +44,11 @@
         }
 
         /* Header */
-        header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
+        header { text-align: center; margin-bottom: 2.5rem; }
+        header h1 { margin: 0; font-size: 2.25rem; color: var(--primary-blue); font-weight: 700; letter-spacing: -0.025em; }
+        header p { margin: 0.5rem 0 0; color: var(--text-muted); font-size: 1.1rem; }
 
-        header h1 {
-            margin: 0;
-            font-size: 2.25rem;
-            color: var(--primary-blue);
-            font-weight: 700;
-            letter-spacing: -0.025em;
-        }
-
-        header p {
-            margin: 0.5rem 0 0;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        /* Indicador de Progreso */
+        /* Progreso */
         .progress-container {
             display: flex;
             justify-content: space-between;
@@ -69,8 +56,6 @@
             margin-bottom: 3rem;
             padding: 0 1rem;
         }
-
-        /* Línea conectora de fondo */
         .progress-container::before {
             content: '';
             position: absolute;
@@ -82,7 +67,6 @@
             z-index: 1;
             transform: translateY(-50%);
         }
-
         .step {
             position: relative;
             z-index: 2;
@@ -93,10 +77,7 @@
             color: var(--text-muted);
             font-size: 0.875rem;
             font-weight: 500;
-            transition: all 0.3s ease;
         }
-
-        /* Estilo para el paso activo */
         .step.active {
             border-color: var(--primary-blue);
             color: var(--primary-blue);
@@ -104,49 +85,93 @@
             box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
         }
 
-        /* Contenido Principal */
-        main {
-            min-height: 200px; /* Altura mínima para mantener estructura mientras está vacío */
+        /* Main y Título */
+        main { min-height: 250px; margin-bottom: 2rem; }
+        main h2 { margin-top: 0; font-size: 1.5rem; font-weight: 600; margin-bottom: 2rem; text-align: center; }
+
+        /* Paso: Usuario - Dropdowns */
+        .dropdowns-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
             margin-bottom: 2rem;
         }
-
-        main h2 {
-            margin-top: 0;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
+        .dropdown {
+            position: relative;
+            width: 56px;
+            height: 56px;
         }
-
-        /* Footer y Botones */
-        footer {
+        .dropdown-toggle {
+            width: 100%;
+            height: 100%;
             display: flex;
-            justify-content: flex-end;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        button {
-            background-color: var(--primary-blue);
-            color: #ffffff;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 500;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            border: 2px solid var(--border-color);
             border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            color: var(--text-dark);
             cursor: pointer;
-            transition: opacity 0.2s ease, background-color 0.2s ease;
-            font-family: var(--font-family);
+            user-select: none;
+            transition: border-color 0.2s;
+        }
+        .dropdown-toggle:hover { border-color: var(--text-muted); }
+        .dropdown.open .dropdown-toggle { border-color: var(--primary-blue); }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        .dropdown.open .dropdown-menu { display: block; }
+        
+        .dropdown-item {
+            padding: 10px;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+        .dropdown-item:hover { background-color: var(--bg-hover); color: var(--primary-blue); }
+
+        /* Preview del Usuario */
+        .user-preview {
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 2rem;
+            letter-spacing: 0.5rem;
+            color: var(--text-dark);
+            padding: 1rem;
+            background: var(--bg-body);
+            border-radius: 8px;
+            border: 1px dashed var(--border-color);
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        button:disabled {
-            background-color: var(--text-muted);
-            opacity: 0.5;
-            cursor: not-allowed;
+        /* Footer y Botón */
+        footer { display: flex; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+        button {
+            background-color: var(--primary-blue); color: #ffffff; border: none;
+            padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 500;
+            border-radius: 8px; cursor: pointer; transition: opacity 0.2s;
         }
-
-        button:not(:disabled):hover {
-            opacity: 0.9;
-        }
+        button:disabled { background-color: var(--text-muted); opacity: 0.5; cursor: not-allowed; }
+        button:not(:disabled):hover { background-color: var(--primary-hover); }
     </style>
 </head>
 <body>
@@ -163,10 +188,7 @@
             <div class="step" data-step="addons">Plan</div>
         </div>
 
-        <main>
-            <h2 id="main-title">Elegí tu nombre de usuario</h2>
-            <!-- El contenido del formulario irá acá -->
-        </main>
+        <main id="app-root"></main>
 
         <footer>
             <button id="btn-continuar" disabled>Continuar</button>
@@ -174,46 +196,135 @@
     </div>
 
     <script>
-        // Estado global de la aplicación
-        // Valores posibles: 'usuario', 'password', 'addons', 'confirmado'
-        let paso = 'usuario';
+        // 1. Generación de datos estáticos y lógica de barajado
+        // ASCII imprimibles: 0x20 (32) a 0x7E (126). Total = 95.
+        const baseASCII = Array.from({ length: 95 }, (_, i) => String.fromCharCode(32 + i));
 
-        // Lógica para actualizar el DOM basándose en el estado `paso`
-        function renderProgress() {
-            const stepsElements = document.querySelectorAll('.step');
-            
-            stepsElements.forEach(stepEl => {
-                const stepName = stepEl.getAttribute('data-step');
-                
-                // Limpiamos las clases previas
-                stepEl.classList.remove('active');
-                
-                // Si el paso actual coincide con el elemento del DOM, lo destacamos
-                if (stepName === paso) {
-                    stepEl.classList.add('active');
-                }
-                
-                // Nota: Los otros pasos quedan visualmente "apagados" (estilo por defecto .step)
-                // como requiere la especificación.
-            });
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
         }
 
-        // Inicialización cuando carga el documento
-        document.addEventListener('DOMContentLoaded', () => {
-            renderProgress();
+        // 2. Estado centralizado
+        const estado = {
+            paso: 'usuario',    // 'usuario', 'password', 'addons', 'confirmado'
+            ordenes: Array.from({ length: 6 }, () => shuffleArray(baseASCII)), // 6 arrays barajados distintos
+            usuario: Array(6).fill(null), // Array de 6 posiciones
+            abierto: null       // Índice del dropdown abierto (0 a 5) o null
+        };
+
+        // 3. Helpers de UI
+        const titulos = {
+            usuario: 'Elegí tu nombre de usuario',
+            password: 'Creá una contraseña',
+            addons: 'Seleccioná tu plan'
+        };
+
+        // Formatea el caracter para mostrar en pantalla, escapando HTML para evitar bugs
+        function formatChar(char) {
+            if (char === null) return '_';
+            if (char === ' ') return '␣';
+            // Escapar entidades HTML básicas por seguridad y correcta renderización (ej: <, >)
+            return char.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        // 4. Función central de renderizado
+        function render() {
+            // Actualizar indicador de progreso
+            document.querySelectorAll('.step').forEach(stepEl => {
+                const isActive = stepEl.getAttribute('data-step') === estado.paso;
+                stepEl.classList.toggle('active', isActive);
+            });
+
+            const root = document.getElementById('app-root');
+            
+            // Reconstruir el contenido del main basado en el estado
+            let html = `<h2>${titulos[estado.paso]}</h2>`;
+
+            if (estado.paso === 'usuario') {
+                html += `<div class="dropdowns-row">`;
+                
+                // Generar los 6 dropdowns
+                for (let i = 0; i < 6; i++) {
+                    const isOpen = estado.abierto === i;
+                    const charElegido = estado.usuario[i];
+                    
+                    html += `
+                        <div class="dropdown ${isOpen ? 'open' : ''}">
+                            <div class="dropdown-toggle" data-index="${i}">
+                                ${formatChar(charElegido)}
+                            </div>
+                            <div class="dropdown-menu">
+                                ${estado.ordenes[i].map(char => `
+                                    <div class="dropdown-item" data-index="${i}" data-code="${char.charCodeAt(0)}">
+                                        ${formatChar(char)}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+
+                // Preview abajo
+                const previewStr = estado.usuario.map(formatChar).join('');
+                html += `<div class="user-preview">${previewStr}</div>`;
+            } else {
+                html += `<p style="text-align:center; color:var(--text-muted);">Contenido en construcción...</p>`;
+            }
+
+            root.innerHTML = html;
+
+            // Actualizar botón continuar
+            const btn = document.getElementById('btn-continuar');
+            if (estado.paso === 'usuario') {
+                // Se habilita si el usuario completó los 6 caracteres
+                btn.disabled = estado.usuario.includes(null);
+            }
+        }
+
+        // 5. Delegación de Eventos
+        document.getElementById('app-root').addEventListener('click', (e) => {
+            if (estado.paso !== 'usuario') return;
+
+            // Click en el botón que abre/cierra el dropdown
+            const toggle = e.target.closest('.dropdown-toggle');
+            if (toggle) {
+                const index = parseInt(toggle.dataset.index, 10);
+                // Si estaba abierto el mismo, lo cierra. Si era otro o ninguno, abre este.
+                estado.abierto = (estado.abierto === index) ? null : index;
+                render();
+                return;
+            }
+
+            // Click en una opción del dropdown
+            const item = e.target.closest('.dropdown-item');
+            if (item) {
+                const index = parseInt(item.dataset.index, 10);
+                const charCode = parseInt(item.dataset.code, 10);
+                
+                estado.usuario[index] = String.fromCharCode(charCode);
+                estado.abierto = null; // Cierra al elegir
+                render();
+                return;
+            }
         });
 
-        // Simulación de cambio de estado (puedes usar esto más adelante para navegar)
-        function cambiarPaso(nuevoPaso) {
-            paso = nuevoPaso;
-            renderProgress();
-            
-            // Actualizar el título a modo de ejemplo si se cambia el paso
-            const mainTitle = document.getElementById('main-title');
-            if (paso === 'usuario') mainTitle.textContent = 'Elegí tu nombre de usuario';
-            if (paso === 'password') mainTitle.textContent = 'Creá una contraseña segura';
-            if (paso === 'addons') mainTitle.textContent = 'Seleccioná tu plan';
-        }
+        // Opcional: Cerrar el dropdown si se clickea en el fondo (fuera de un dropdown)
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown') && estado.abierto !== null) {
+                estado.abierto = null;
+                render();
+            }
+        });
+
+        // 6. Arranque inicial
+        document.addEventListener('DOMContentLoaded', render);
+
     </script>
 </body>
 </html>

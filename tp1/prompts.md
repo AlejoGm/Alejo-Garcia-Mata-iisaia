@@ -68,3 +68,67 @@ Lo que verifiqué:
 - Con `cambiarPaso("confirmado")`, que es uno de los cuatro valores que yo
   mismo declaré, no queda ningún paso destacado y el título se queda pegado
   en el anterior.
+
+---
+
+## 1b — Consolidar el estado y llenar el paso usuario (Patrón 2: iterar sobre el estado)
+
+```
+Dos cosas.
+
+Juntá el estado en un objeto `estado` y hacé una sola `render()` que
+dibuje todo desde ahí. Sacá `cambiarPaso`: el título sale de render(),
+no escrito en dos lados.
+
+Y llená el paso usuario: 6 dropdowns en fila, uno por carácter. Cada
+dropdown lista los 95 ASCII imprimibles (0x20-0x7E) en un orden
+barajado distinto para cada uno, generado una vez al cargar.
+
+Estado: `ordenes` (los 6 arrays), `usuario` (6 posiciones, char o null),
+`abierto` (índice desplegado o null).
+
+Click en dropdown cerrado abre y cierra el que estuviera abierto. Click
+en opción la escribe y cierra. Click en el ya abierto cierra sin elegir.
+
+Debajo, el usuario armado con "_" en los huecos. El espacio se muestra
+como "␣".
+```
+
+**Qué intentaba lograr:** dos cosas en un prompt, a propósito. Primero arreglar
+el desvío que había detectado en el 1a — el render partido en dos lugares — y
+recién después apilar la capa nueva encima. Si construía los seis dropdowns
+sobre el render roto, arreglarlo después iba a ser una regresión esperando.
+
+Las tres líneas de click son la ida y **dos** vueltas distintas: completar la
+selección, y cancelar sin elegir. Nombrar solo la ida deja al modelo inventando
+cómo se sale del estado, y lo más común es que no haya forma de cerrar el
+dropdown sin quedarse con un carácter que no querías.
+
+**Qué devolvió:** el estado consolidado en un objeto `estado`, una sola
+`render()` que dibuja desde ahí, y los seis dropdowns funcionando con las tres
+transiciones correctas.
+
+Lo interesante es lo que hizo sin que se lo pidiera: **construyó los dropdowns
+con divs en lugar de `<select>` nativo**. Yo tenía preparado un prompt para
+forzar ese cambio y no hizo falta. Con `<select>` el ejercicio se caía solo,
+porque el select del navegador permite saltar a una opción tipeando su primera
+letra y el orden barajado dejaba de importar.
+
+Agregó también dos cosas que no pedí: cerrar el dropdown al clickear fuera, y
+habilitar el botón "Continuar" cuando los seis caracteres están elegidos.
+
+**Qué hice con eso:** lo acepté, pero verificando primero lo que importaba:
+
+- Los seis órdenes son independientes de verdad. La letra "A" cayó en las
+  posiciones 74, 64, 19, 54, 62 y 85. Si hubieran salido iguales, el barajado
+  estaba compartido y la dificultad se evaporaba después del primer dropdown.
+- Cero `<select>` y cero `<datalist>` en todo el archivo.
+- Las tres transiciones de click andan: abrir cierra el que estuviera abierto,
+  elegir escribe y cierra, y volver a clickear el abierto lo cierra sin tocar
+  `usuario`.
+- 570 nodos `.dropdown-item` viven en el DOM permanentemente — 95 por dropdown,
+  los seis renderizados aunque estén cerrados.
+
+Y dos problemas que quedan abiertos, anotados en el README: el objeto `titulos`
+sigue sin cubrir el cuarto valor de `paso`, y el botón "Continuar" se habilita
+pero todavía no lleva a ningún lado.
