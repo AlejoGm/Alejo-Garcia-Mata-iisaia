@@ -8,7 +8,7 @@ Ingeniero electrónico, embedded engineer. Trabajo habitual en C/C++ sobre ESP32
 
 | Entrega | Carpeta | Estado |
 |---------|---------|--------|
-| TP 1 — Bad UI | [tp1/](tp1/) | en curso |
+| TP 1 — Bad UI: Nimbus | [tp1/](tp1/) | entregado |
 | TP 2 | tp2/ | pendiente |
 | Trabajo Práctico Final | tp-final/ | pendiente |
 
