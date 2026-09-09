@@ -54,6 +54,13 @@ carácter que no querías. Quiero que cueste, no que sea irreversible.
 **Prompts chicos en vez de uno grande.** Tres mecánicas independientes pedidas
 juntas me dejaban sin forma de saber cuál rompió qué.
 
+**Medir de dónde venía la dificultad antes de tocarla.** La grilla de 5x5 quedó
+injugable y lo primero que se me ocurrió fue achicarla. Antes de hacerlo medí:
+la dificultad no estaba en el tamaño sino en los diez clicks con los que se
+generaba. Con cuatro clicks, una grilla de 25 celdas y una de 15 cuestan lo
+mismo. Achiqué igual, pero por otro motivo — escanear 25 celdas abruma y así la
+grilla entra en pantalla junto al botón.
+
 ## Qué salió mal y cómo lo corregí
 
 **El código que no pedí fue el que trajo los bugs.** Pedí un esqueleto y llegó
@@ -61,14 +68,29 @@ además una función "para más adelante" que duplicaba un texto que ya estaba e
 el HTML. Según por qué camino cambiaras el estado, la pantalla acompañaba o se
 quedaba quieta. No lo vi leyendo el código: lo vi corriéndolo.
 
-**Corregirlo mudó el bug en lugar de cerrarlo.** Pedí centralizar el render y lo
-centralizó, pero la tabla de títulos quedó con tres entradas para un estado de
-cuatro valores, y el cuarto mostraba `undefined`. El modelo corrige exactamente
-lo que le señalás, y el problema real casi nunca es exactamente lo que señalaste.
+**Las instrucciones generales no se cumplen; las listas, sí.** Pasó tres veces.
+Pedí centralizar el render y lo centralizó, pero dejó un valor de estado sin
+cubrir que mostraba `undefined`. Un prompt de puro CSS decía "nada más cambia,
+ni las reglas" y aun así cambió el texto de una regla a medio inglés. El de
+tematizado decía "no debe quedar ningún valor escrito a mano" y tokenizó
+exactamente los diez de mi lista, dejando crudos los que no encajaban.
+
+Con tres casos deja de ser anécdota: el modelo cumple al pie de la letra lo que
+enumerás e ignora la instrucción general que lo acompaña. Las líneas defensivas
+sirven, pero solo para lo que nombran.
 
 **Una regla mía tenía un agujero.** Aclaré en el prompt que la "y" cuenta como
 consonante y me olvidé de la "ñ". El modelo hizo lo que pedí, así que quedaba
-una escapatoria para saltear esa regla. Apareció testeando, no leyendo.
+una escapatoria para saltear esa regla.
+
+**Y una decisión mía que salió mal.** Para que la grilla de addons no se
+desbordara en pantallas angostas pedí `grid-template-columns: auto-fit`. Anda,
+pero reacomoda la grilla a dos columnas mientras la lógica de vecinos sigue
+calculando sobre cinco: el puzzle deja de coincidir con lo que se ve. Lo dejé
+porque la entrega se abre en una compu, donde siguen siendo cinco.
+
+Ninguno de estos apareció leyendo el código. Salieron corriéndolo y midiendo el
+DOM.
 
 ## Prompts
 
