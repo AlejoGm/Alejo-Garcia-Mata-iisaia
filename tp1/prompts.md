@@ -138,3 +138,76 @@ Sólo mostrar la regla cuando no se cumple
 **Qué devolvió:** las diez reglas implementadas y el paso funcionando. Guardó y restauró la posición del cursor en cada render, que no le pedí y sin lo cual escribir sería imposible, porque el `innerHTML` destruye el input en cada tecla.
 
 Probé escribiendo `f51at28g26*ul0&17` carácter por carácter: las diez reglas se revelan en orden y el botón se habilita. Encontré un agujero: el regex de consonantes no incluye la `ñ`, así que `bñcñdñf` pasa la regla 5 usando la `ñ` como separador. Mi prompt aclaró la `y` y se olvidó de la `ñ`.
+
+---
+
+## 3 — Ocultar la contraseña y cerrar el agujero de la ñ
+
+```
+Dos cosas.
+
+En la regla 5, la "ñ" también cuenta como consonante.
+
+Y el input de contraseña ahora es type="password".
+
+Estado nuevo: `passwordVisible` (boolean, arranca en false). A la
+derecha del input, un botón con un ojo.
+
+Al click en el ojo: `passwordVisible` pasa a true, el input se vuelve
+type="text" y el ojo se tacha. Un segundo después vuelve solo a false
+y a type="password".
+
+Si se clickea el ojo mientras ya está visible, el segundo arranca de
+nuevo desde ese click.
+
+Escribir en el input no interrumpe el segundo.
+```
+
+**Qué intentaba lograr:** con diecisiete caracteres y diez reglas, no ver lo que escribís multiplica el dolor sin agregar ninguna trampa escondida.
+
+**Por qué la última línea:** sin ella el `render()` de cada tecla pisa el timer y el ojo se apaga apenas escribís una letra. Es un bug silencioso: nadie lo pide y siempre aparece.
+
+**Qué devolvió:** las dos cosas. Verifiqué que escribir con el ojo abierto no lo apaga. Efecto lateral que no pedí: al clickear el ojo se pierde el foco del input y hay que volver a clickear adentro para seguir escribiendo.
+
+---
+
+## 4 — El paso addons (Patrón 2: iterar sobre el estado)
+
+```
+Agregale el paso addons.
+
+Una grilla de 5x5 con 25 addons. Cada celda muestra el nombre y su
+precio mensual. Estos, en este orden:
+
+Blockchain $34   Feng Shui $7    Karaoke $19     Antivirus $23   Riego $5
+Tarot $16        Dark Mode $3    Veterinaria $28 Fax $9          Quantum $37
+Sommelier $14    Backup $21      Astrología $6   CDN $31         Yoga $11
+Metaverso $26    Cerrajería $8   Webhooks $18    Drones $33      Hipnosis $4
+Contaduría $24   Ajedrez $13     Clima $29       Podcast $15     Exorcismo $22
+
+Estado nuevo: `addons`, array de 25 booleanos — true es contratado.
+
+Arriba de la grilla: el saldo disponible, fijo en $0, y el total
+mensual de los addons contratados. El total en rojo si supera el
+saldo.
+
+Click en una celda: se invierte el estado de esa celda y el de sus
+vecinos de arriba, abajo, izquierda y derecha. Los vecinos que caen
+fuera de la grilla se ignoran. Es la mecánica del juego Lights Out.
+
+Generación del estado inicial: arrancá con las 25 en false y aplicá
+10 clicks en celdas al azar, usando la misma función que usa el
+click del usuario. No generes los 25 booleanos al azar de forma
+independiente: la mayoría de esas grillas no tiene solución y el
+paso quedaría imposible. Si después de los 10 clicks quedaron todas
+en false, repetí la generación.
+
+Continuar se habilita cuando el total es $0, y pasa `estado.paso` a
+"confirmado".
+```
+
+**Qué intentaba lograr:** invertir la lógica de cualquier página de precios. En vez de sumar lo que querés, tenés que restar todo — y restar prende cosas. El saldo fijo en $0 es lo que convierte "apagá todo" de capricho en consecuencia: la página te preseleccionó addons que nunca pediste y no cargaste un peso.
+
+**Por qué el párrafo de la generación:** en una grilla de 5x5 solo una de cada cuatro configuraciones de Lights Out tiene solución. Generada al azar, tarde o temprano le toca a alguien un plan gratis inalcanzable, y eso no es bad UI: es un bug. Generarla aplicando clicks sobre la grilla apagada garantiza que el camino de vuelta existe, porque es el mismo camino.
+
+**Qué devolvió:** el paso completo y andando. Generé 300 grillas y verifiqué con un solver que las 300 tuvieran solución, y que ninguna arrancara ya resuelta. El flujo entero cierra: la contraseña abre un plan de $253 con nueve addons puestos por la página, que se apaga en seis clicks.

@@ -87,7 +87,7 @@
 
         /* Main y Título */
         main { min-height: 250px; margin-bottom: 2rem; }
-        main h2 { margin-top: 0; font-size: 1.5rem; font-weight: 600; margin-bottom: 2rem; text-align: center; }
+        main h2 { margin-top: 0; font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; text-align: center; }
 
         /* Paso: Usuario - Dropdowns */
         .dropdowns-row {
@@ -124,17 +124,68 @@
 
         /* Paso: Contraseña */
         .pw-container { display: flex; flex-direction: column; gap: 1rem; }
+        .pw-wrapper { display: flex; gap: 0.5rem; align-items: stretch; }
         .pw-input {
-            width: 100%; padding: 0.75rem 1rem; font-size: 1.25rem; font-family: var(--font-mono);
+            flex: 1; padding: 0.75rem 1rem; font-size: 1.25rem; font-family: var(--font-mono);
             border: 2px solid var(--border-color); border-radius: 8px; box-sizing: border-box; outline: none;
             transition: border-color 0.2s; background: #fff;
         }
         .pw-input:focus { border-color: var(--primary-blue); }
+        .eye-btn {
+            background: #fff; border: 2px solid var(--border-color); border-radius: 8px;
+            padding: 0 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; transition: border-color 0.2s, background-color 0.2s;
+        }
+        .eye-btn:hover { border-color: var(--text-muted); background-color: var(--bg-hover); }
         .rules-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
         .rule-item {
             padding: 0.75rem 1rem; background-color: #fef2f2; border: 1px solid #fca5a5;
             border-radius: 8px; font-size: 0.95rem; color: #991b1b;
         }
+
+        /* Paso: Addons */
+        .addons-dashboard { display: flex; flex-direction: column; gap: 1rem; }
+        .addons-header-info {
+            display: flex;
+            justify-content: space-between;
+            background: var(--bg-body);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .total-price.over-budget { color: #dc2626; font-weight: 700; }
+        
+        .addons-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .addon-cell {
+            background-color: var(--bg-surface);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            min-height: 70px;
+        }
+        .addon-cell:hover { border-color: var(--text-muted); background-color: var(--bg-hover); }
+        .addon-cell.contratado {
+            background-color: #eff6ff;
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+        .addon-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .addon-price { font-size: 0.8rem; color: var(--text-muted); }
+        .addon-cell.contratado .addon-price { color: var(--primary-blue); opacity: 0.8; }
 
         /* Footer y Botón */
         footer { display: flex; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
@@ -169,7 +220,7 @@
     </div>
 
     <script>
-        // --- 1. Utilidades y Generación ---
+        // --- 1. Utilidades y Datos Estáticos ---
         const baseASCII = Array.from({ length: 95 }, (_, i) => String.fromCharCode(32 + i));
         function shuffleArray(array) {
             const arr = [...array];
@@ -180,6 +231,14 @@
             return arr;
         }
 
+        const addonsCatalogo = [
+            { name: "Blockchain", price: 34 }, { name: "Feng Shui", price: 7 }, { name: "Karaoke", price: 19 }, { name: "Antivirus", price: 23 }, { name: "Riego", price: 5 },
+            { name: "Tarot", price: 16 }, { name: "Dark Mode", price: 3 }, { name: "Veterinaria", price: 28 }, { name: "Fax", price: 9 }, { name: "Quantum", price: 37 },
+            { name: "Sommelier", price: 14 }, { name: "Backup", price: 21 }, { name: "Astrología", price: 6 }, { name: "CDN", price: 31 }, { name: "Yoga", price: 11 },
+            { name: "Metaverso", price: 26 }, { name: "Cerrajería", price: 8 }, { name: "Webhooks", price: 18 }, { name: "Drones", price: 33 }, { name: "Hipnosis", price: 4 },
+            { name: "Contaduría", price: 24 }, { name: "Ajedrez", price: 13 }, { name: "Clima", price: 29 }, { name: "Podcast", price: 15 }, { name: "Exorcismo", price: 22 }
+        ];
+
         // --- 2. Estado Global ---
         const estado = {
             paso: 'usuario',
@@ -187,8 +246,12 @@
             usuario: Array(6).fill(null),
             abierto: null,
             password: '',
-            reglasVisibles: 1
+            reglasVisibles: 1,
+            passwordVisible: false,
+            addons: Array(25).fill(false)
         };
+
+        let eyeTimeout = null;
 
         const titulos = {
             usuario: 'Elegí tu nombre de usuario',
@@ -197,14 +260,50 @@
             confirmado: '¡Cuenta confirmada!'
         };
 
-        // --- 3. Reglas de Contraseña ---
+        // --- 3. Lógica del juego Lights Out para Addons ---
+        function toggleAddonCell(index) {
+            const row = Math.floor(index / 5);
+            const col = index % 5;
+
+            // Invertir celda clickeada
+            estado.addons[index] = !estado.addons[index];
+
+            // Vecinos (Arriba, Abajo, Izquierda, Derecha)
+            const vecinos = [
+                { r: row - 1, c: col }, // Arriba
+                { r: row + 1, c: col }, // Abajo
+                { r: row, c: col - 1 }, // Izquierda
+                { r: row, c: col + 1 }  // Derecha
+            ];
+
+            vecinos.forEach(v => {
+                if (v.r >= 0 && v.r < 5 && v.c >= 0 && v.c < 5) {
+                    const vIndex = v.r * 5 + v.c;
+                    estado.addons[vIndex] = !estado.addons[vIndex];
+                }
+            });
+        }
+
+        function inicializarAddons() {
+            do {
+                estado.addons.fill(false);
+                // Aplicar 10 clicks al azar
+                for (let i = 0; i < 10; i++) {
+                    const randomIndex = Math.floor(Math.random() * 25);
+                    toggleAddonCell(randomIndex);
+                }
+                // Repetir si quedaron todas en false (evita grillas vacías sin puzzle)
+            } while (estado.addons.every(val => !val));
+        }
+
+        // --- 4. Reglas de Contraseña ---
         const reglas = [
             { id: 1, text: "Empieza con una letra.", check: pw => /^[a-zA-Z]/.test(pw) },
             { id: 2, text: "Mínimo 15 caracteres.", check: pw => pw.length >= 15 },
             { id: 3, text: "Al menos un símbolo de !@#$%^&*()-", check: pw => /[!@#$%^&*()-]/.test(pw) },
             { id: 4, text: "Más de 7 dígitos en total.", check: pw => (pw.match(/\d/g) || []).length > 7 },
-            { id: 5, text: "No puede tener dos consonantes seguidas (sin distinguir mayúsculas; la 'y' cuenta como consonante).", 
-              check: pw => !/[bcdfghjklmnpqrstvwxyz]{2}/i.test(pw) },
+            { id: 5, text: "No puede tener dos consonantes seguidas (sin distinguir mayúsculas; la 'y' y la 'ñ' cuentan como consonantes).", 
+              check: pw => !/[bcdfghjklmnpqrstvwxyzñ]{2}/i.test(pw) },
             { id: 6, text: "No puede tener dos caracteres iguales seguidos.", 
               check: pw => !/(.)\1/.test(pw) },
             { id: 7, text: "No puede tener dos dígitos consecutivos en valor uno al lado del otro: ni '12' ni '21', ni '89' ni '98'.", 
@@ -250,9 +349,8 @@
             return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        // --- 4. Renderizado Central ---
+        // --- 5. Renderizado Central ---
         function render() {
-            // Guardamos el foco y posición del cursor si estamos escribiendo la contraseña
             const activeEl = document.activeElement;
             const isPwFocused = activeEl && activeEl.id === 'pw-input';
             let cursorStart = null, cursorEnd = null;
@@ -261,7 +359,6 @@
                 cursorEnd = activeEl.selectionEnd;
             }
 
-            // Actualizar steps visuales
             document.querySelectorAll('.step').forEach(stepEl => {
                 const isActive = stepEl.getAttribute('data-step') === estado.paso;
                 stepEl.classList.toggle('active', isActive);
@@ -295,13 +392,18 @@
                 disableBtn = !(completo && empiezaConLetra);
 
             } else if (estado.paso === 'password') {
+                const inputType = estado.passwordVisible ? 'text' : 'password';
+                const eyeIcon = estado.passwordVisible ? '👁️‍🗨️' : '👁️';
+
                 html += `<div class="pw-container">`;
-                html += `<input type="text" id="pw-input" class="pw-input" value="${escapeHtml(estado.password)}" placeholder="Escribí acá tu contraseña..." autocomplete="off" spellcheck="false" />`;
+                html += `<div class="pw-wrapper">`;
+                html += `<input type="${inputType}" id="pw-input" class="pw-input" value="${escapeHtml(estado.password)}" placeholder="Escribí acá tu contraseña..." autocomplete="off" spellcheck="false" />`;
+                html += `<button type="button" id="eye-btn" class="eye-btn" title="Mostrar/Ocultar contraseña">${eyeIcon}</button>`;
+                html += `</div>`;
                 
                 html += `<ul class="rules-list">`;
                 let todasCumplen = true;
 
-                // Solo renderizamos las reglas que NO se cumplen
                 for (let i = 0; i < estado.reglasVisibles; i++) {
                     const cumple = reglas[i].check(estado.password);
                     if (!cumple) {
@@ -311,43 +413,92 @@
                 }
                 html += `</ul></div>`;
 
-                // El botón continuar se habilita si se descubrieron todas las reglas y todas están cumplidas
                 disableBtn = !(estado.reglasVisibles === reglas.length && todasCumplen);
 
+            } else if (estado.paso === 'addons') {
+                let totalMensual = 0;
+                estado.addons.forEach((contratado, idx) => {
+                    if (contratado) totalMensual += addonsCatalogo[idx].price;
+                });
+
+                const isOverBudget = totalMensual > 0; // Saldo disponible es fijo en $0, por lo que cualquier gasto > 0 supera el saldo y se pone en rojo
+
+                html += `<div class="addons-dashboard">`;
+                html += `<div class="addons-header-info">`;
+                html += `<span>Saldo disponible: <strong>$0</strong></span>`;
+                html += `<span>Total mensual: <strong class="total-price ${isOverBudget ? 'over-budget' : ''}">$${totalMensual}</strong></span>`;
+                html += `</div>`;
+
+                html += `<div class="addons-grid">`;
+                addonsCatalogo.forEach((addon, idx) => {
+                    const isContratado = estado.addons[idx];
+                    html += `
+                        <div class="addon-cell ${isContratado ? 'contratado' : ''}" data-addon-index="${idx}">
+                            <div class="addon-name">${addon.name}</div>
+                            <div class="addon-price">$${addon.price}</div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+
+                // Se habilita cuando el total es $0
+                disableBtn = (totalMensual !== 0);
+
             } else {
-                html += `<p style="text-align:center; color:var(--text-muted);">Contenido del paso ${estado.paso}...</p>`;
+                html += `<p style="text-align:center; color:var(--text-muted);">¡Gracias por registrarte en Nimbus!</p>`;
             }
 
             root.innerHTML = html;
             document.getElementById('btn-continuar').disabled = disableBtn;
 
-            // Restaurar el foco y cursor si aplica
             if (isPwFocused) {
                 const pwInput = document.getElementById('pw-input');
                 if (pwInput) {
                     pwInput.focus();
-                    pwInput.setSelectionRange(cursorStart, cursorEnd);
+                    try {
+                        pwInput.setSelectionRange(cursorStart, cursorEnd);
+                    } catch (e) {}
                 }
             }
         }
 
-        // --- 5. Lógica y Eventos ---
+        // --- 6. Lógica y Eventos ---
         document.getElementById('app-root').addEventListener('click', (e) => {
-            if (estado.paso !== 'usuario') return;
+            if (estado.paso === 'usuario') {
+                const toggle = e.target.closest('.dropdown-toggle');
+                if (toggle) {
+                    const index = parseInt(toggle.dataset.index, 10);
+                    estado.abierto = (estado.abierto === index) ? null : index;
+                    render();
+                    return;
+                }
 
-            const toggle = e.target.closest('.dropdown-toggle');
-            if (toggle) {
-                const index = parseInt(toggle.dataset.index, 10);
-                estado.abierto = (estado.abierto === index) ? null : index;
-                render();
-                return;
-            }
+                const item = e.target.closest('.dropdown-item');
+                if (item) {
+                    estado.usuario[parseInt(item.dataset.index, 10)] = String.fromCharCode(parseInt(item.dataset.code, 10));
+                    estado.abierto = null;
+                    render();
+                }
+            } else if (estado.paso === 'password') {
+                const eyeBtn = e.target.closest('#eye-btn');
+                if (eyeBtn) {
+                    if (eyeTimeout) clearTimeout(eyeTimeout);
 
-            const item = e.target.closest('.dropdown-item');
-            if (item) {
-                estado.usuario[parseInt(item.dataset.index, 10)] = String.fromCharCode(parseInt(item.dataset.code, 10));
-                estado.abierto = null;
-                render();
+                    estado.passwordVisible = true;
+                    render();
+
+                    eyeTimeout = setTimeout(() => {
+                        estado.passwordVisible = false;
+                        render();
+                    }, 1000);
+                }
+            } else if (estado.paso === 'addons') {
+                const cell = e.target.closest('.addon-cell');
+                if (cell) {
+                    const index = parseInt(cell.dataset.addonIndex, 10);
+                    toggleAddonCell(index);
+                    render();
+                }
             }
         });
 
@@ -356,11 +507,9 @@
             if (e.target.id === 'pw-input' && estado.paso === 'password') {
                 estado.password = e.target.value;
 
-                // Evaluación de reglas para avanzar el nivel visible
                 let checkeosActivos = true;
                 while (checkeosActivos && estado.reglasVisibles <= reglas.length) {
                     checkeosActivos = true;
-                    // Chequeamos si todas las reglas VISIBLES actualmente se cumplen
                     for (let i = 0; i < estado.reglasVisibles; i++) {
                         if (!reglas[i].check(estado.password)) {
                             checkeosActivos = false;
@@ -368,7 +517,6 @@
                         }
                     }
                     
-                    // Si todas las visibles se cumplen, mostramos la siguiente
                     if (checkeosActivos && estado.reglasVisibles < reglas.length) {
                         estado.reglasVisibles++;
                     } else {
@@ -379,7 +527,6 @@
             }
         });
 
-        // Cerrar dropdown si se clickea afuera
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.dropdown') && estado.abierto !== null) {
                 estado.abierto = null;
@@ -387,18 +534,20 @@
             }
         });
 
-        // Lógica del botón Continuar
         document.getElementById('btn-continuar').addEventListener('click', () => {
             if (estado.paso === 'usuario') {
                 estado.paso = 'password';
                 render();
             } else if (estado.paso === 'password') {
                 estado.paso = 'addons';
+                inicializarAddons(); // Inicializamos el puzzle de addons al entrar al paso
+                render();
+            } else if (estado.paso === 'addons') {
+                estado.paso = 'confirmado';
                 render();
             }
         });
 
-        // Arranque inicial
         document.addEventListener('DOMContentLoaded', render);
 
     </script>
