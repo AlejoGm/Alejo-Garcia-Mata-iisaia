@@ -1,0 +1,18 @@
+[project]
+name = "gym-bro"
+version = "0.1.0"
+description = "Tracker de gimnasio para grupos de amigos que se comparan"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[standard]",
+    "sqlmodel",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
