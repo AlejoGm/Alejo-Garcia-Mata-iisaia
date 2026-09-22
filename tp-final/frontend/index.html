@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gym-bro</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <h1>Gym-bro</h1>
+      <p>Cada uno con su rutina. Comparados de forma justa.</p>
+    </header>
+
+    <p id="resume" class="card resume" hidden>
+      Ya estás en un grupo. <a id="resume-link" href="group.html">Volver al grupo</a>
+    </p>
+
+    <div class="columns">
+      <form id="create-form" class="card">
+        <h2>Crear grupo</h2>
+        <label>Nombre del grupo <input name="group" required maxlength="40"></label>
+        <label>Tu nickname <input name="nickname" required maxlength="20"></label>
+        <label>Tu peso corporal (kg) <input name="bodyweight" type="number" step="0.1" min="1" max="300" required></label>
+        <button type="submit">Crear</button>
+        <p class="error" role="alert"></p>
+      </form>
+
+      <form id="join-form" class="card">
+        <h2>Unirme con un código</h2>
+        <label>Código <input name="code" required maxlength="6" class="code-input"></label>
+        <label>Tu nickname <input name="nickname" required maxlength="20"></label>
+        <label>Tu peso corporal (kg) <input name="bodyweight" type="number" step="0.1" min="1" max="300" required></label>
+        <button type="submit">Unirme</button>
+        <p class="error" role="alert"></p>
+      </form>
+    </div>
+  </main>
+  <script type="module" src="js/home.js"></script>
+</body>
+</html>
