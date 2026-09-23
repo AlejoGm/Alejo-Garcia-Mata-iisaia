@@ -1,88 +1,135 @@
 # Grill de Gym-bro
 
-Preguntas que había que cerrar antes del PRD, cada una con la decisión tomada. Primero las del producto completo; después las que hacen falta para construir la v1. Hecho con la skill `grilling` en modo auto: el agente se hizo las preguntas y propuso cada respuesta.
+Decisiones de diseño con su porqué. Salió en dos pasadas. Primero un auto-grill con la skill `grilling`, donde el agente se hizo las preguntas y propuso cada respuesta. Después lo repasamos pregunta por pregunta: la sección siguiente resume qué cambió en ese repaso, y el resto del documento ya está actualizado.
+
+## Qué cambió al repasarlo
+
+- **Fuerza relativa.** El auto-grill proponía 1RM / peso corporal, pero eso favorece al liviano porque la fuerza no escala lineal con el peso. Pasó a **DOTS**.
+- **Peso corporal.** El auto-grill usaba el actual del perfil, y bajar de peso mejoraba marcas viejas. Ahora el peso viaja con cada sesión.
+- **Progreso.** El auto-grill lo medía contra el récord histórico, y un veterano daba negativo casi siempre. Ahora es mes de calendario contra mes anterior.
+- **Constancia.** El auto-grill contaba días entrenados, lo que premia al que va más, no al que cumple. Ahora es cumplimiento de un objetivo semanal propio.
+- **Agregados.** Ranking absoluto, dos tipos de PR, ranking semanal (en lugar del cartel de la vergüenza), rutinas del grupo con carga guiada, y campañas con ganador (en lugar de temporadas mensuales).
+- **Descartado.** El PIN por miembro: se queda solo con nickname.
 
 ## Producto
 
-**¿Qué es el producto terminado?** Un lugar donde un grupo de amigos registra lo que entrena y compite de forma justa: rankings, duelos, un feed con reacciones y temporadas mensuales. No es una app de rutinas ni de nutrición.
+**¿Qué es?** Un lugar donde un grupo de amigos registra lo que entrena, se motiva viendo lo que hace el otro y compite de forma justa. Cada uno puede seguir su rutina o la misma que su bro; los rankings no dependen de la rutina.
 
-**¿Cómo se parte en versiones?** Por lo que hace falta para que el grupo compita:
-- **v1:** carga y rankings.
+**¿Cómo se parte en versiones?**
+- **v1:** carga libre y rankings.
+- **v1.1:** rutinas con carga guiada, y constancia.
 - **v2:** lo social (duelos, reacciones, gráficos).
-- **v3:** lo que exige cuentas o cambia el modelo de datos.
+- **v3:** lo que exige cuentas o cambia el modelo (campañas, validación social).
 
-**¿Cuentas de usuario?** Sí, en v3. Hacen falta para que una persona esté en varios grupos y para que nadie cargue a nombre de otro. Hasta entonces alcanza con nickname y código de grupo.
+**¿Tiempo real, notificaciones, app nativa?** No. Polling cada 30 segundos desde la v2, y una web que se usa desde el celular.
 
-**¿Quién administra el grupo?** En v1, cualquiera. En v2 el creador pasa a ser admin: elige los desafíos y puede sacar miembros.
+## Identidad
 
-**¿Duelos?** En v2. Uno contra uno, en un ejercicio, durante 7 días. Gana el que más mejora en porcentaje sobre su mejor 1RM previo. El retado acepta o rechaza, y cada par puede tener un solo duelo activo.
+**¿Cómo se identifica cada uno?** Solo con nickname dentro del grupo, sin contraseña ni PIN. El riesgo está asumido: cualquiera con el código puede cargar o borrar a nombre de otro. Entre amigos se acepta.
 
-**¿Reacciones en el feed?** En v2, con un set fijo: fuerza, fuego y dudoso. No hay comentarios libres; eso sería un chat y ya tienen uno.
+**¿Cuentas?** En la v3, cuando haga falta estar en varios grupos.
 
-**¿Qué pasa con una carga absurda que pasa la validación?** En v3 entra la validación social. Si la mayoría del grupo marca un PR como dudoso, deja de contar para los rankings. En v1 y v2 solo la frena el rango de validación.
+**¿Qué se pide al unirse?** Nickname, sexo (para DOTS), peso corporal y objetivo semanal de sesiones.
 
-**¿Historial de peso corporal?** En v2, con fecha. La fuerza relativa pasa a usar el peso vigente a la fecha de cada serie, no el actual. Si no, bajar de peso mejora retroactivamente marcas viejas.
+## Fuerza
 
-**¿Gráficos?** En v2: la evolución del 1RM estimado por ejercicio y la del peso corporal.
+**¿Cómo se compara la fuerza entre pesos distintos?** Con DOTS, el coeficiente que usa el powerlifting, con los coeficientes de OpenPowerlifting:
+- **Fórmula:** `levantado × 500 / (a·p⁴ + b·p³ + c·p² + d·p + e)`, donde `p` es el peso corporal en kg.
+- **Rango de p:** de 40 a 210 kg en hombres y de 40 a 150 kg en mujeres. Fuera de rango se usa el extremo más cercano.
+- **Aplicación:** DOTS está calibrado para el total de los tres levantamientos. Acá se aplica a un ejercicio suelto: la escala por peso se conserva, los números salen más chicos.
 
-**¿Cartel de la vergüenza?** En v2. Muestra a quien no cargó ninguna sesión en la semana en curso, a partir del jueves.
+**¿Sobre qué número se aplica?** Sobre el 1RM estimado con Epley: `peso × (1 + reps / 30)`, y con 1 rep es el peso. Las series de más de 10 reps no estiman 1RM.
 
-**¿Plantillas de rutina?** En v2. Guardan una sesión tipo para cargarla en dos clics.
+**¿Qué peso corporal cuenta?** El de la sesión. El formulario lo trae prellenado con el último, y cada serie usa el de su sesión. El historial de peso sale de ahí, sin entidad aparte.
 
-**¿Temporadas?** En v3. Los rankings se reinician cada mes y queda guardado el campeón de cada tabla.
+**¿Hay ranking absoluto?** Sí. Es el peso más alto levantado en una serie, con cualquier cantidad de reps. A igual peso gana el que hizo más reps, y si también empatan, el que lo hizo primero. Se elige con un selector **DOTS / Absoluto** en cada desafío.
 
-**¿Ejercicios con peso corporal, como dominadas?** En v3. Se marcan como "con lastre" y el 1RM se calcula sobre peso corporal más lastre.
+**¿Qué es un PR?**
+- **"PR de peso":** más kilos que nunca en ese ejercicio, o los mismos kilos con más reps.
+- **"PR de 1RM":** subió el 1RM estimado pero no el peso.
 
-**¿Libras?** En v3, como preferencia de visualización. Internamente todo queda en kg.
+Si una serie cumple las dos condiciones, se muestra solo "PR de peso". La primera serie de un ejercicio es línea base, no PR. Los PRs se calculan, no se guardan.
 
-**¿Tiempo real?** No. El feed y los rankings se actualizan al recargar o cada 30 segundos (polling) desde v2.
+## Progreso y períodos
 
-**¿Notificaciones y app móvil nativa?** Quedan fuera del producto. Es una web que se usa desde el celular.
+**¿Contra qué se mide?** Contra uno mismo, en meses de calendario. Es tu mejor 1RM del mes contra tu mejor del mes anterior, en porcentaje y promediado entre los ejercicios que hiciste en los dos meses. Después se rankean esos porcentajes.
 
-## v1: identidad y grupos
+**¿Qué stats tiene un mes?** El mejor 1RM y el promedio del mejor 1RM de cada sesión.
 
-**¿Cómo se identifica cada uno?** Nickname por grupo, sin contraseña. El código del grupo funciona como secreto compartido. Cualquiera con el código puede cargar a nombre de otro; entre amigos se acepta hasta que lleguen las cuentas.
+**¿Y períodos largos?** En la v2 llegan 6 meses, 12 meses y un período elegido a mano, con un selector que cambia todas las tablas juntas. En ese caso se compara el mes actual contra el mes con el que arranca el período. Los gráficos muestran el mejor y el promedio por mes, y una línea semana a semana.
 
-**¿Una persona en varios grupos?** No hasta v3. El mismo nickname en otro grupo es otro miembro.
+## Constancia (v1.1)
 
-**¿Crear grupo y unirse son un solo paso?** No. `groups` y `members` son recursos separados; la página encadena las dos llamadas.
+**¿Qué mide?** El cumplimiento de tu objetivo semanal: el porcentaje de semanas del período en que llegaste a tu objetivo. La racha son las semanas seguidas cumpliéndolo. Así el que va 3 veces y nunca falla le gana al que va 6 y falla la mitad.
 
-**¿Cómo es el código?** Seis caracteres en mayúscula, sin los ambiguos (0, O, 1, I). Lo genera el servidor.
+**¿Y la semana en curso?** No cuenta hasta que termina.
 
-## v1: ejercicios
+**¿Si cambio el objetivo?** Rige desde la semana siguiente. Por eso se guarda el historial de objetivos.
 
-**¿Catálogo global o por grupo?** Por grupo. Al crearlo se cargan sentadilla, press banca, peso muerto y press militar, los cuatro como desafío.
+## Ranking de la semana (v1)
 
-**¿Cuántos desafíos?** Máximo 4. Marcar el quinto devuelve `409`.
+**¿Qué muestra?** Las sesiones de cada uno de lunes a domingo, con "x / objetivo" al lado. Hay dos estados:
+- **"cumplido":** llegaste a tu objetivo.
+- **"ya no llega":** te faltan más sesiones que días quedan en la semana.
 
-## v1: series y sesiones
+A igual cantidad de sesiones, queda arriba el que tiene más porcentaje del objetivo cumplido. Reemplaza al cartel de la vergüenza.
 
-**¿Qué fórmula de 1RM?** Epley: `peso × (1 + reps / 30)`, y con 1 rep es el peso. Las series de más de 10 reps se guardan pero no cuentan para el 1RM, porque la estimación se degrada.
+## Rutinas (v1.1)
 
-**¿Qué se valida?** Reps de 1 a 50, peso mayor a 0 y hasta 500 kg, fecha no futura, al menos una serie. Todo eso es `422`.
+**¿De quién son?** Del grupo. Cualquiera crea una y cada miembro elige cuál sigue: la misma que su bro, otra, o ninguna. Si alguien edita una rutina que siguen otros, la app avisa.
 
-**¿Un ejercicio de otro grupo en el body?** `422`, no `404`. El recurso del path existe; lo inválido es el contenido.
+**¿Qué tiene una rutina?** Nombre y días. Cada día es una lista de ejercicios con cantidad de series.
 
-**¿Se puede borrar una sesión?** Sí. Sin borrado, un 500 por error de tipeo arruina el ranking para siempre. Editar no: se borra y se vuelve a cargar.
+**¿Cómo es la carga guiada?** Se elige el día y la app va serie por serie: ejercicio y "Serie 1 de 3", peso y reps, con los botones "Siguiente serie" y "Terminar ejercicio". El peso viene prellenado con tu última vez.
 
-## v1: PRs y feed
+**¿Qué pasa si me salgo de la rutina?** La rutina es una guía. Podés saltear un ejercicio, sumar series, agregar uno que no estaba o cambiar el orden. La sesión guarda lo que hiciste y no hay métrica de cumplimiento de la rutina.
 
-**¿Qué es un PR?** Una serie cuyo 1RM estimado supera al mejor anterior del mismo miembro en ese ejercicio, en orden cronológico por fecha de sesión. La primera serie de un ejercicio es la línea base, no un PR.
+**¿Cuándo se guarda?** Al final, en un solo `POST`, como la carga libre. Cada serie queda en un borrador en el navegador. Si falla la conexión, aparece "Reintentar". Si se cierra la pestaña, al volver la app pregunta si seguís.
 
-**¿Se guardan o se calculan?** Se calculan. Si se guardaran, borrar una sesión o cargar una atrasada dejaría el feed inconsistente. Cuando lleguen las reacciones en v2, se cuelgan de la serie, no de un evento de PR guardado.
+**¿"La última vez"?** Va desde la v1, también en la carga libre. Al elegir un ejercicio muestra tu última serie y la de hasta dos miembros más que lo hayan hecho hace poco.
 
-## v1: rankings
+## Duelos (v2)
 
-**¿Qué peso corporal se usa?** El actual del perfil. En v2 pasa al peso vigente a la fecha de la serie.
+**¿Cómo se gana?** El retador elige el modo: absoluto o DOTS. Gana la mejor serie del ejercicio dentro del plazo. Progreso queda afuera.
 
-**Fuerza relativa.** Por ejercicio de desafío: mejor 1RM estimado histórico dividido por el peso corporal.
+**¿Cuánto dura?** 3, 7 o 14 días; 7 por defecto.
 
-**Progreso.** Por ejercicio, el mejor 1RM de los últimos 28 días contra el mejor de antes de esa ventana. Se promedia el porcentaje entre los ejercicios que tienen datos en las dos. Quien no tiene datos comparables aparece como "sin datos".
+**¿Sin datos?** Si uno no hace el ejercicio, pierde. Si no lo hace ninguno, o empatan exacto, es empate.
 
-**Constancia.** Días entrenados en los últimos 28 días y racha de semanas seguidas con al menos una sesión. La semana en curso sin sesión todavía no corta la racha.
+**¿Se garantiza que sea parejo?** No. La app sugiere rivales parejos y muestra el desbalance entre los mejores del mes de cada uno, en el modo elegido:
 
-**¿"Hoy" lo define quién?** El servidor. La fecha de la sesión la manda el cliente, porque se puede cargar la de ayer.
+| Nivel | Diferencia |
+|---|---|
+| Bajo | hasta 10% |
+| Medio | de 10 a 25% |
+| Alto | más de 25% |
+| Sin datos | alguno no hizo el ejercicio en el mes |
 
-## Exposición de la idea
+Cualquiera puede retar a cualquiera. El retado ve el nivel antes de aceptar. Hay un solo duelo activo por par.
 
-**¿Qué se muestra?** Un corte de la v1: crear o unirse a un grupo, cargar una sesión y ver el ranking de fuerza relativa. Está hecho.
+## Campañas (v3)
+
+**¿Qué son?** Una competencia del grupo con fecha de inicio, fecha de fin y ganador. Pueden exigir que todos sigan la misma rutina o ser indistintas. Reemplazan a las temporadas mensuales.
+
+**¿Cómo se define el ganador?** Por puntos de posición, como en la Fórmula 1 (10, 8, 6...), en las tablas que se eligen al crear la campaña:
+- **Tablas por defecto:** DOTS en los desafíos, progreso y constancia. El absoluto queda afuera por defecto, porque ya lo gana el más pesado.
+- **Empate:** gana el que tenga más primeros puestos.
+- **Durante la campaña:** la tabla de posiciones se ve en vivo.
+- **Al terminar:** el ganador queda congelado. Es lo único derivado que se guarda, porque es un premio.
+- **Quién la crea:** el admin del grupo.
+
+## Otros
+
+**Ejercicios.** Por grupo. El grupo arranca con sentadilla, press banca, peso muerto y press militar como desafíos, con un máximo de 4: el quinto devuelve `409`.
+
+**Validación.** Reps de 1 a 50, peso mayor a 0 y hasta 500 kg, fecha no futura, al menos una serie. Todo eso es `422`. Un ejercicio de otro grupo en el body también es `422`, no `404`: el recurso del path existe, lo inválido es el contenido.
+
+**Borrar sesión.** Sí; editar, no. Se borra y se vuelve a cargar.
+
+**Admin del grupo.** Existe desde la v2 y es el creador: elige los desafíos, puede sacar miembros y crea campañas.
+
+**Reacciones.** Desde la v2, con un set fijo: fuerza, fuego y dudoso. En la v3, un PR que más de la mitad del grupo marca como dudoso deja de contar.
+
+**Ejercicios con lastre y libras.** Los dos en la v3.
+
+**"Hoy".** Lo define el servidor. La fecha de la sesión la manda el cliente.

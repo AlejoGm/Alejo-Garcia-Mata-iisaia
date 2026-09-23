@@ -31,7 +31,7 @@ Hecho, el corte vertical para la exposición de la idea:
 - Cargar una sesión con varias series; la respuesta trae el 1RM estimado de cada una.
 - Ranking de fuerza relativa en los cuatro ejercicios de desafío.
 
-Pendiente: ranking de progreso, ranking de constancia, feed de PRs, gestión de ejercicios, borrar sesión y actualizar peso corporal.
+Pendiente para la v1: pasar el ranking a DOTS con peso corporal por sesión, ranking absoluto, PRs y feed, progreso mes contra mes, ranking de la semana, gestión de desafíos y borrar sesión. Lo que viene después está en el [PRD](docs/prd.md).
 
 ## Documentos
 
