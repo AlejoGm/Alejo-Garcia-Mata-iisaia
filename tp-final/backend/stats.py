@@ -90,3 +90,23 @@ def detect_prs(records: list[SetRecord]) -> dict[int, str]:
         if rm is not None:
             best_rm[key] = max(best_rm.get(key, 0), rm)
     return prs
+
+
+def period_range(kind, today, month=None, start=None, end=None, first=None):
+    raise NotImplementedError
+
+
+def strength_table(records, sexes, exercise_id, mode):
+    raise NotImplementedError
+
+
+def progress_table(records, user_ids, current, baseline):
+    raise NotImplementedError
+
+
+def weekly_table(records, goals, today):
+    raise NotImplementedError
+
+
+def consistency_table(records, goals, start, end, today):
+    raise NotImplementedError
