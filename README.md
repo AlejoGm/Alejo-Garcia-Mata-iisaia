@@ -10,6 +10,6 @@ Ingeniero electrónico, embedded engineer. Trabajo habitual en C/C++ sobre ESP32
 |---------|---------|--------|
 | TP 1 — Bad UI: Nimbus | [tp1/](tp1/) | entregado |
 | TP 2 | tp2/ | pendiente |
-| Trabajo Práctico Final — Gym-bro (con Gustavo Campero) | [tp-final/](tp-final/) | en planteo |
+| Trabajo Práctico Final — Gym-bro (con Gustavo Campero) | [tp-final/](tp-final/) | app completa, a defender en el Demo Day |
 
 Cada carpeta tiene su propio `README.md`, que es el informe de esa entrega: qué construí, qué decisiones tomé yo y qué salió mal en el camino.
