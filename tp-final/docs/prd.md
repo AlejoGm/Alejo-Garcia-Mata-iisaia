@@ -18,10 +18,10 @@ Una app web donde un grupo de amigos registra lo que entrena, se motiva viendo l
 
 | Versión | Qué agrega |
 |---|---|
-| **v1 (MVP)** | Grupos con código · carga libre con peso corporal por sesión y "la última vez" · fuerza DOTS y absoluta por desafío · PR de peso y PR de 1RM con feed · progreso mes contra mes · ranking de la semana · gestión de desafíos · borrar sesión |
+| **v1 (MVP)** | Login con Google y perfil · grupos con código, varios por persona · carga libre con peso corporal por sesión y "la última vez" · fuerza DOTS y absoluta por desafío · PR de peso y PR de 1RM con feed · progreso mes contra mes · ranking de la semana · gestión de desafíos · borrar sesión |
 | **v1.1** | Primero: rutinas del grupo y carga guiada con borrador local. Después: constancia por objetivo semanal |
 | **v2** | Duelos con sugerencia de rival y nivel de desbalance · reacciones · gráficos por mes y por semana · períodos de 6 meses, 12 meses y elegido · admin del grupo · polling |
-| **v3** | Cuentas y varios grupos por persona · campañas · validación social de PRs dudosos · ejercicios con lastre · libras |
+| **v3** | Campañas · validación social de PRs dudosos · ejercicios con lastre · libras |
 
 La v1 y la v1.1 apuntan al Demo Day. Si no llega todo, lo primero que se cae es la constancia, que se nota menos que las rutinas.
 
@@ -32,12 +32,12 @@ La exposición de la idea mostró un corte de la v1: crear o unirse a un grupo, 
 ### Grupo y miembros
 
 1. **[v1]** Como usuario, quiero crear un grupo y recibir un código corto, para invitar a mis amigos por el chat.
-2. **[v1]** Como amigo, quiero unirme con el código, un nickname, mi sexo, mi peso y mi objetivo semanal, para empezar a cargar.
-3. **[v1]** Como amigo, quiero que me avise si el nickname ya está tomado, para elegir otro.
+2. **[v1]** Como amigo, quiero entrar con mi cuenta de Google y unirme con el código, para no crear otra contraseña.
+3. **[v1]** Como usuario nuevo, quiero completar una sola vez mi nombre, sexo, objetivo semanal y unidad, para que todos mis grupos lo usen.
 4. **[v1]** Como miembro, quiero que la app me recuerde en este navegador, para no reingresar el código.
 5. **[v1]** Como miembro, quiero cambiar mi objetivo semanal, para ajustarlo si cambio de rutina.
 6. **[v2]** Como creador del grupo, quiero ser admin, para decidir los desafíos y sacar a alguien que ya no va.
-7. **[v3]** Como usuario, quiero una cuenta y estar en varios grupos, para competir con los del gym y con los del laburo.
+7. **[v1]** Como usuario, quiero estar en varios grupos con la misma cuenta, y que lo que entreno cuente en todos.
 
 ### Ejercicios y rutinas
 
@@ -100,72 +100,11 @@ La exposición de la idea mostró un corte de la v1: crear o unirse a un grupo, 
 - **Módulo de estadísticas.** Es el módulo profundo del proyecto. Son funciones puras que reciben series ya leídas y la fecha de hoy, y devuelven 1RM, DOTS, PRs, rankings, stats del mes y, desde v2, duelos y desbalance. No conoce la base ni HTTP. Las rutas solo leen, llaman y serializan.
 - **Todo lo derivable se calcula.** PRs, rankings, resultados de duelos y posiciones de campaña salen de las series. La única excepción es el ganador de una campaña cerrada, que se congela porque es un premio.
 - **El path identifica, el body transporta.** El grupo y el miembro van en el path y no se repiten en el body.
-- **Identidad.** Nickname por grupo, sin contraseña. El navegador guarda el código y el nickname. El riesgo está asumido hasta las cuentas de la v3.
+- **Identidad.** Login con Google a través de Auth0. Las sesiones son del usuario y cuentan en todos sus grupos. Sin Auth0 configurado, la app corre en modo desarrollo con un login por nombre.
 
-### Datos
+### Datos y contrato
 
-- **v1.**
-  - `Group`: nombre y código.
-  - `Member`: nickname, sexo y objetivo semanal.
-  - `Exercise`: nombre y si es desafío.
-  - `WorkoutSession`: miembro, fecha y peso corporal.
-  - `WorkSet`: sesión, ejercicio, peso y reps.
-- **v1.1.**
-  - `Routine`: grupo y nombre.
-  - `RoutineDay`: rutina, nombre y orden.
-  - `RoutineItem`: día, ejercicio, series y orden.
-  - `WorkoutSession` suma el día de rutina, opcional.
-  - `WeeklyGoalChange`: miembro, objetivo y semana desde la que rige.
-- **v2.**
-  - `Duel`: retador, retado, ejercicio, modo, duración, inicio y estado.
-  - `Reaction`: miembro, serie y tipo.
-  - `Member` suma el rol de admin.
-- **v3.**
-  - `User`: la cuenta, que pasa a ser la identidad.
-  - `Member` pasa a ser la relación entre `User` y `Group`.
-  - `Campaign`: fechas, tablas que suman, rutina opcional y ganador congelado.
-  - `Exercise` suma el flag "con lastre".
-
-### Reglas
-
-- **1RM.** Epley. Las series de más de 10 reps no estiman.
-- **DOTS.** Se calcula sobre el 1RM estimado, con el peso corporal de la sesión de esa serie y los coeficientes de OpenPowerlifting por sexo. El peso se lleva al rango de la fórmula: de 40 a 210 kg en hombres y de 40 a 150 kg en mujeres.
-- **Absoluto.** El mayor peso levantado en una serie. Desempata más reps y, si siguen iguales, la fecha más temprana.
-- **PRs.** Se evalúan en orden cronológico:
-  - **"PR de peso":** más kilos, o los mismos kilos con más reps.
-  - **"PR de 1RM":** sube el 1RM estimado sin subir el peso.
-
-  Si una serie cumple las dos, se muestra solo "de peso". La primera serie de un ejercicio es línea base.
-- **Meses.** Son de calendario, y la zona horaria es la del servidor. Stats del mes: el mejor 1RM y el promedio del mejor 1RM de cada sesión.
-- **Progreso.** Mejor del mes contra mejor del mes anterior, en porcentaje, promediado entre los ejercicios con datos en los dos meses.
-- **Ranking de la semana.** Lunes a domingo, ordenado por sesiones. Muestra "x / objetivo". Estados:
-  - **"cumplido":** llegó a su objetivo.
-  - **"ya no llega":** le faltan más sesiones que días quedan.
-
-  Desempata el porcentaje del objetivo cumplido.
-- **Constancia (v1.1).** Porcentaje de semanas cerradas en que se cumplió el objetivo vigente, más la racha. La semana en curso no cuenta. Un cambio de objetivo rige desde la semana siguiente.
-- **Carga guiada (v1.1).** Borrador en el navegador y un solo `POST` al terminar, con reintento. La rutina es una guía, no se valida contra lo cargado.
-- **Duelos (v2).** Modo absoluto o DOTS. Duran 3, 7 o 14 días. Gana la mejor serie en el plazo. Quien no hace el ejercicio pierde, y si no lo hace ninguno es empate. El desbalance es bajo hasta 10%, medio hasta 25% y alto por encima.
-- **Campañas (v3).** Puntos 10, 8, 6... por posición en las tablas elegidas. Desempata la cantidad de primeros puestos.
-- **Validaciones.** Reps de 1 a 50, peso de más de 0 a 500 kg, peso corporal de más de 0 a 300 kg, fecha no futura, al menos una serie.
-
-### Contrato de la v1
-
-| Method | Path | Respuestas |
-|---|---|---|
-| `POST` | `/api/groups` | `201` grupo con código · `422` |
-| `GET` | `/api/groups/{code}` | `200` grupo, miembros y ejercicios · `404` |
-| `POST` | `/api/groups/{code}/members` | `201` · `404` · `409` nickname tomado · `422` |
-| `PATCH` | `/api/groups/{code}/members/{nickname}` | `200` objetivo semanal actualizado · `404` · `422` |
-| `POST` | `/api/groups/{code}/exercises` | `201` · `404` · `409` nombre repetido o quinto desafío · `422` |
-| `PATCH` | `/api/groups/{code}/exercises/{id}` | `200` · `404` · `409` quinto desafío |
-| `GET` | `/api/groups/{code}/exercises/{id}/recent` | `200` última serie de hasta tres miembros · `404` |
-| `POST` | `/api/groups/{code}/members/{nickname}/sessions` | `201` sesión con 1RM, DOTS y PRs por serie · `404` · `422` |
-| `DELETE` | `/api/groups/{code}/members/{nickname}/sessions/{id}` | `204` · `404` |
-| `GET` | `/api/groups/{code}/rankings?month=2026-09` | `200` DOTS y absoluto por desafío, progreso, stats del mes y ranking de la semana · `404` · `422` mes inválido |
-| `GET` | `/api/groups/{code}/feed` | `200` últimos 20 PRs con su tipo · `404` |
-
-Un ejercicio de otro grupo en el body es `422`, no `404`, porque lo inválido es el contenido. En la v1.1 se suman `routines` bajo el grupo y el día de rutina opcional en el body de la sesión. En la v2 se suman `duels` y `reactions`. En la v3 aparecen `/api/auth` y `campaigns`.
+El modelo de datos, el contrato completo de la API y las fórmulas están en [spec.md](spec.md).
 
 ## Testing Decisions
 
