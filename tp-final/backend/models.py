@@ -59,3 +59,46 @@ class Routine(SQLModel, table=True):
     group_id: int = Field(foreign_key="group.id", index=True)
     name: str
     created_by: int = Field(foreign_key="user.id")
+
+
+class WorkoutSession(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    date: date
+    bodyweight_kg: float
+    routine_day_id: int | None = Field(default=None, foreign_key="routineday.id")
+    created_at: datetime = Field(default_factory=now_utc)
+
+
+class WorkSet(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    session_id: int = Field(foreign_key="workoutsession.id", index=True)
+    exercise_id: int = Field(foreign_key="exercise.id", index=True)
+    weight_kg: float
+    reps: int
+    position: int = 0
+
+
+class RoutineDay(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    routine_id: int = Field(foreign_key="routine.id", index=True)
+    name: str
+    position: int = 0
+
+
+class RoutineItem(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    day_id: int = Field(foreign_key="routineday.id", index=True)
+    exercise_id: int = Field(foreign_key="exercise.id")
+    sets: int
+    position: int = 0
+
+
+class Reaction(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint("group_id", "set_id", "user_id"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    group_id: int = Field(foreign_key="group.id", index=True)
+    set_id: int = Field(foreign_key="workset.id", index=True)
+    user_id: int = Field(foreign_key="user.id")
+    kind: str  # "fuerza", "fuego" o "dudoso"

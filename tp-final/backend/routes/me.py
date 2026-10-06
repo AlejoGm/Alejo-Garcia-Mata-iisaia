@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 
 from backend import config
 from backend.auth import SessionDep, SubDep, UserDep
-from backend.models import GoalChange, User
+from backend.models import GoalChange, User, WorkoutSession
 from backend.schemas import ConfigOut, ProfileInput, ProfileOut
 from backend.weeks import goal_for_week, monday
 
@@ -22,6 +22,12 @@ def get_config() -> ConfigOut:
     )
 
 
+def last_bodyweight(session: Session, user: User) -> float | None:
+    query = (select(WorkoutSession.bodyweight_kg).where(WorkoutSession.user_id == user.id)
+             .order_by(WorkoutSession.date.desc(), WorkoutSession.id.desc()))
+    return session.exec(query).first()
+
+
 def profile_out(session: Session, user: User) -> ProfileOut:
     changes = [(c.week, c.goal) for c in session.exec(select(GoalChange).where(GoalChange.user_id == user.id))]
     this_week = monday(date.today())
@@ -32,7 +38,7 @@ def profile_out(session: Session, user: User) -> ProfileOut:
         unit=user.unit,
         weekly_goal=goal_for_week(changes, this_week),
         next_week_goal=goal_for_week(changes, this_week + timedelta(days=7)),
-        last_bodyweight_kg=None,
+        last_bodyweight_kg=last_bodyweight(session, user),
     )
 
 
