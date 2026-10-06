@@ -11,6 +11,16 @@ Decisiones de diseño con su porqué. Salió en dos pasadas. Primero un auto-gri
 - **Agregados.** Ranking absoluto, dos tipos de PR, ranking semanal (en lugar del cartel de la vergüenza), rutinas del grupo con carga guiada, y campañas con ganador (en lugar de temporadas mensuales).
 - **Descartado.** El PIN por miembro: se queda solo con nickname.
 
+## Tercera pasada: login con Google y app completa
+
+Al encarar la app entera decidí sumar login con Google por Auth0, que tiene plan gratis. Eso adelanta las cuentas de la v3 y cambia la raíz del modelo. Lo cerré con otro auto-grill, cuyas respuestas quedaron en las secciones de abajo:
+
+- **Proveedor.** Auth0 con conexión de Google. El backend no maneja contraseñas.
+- **Raíz del modelo.** La identidad deja de ser el nickname dentro del grupo y pasa a ser el usuario. Una persona puede estar en varios grupos.
+- **De quién son las sesiones.** Del usuario, no del grupo. Lo que entrenás cuenta en todos tus grupos.
+- **Catálogo de ejercicios.** Pasa a ser global. Los desafíos siguen siendo por grupo.
+- **Modo desarrollo.** Sin Auth0 configurado, la app entra con un login de desarrollo que pide solo un nombre. Así corre en cualquier máquina, en los tests y en la prueba con agentes.
+
 ## Producto
 
 **¿Qué es?** Un lugar donde un grupo de amigos registra lo que entrena, se motiva viendo lo que hace el otro y compite de forma justa. Cada uno puede seguir su rutina o la misma que su bro; los rankings no dependen de la rutina.
@@ -19,17 +29,29 @@ Decisiones de diseño con su porqué. Salió en dos pasadas. Primero un auto-gri
 - **v1:** carga libre y rankings.
 - **v1.1:** rutinas con carga guiada, y constancia.
 - **v2:** lo social (duelos, reacciones, gráficos).
-- **v3:** lo que exige cuentas o cambia el modelo (campañas, validación social).
+- **v3:** campañas, validación social, lastre y libras. Las cuentas se adelantaron: entran desde el principio con el login de Google.
 
 **¿Tiempo real, notificaciones, app nativa?** No. Polling cada 30 segundos desde la v2, y una web que se usa desde el celular.
 
 ## Identidad
 
-**¿Cómo se identifica cada uno?** Solo con nickname dentro del grupo, sin contraseña ni PIN. El riesgo está asumido: cualquiera con el código puede cargar o borrar a nombre de otro. Entre amigos se acepta.
+**¿Cómo se identifica cada uno?** Con su cuenta de Google, a través de Auth0. El frontend usa el SDK de Auth0 para SPA y manda un access token en cada request. El backend lo valida contra las claves públicas del tenant (JWKS), con la audiencia de la API. Del token se toma el `sub`: es el usuario.
 
-**¿Cuentas?** En la v3, cuando haga falta estar en varios grupos.
+**¿Por qué Auth0 y no Google directo?** Con Auth0 el login de Google funciona sin crear un proyecto en Google Cloud: en desarrollo usa las credenciales de prueba de Auth0. Y si mañana se suma otro proveedor, es un switch en el panel, no código.
 
-**¿Qué se pide al unirse?** Nickname, sexo (para DOTS), peso corporal y objetivo semanal de sesiones.
+**¿Qué pasa sin Auth0 configurado?** Si no está la variable `AUTH0_DOMAIN`, la app arranca en modo desarrollo: un login que pide un nombre y emite un token `dev:<nombre>`. El servidor lo avisa en el log al arrancar. Con Auth0 configurado, ese token se rechaza.
+
+**¿Qué se guarda del usuario?** El `sub` de Auth0, un nombre para mostrar, el sexo (para DOTS), la unidad preferida y el objetivo semanal. El email no: no hace falta para nada.
+
+**¿Cuándo se completa el perfil?** En el primer login. Hasta que no está el perfil, la app no deja hacer otra cosa, porque sin sexo no hay DOTS y sin objetivo no hay ranking semanal.
+
+**¿Nickname por grupo?** No. Cada usuario tiene un solo nombre para mostrar en todos sus grupos. Dos usuarios pueden llamarse igual: los identifica el id, no el nombre.
+
+**¿Una persona en varios grupos?** Sí. Las sesiones son del usuario, así que una sentadilla cuenta en todos sus grupos. Los rankings de un grupo toman todas las sesiones de sus miembros, incluso las de antes de entrar: el historial es personal.
+
+**¿Quién administra un grupo?** El que lo crea. Si el admin se va, pasa a serlo el miembro más antiguo. El admin elige los desafíos, saca miembros y crea campañas.
+
+**¿Se sigue invitando con código?** Sí. El código de 6 caracteres es la invitación. Unirse requiere estar logueado.
 
 ## Fuerza
 
@@ -120,16 +142,18 @@ Cualquiera puede retar a cualquiera. El retado ve el nivel antes de aceptar. Hay
 
 ## Otros
 
-**Ejercicios.** Por grupo. El grupo arranca con sentadilla, press banca, peso muerto y press militar como desafíos, con un máximo de 4: el quinto devuelve `409`.
+**Ejercicios.** El catálogo es global, porque las sesiones son del usuario y una sentadilla tiene que ser la misma en todos sus grupos. Viene precargado con los ejercicios comunes y cualquiera puede sumar uno; el nombre es único sin importar mayúsculas. Los desafíos son por grupo: arranca con sentadilla, press banca, peso muerto y press militar, con un máximo de 4.
 
 **Validación.** Reps de 1 a 50, peso mayor a 0 y hasta 500 kg, fecha no futura, al menos una serie. Todo eso es `422`. Un ejercicio de otro grupo en el body también es `422`, no `404`: el recurso del path existe, lo inválido es el contenido.
 
 **Borrar sesión.** Sí; editar, no. Se borra y se vuelve a cargar.
 
-**Admin del grupo.** Existe desde la v2 y es el creador: elige los desafíos, puede sacar miembros y crea campañas.
+**Admin del grupo.** Es el creador: elige los desafíos, puede sacar miembros y crea campañas. Si se va, hereda el rol el miembro más antiguo.
 
-**Reacciones.** Desde la v2, con un set fijo: fuerza, fuego y dudoso. En la v3, un PR que más de la mitad del grupo marca como dudoso deja de contar.
+**Reacciones.** Un set fijo: fuerza, fuego y dudoso, una por persona y por PR. Las reacciones son por grupo, porque el mismo PR aparece en el feed de cada grupo del usuario. Si más de la mitad de los miembros de un grupo lo marca como dudoso, esa serie deja de contar para los rankings de ese grupo.
 
-**Ejercicios con lastre y libras.** Los dos en la v3.
+**Ejercicios con lastre.** Un ejercicio del catálogo puede ser "de peso corporal", como dominadas o fondos. En esos, el peso cargado es el lastre (puede ser 0) y la carga real es peso corporal más lastre. Esa carga es la que usan el 1RM, DOTS y el absoluto.
+
+**Libras.** Es una preferencia del perfil, solo de visualización. El formulario acepta libras y las convierte; la API y la base trabajan siempre en kg.
 
 **"Hoy".** Lo define el servidor. La fecha de la sesión la manda el cliente.
