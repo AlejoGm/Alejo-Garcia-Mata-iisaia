@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gym-bro — pitch</title>
+<style>
+  :root {
+    --bg: #111418;
+    --surface: #1b2027;
+    --border: #2c333d;
+    --text: #e8ebef;
+    --muted: #9aa4b1;
+    --accent: #f5a524;
+    --accent-text: #1a1204;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; padding: 6vh 8vw; gap: 3vh; }
+  .slide.active { display: flex; }
+  h1 { font-size: 11vh; margin: 0; line-height: 1; }
+  h2 { font-size: 7vh; margin: 0; line-height: 1.1; }
+  p, li, td, th { font-size: 3.4vh; line-height: 1.45; }
+  p { margin: 0; }
+  .eyebrow { color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; font-size: 2.4vh; }
+  .muted { color: var(--muted); }
+  .big { font-size: 4.6vh; }
+  ul { margin: 0; padding-left: 1.2em; }
+  li + li { margin-top: 1vh; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(22vw, 1fr)); gap: 2.5vw; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 3vh 2vw; }
+  .card h3 { margin: 0 0 1.5vh; font-size: 3.6vh; color: var(--accent); }
+  .card p, .card li { font-size: 2.9vh; }
+  table { border-collapse: collapse; width: 100%; max-width: 70vw; }
+  th { text-align: left; color: var(--muted); font-weight: 500; padding: 1vh 1.5vw; }
+  td { padding: 1.4vh 1.5vw; border-top: 1px solid var(--border); }
+  td.win { color: var(--accent); font-weight: 700; }
+  .step { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 3vh 2.5vw; max-width: 42vw; }
+  .step .ex { font-size: 3.8vh; font-weight: 700; }
+  .step .row { display: flex; gap: 1.5vw; margin: 2vh 0; }
+  .step .field { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 1.2vh 1vw; font-size: 3.2vh; }
+  .step .bro { color: var(--muted); font-size: 2.6vh; }
+  .step .btns { display: flex; gap: 1vw; margin-top: 2vh; }
+  .step .btn { background: var(--accent); color: var(--accent-text); border-radius: 8px; padding: 1vh 1.4vw; font-weight: 700; font-size: 2.6vh; }
+  .step .btn.alt { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .tag { display: inline-block; background: var(--accent); color: var(--accent-text); border-radius: 6px; padding: 0.2vh 0.8vw; font-weight: 700; font-size: 2.4vh; margin-right: 0.8vw; }
+  .counter { position: fixed; right: 3vw; bottom: 3vh; color: var(--muted); font-size: 2.2vh; }
+  .hint { position: fixed; left: 3vw; bottom: 3vh; color: var(--muted); font-size: 2vh; opacity: 0.6; }
+</style>
+</head>
+<body>
+
+<section class="slide active">
+  <p class="eyebrow">Trabajo práctico final · IISAIA</p>
+  <h1>Gym-bro</h1>
+  <p class="big">Cada uno con su rutina. Comparados de forma justa.</p>
+  <p class="muted">Alejo García Mata · Gustavo Campero</p>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Problema</p>
+  <h2>Entrenamos juntos, pero no hay con qué compararse</h2>
+  <ul>
+    <li>Cada uno anota en su app o en una nota del celular.</li>
+    <li>Comparar kilos no sirve: el que pesa 95 siempre levanta más que el que pesa 65.</li>
+    <li>La competencia, que es lo que motiva, queda en el chat del grupo y a ojo.</li>
+  </ul>
+  <p class="muted">Usuarios: grupos chicos de amigos que van al gimnasio. No es para entrenadores ni para gimnasios.</p>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">La idea central</p>
+  <h2>Fuerza relativa con DOTS, no con kilos</h2>
+  <table>
+    <tr><th>Quién</th><th>Peso</th><th>Sentadilla</th><th>× peso</th><th>DOTS</th></tr>
+    <tr><td>El flaco</td><td>65 kg</td><td>130</td><td class="win">2,00</td><td>103,0</td></tr>
+    <tr><td>El pesado</td><td>95 kg</td><td>170</td><td>1,79</td><td class="win">107,1</td></tr>
+  </table>
+  <p class="muted">Dividir por el peso favorece al liviano: la fuerza no escala lineal con el peso. DOTS es el coeficiente del powerlifting para comparar entre categorías.</p>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Cómo se compiten</p>
+  <h2>Cuatro formas de ganarle a tu bro</h2>
+  <div class="cols">
+    <div class="card"><h3>DOTS</h3><p>Quién es más fuerte para su peso, en los ejercicios de desafío del grupo.</p></div>
+    <div class="card"><h3>Absoluto</h3><p>Quién mueve más hierro. Desempata la cantidad de reps.</p></div>
+    <div class="card"><h3>Progreso</h3><p>Tu mejor de este mes contra el del mes pasado. El que arranca puede ganarle al veterano.</p></div>
+    <div class="card"><h3>La semana</h3><p>Sesiones contra tu objetivo semanal. Marca al que ya no llega.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">MVP · v1</p>
+  <h2>Lo mínimo para que el grupo compita</h2>
+  <ul>
+    <li>Crear un grupo y sumar amigos con un código de 6 letras.</li>
+    <li>Cargar sesiones: series de peso y reps, con el peso corporal del día.</li>
+    <li>Al elegir un ejercicio: tu última vez y la de tus amigos.</li>
+    <li>Rankings DOTS, absoluto, progreso y de la semana.</li>
+    <li>Feed con los PRs del grupo: PR de peso y PR de 1RM.</li>
+  </ul>
+  <p class="muted">Ya anda un corte: crear grupo, unirse, cargar sesión y ranking de fuerza.</p>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">v1.1 · para el Demo Day</p>
+  <h2>Rutinas del grupo y carga guiada</h2>
+  <div class="cols">
+    <div>
+      <ul>
+        <li>Las rutinas son del grupo: cada uno sigue la suya o la misma que su bro.</li>
+        <li>La app te lleva serie por serie; el peso viene prellenado.</li>
+        <li>Se guarda al terminar, con borrador local por si no hay señal en el gimnasio.</li>
+      </ul>
+    </div>
+    <div class="step">
+      <div class="ex">Press plano · Serie 1 de 3</div>
+      <div class="row"><div class="field">80 kg</div><div class="field">8 reps</div></div>
+      <div class="bro">La última vez: vos 80 × 8 · Gustavo 85 × 6</div>
+      <div class="btns"><span class="btn">Siguiente serie</span><span class="btn alt">Terminar ejercicio</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Después del curso</p>
+  <h2>El producto completo</h2>
+  <ul>
+    <li><span class="tag">v2</span>Duelos 1 contra 1 con rival sugerido y nivel de desbalance · reacciones · gráficos por mes y semana</li>
+    <li><span class="tag">v3</span>Campañas con fecha de inicio, fin y ganador por puntos · cuentas y varios grupos · validación social de PRs dudosos</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Stack y proceso</p>
+  <h2>Chico a propósito</h2>
+  <div class="cols">
+    <div class="card"><h3>Stack</h3><ul><li>FastAPI + SQLite</li><li>HTML, CSS y JS sin build</li><li>Un solo proceso sirve API y página</li></ul></div>
+    <div class="card"><h3>Proceso</h3><ul><li>Claude Code</li><li>PRD y grill de decisiones en disco</li><li>TDD en la lógica de rankings</li><li>Commit por pieza, PR por feature</li></ul></div>
+  </div>
+</section>
+
+
+<div class="counter" id="counter"></div>
+<div class="hint">← → para avanzar · F pantalla completa</div>
+
+<script>
+  const slides = [...document.querySelectorAll(".slide")];
+  let current = 0;
+  function show(i) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, j) => s.classList.toggle("active", j === current));
+    document.getElementById("counter").textContent = `${current + 1} / ${slides.length}`;
+  }
+  document.addEventListener("keydown", (e) => {
+    if (["ArrowRight", "ArrowDown", " ", "PageDown"].includes(e.key)) show(current + 1);
+    if (["ArrowLeft", "ArrowUp", "PageUp"].includes(e.key)) show(current - 1);
+    if (e.key === "f" || e.key === "F") document.documentElement.requestFullscreen?.();
+  });
+  document.addEventListener("click", (e) => show(current + (e.clientX < window.innerWidth / 3 ? -1 : 1)));
+  show(0);
+</script>
+</body>
+</html>
