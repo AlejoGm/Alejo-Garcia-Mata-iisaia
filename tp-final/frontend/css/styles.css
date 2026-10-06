@@ -223,3 +223,21 @@ td.error { color: var(--error); }
 .item-row { display: grid; grid-template-columns: 1fr 64px 48px; gap: 6px; }
 .day-button { flex-direction: column; align-items: flex-start; text-align: left; }
 li.routine { align-items: flex-start; }
+
+.chart { width: 100%; height: auto; display: block; }
+.chart-grid { stroke: var(--border); stroke-width: 1; }
+.chart-axis { fill: var(--muted); font-size: 22px; }
+.chart-empty { fill: var(--muted); font-size: 24px; }
+.chart-line { fill: none; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+.chart-line.best, .chart-dot.best { stroke: var(--accent); fill: none; }
+.chart-dot.best { fill: var(--accent); }
+.chart-line.avg { stroke: var(--muted); stroke-dasharray: 6 5; }
+.chart-dot.avg { fill: var(--muted); }
+.chart-line.bw { stroke: var(--ok); }
+.chart-dot.bw { fill: var(--ok); }
+.legend { display: flex; gap: 16px; font-size: 0.8rem; color: var(--muted); }
+.legend-item::before { content: ""; display: inline-block; width: 14px; height: 3px; margin-right: 6px; vertical-align: middle; background: var(--accent); }
+.legend-item.avg::before { background: var(--muted); }
+.stat-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tile { padding: 12px; gap: 4px; }
+.tile strong { font-size: 1.05rem; }

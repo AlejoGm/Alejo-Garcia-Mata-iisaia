@@ -307,3 +307,32 @@ class CampaignOut(BaseModel):
     status: str
     standings: list[StandingRow]
     winner: Person | None
+
+
+class MonthPointOut(BaseModel):
+    month: date
+    best: float | None
+    average: float | None
+
+
+class WeekPointOut(BaseModel):
+    week: date
+    best: float | None
+
+
+class BodyweightPointOut(BaseModel):
+    week: date
+    kg: float
+
+
+class PersonalStatsOut(BaseModel):
+    period: PeriodOut
+    exercises: list[ExerciseOut]
+    exercise_id: int | None
+    months: list[MonthPointOut]
+    weeks: list[WeekPointOut]
+    bodyweight: list[BodyweightPointOut]
+    best_weight_kg: float | None
+    best_reps: int | None
+    best_1rm: float | None
+    sessions: int
