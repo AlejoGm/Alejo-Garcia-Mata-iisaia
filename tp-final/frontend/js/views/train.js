@@ -44,15 +44,38 @@ async function historyCard(unit) {
   return el("div", { class: "card" }, el("h3", {}, "Tus últimas sesiones"), blocks, error);
 }
 
+function dayButtons(group, routine, hasDraft) {
+  if (!routine) {
+    return el("p", { class: "muted small" }, "No seguís ninguna rutina. Elegí una en Grupo → Rutinas, o cargá libre.");
+  }
+  return el("div", { class: "actions" }, el("p", { class: "muted small" }, routine.name), routine.days.map((day) => {
+    const button = el("button", { type: "button", class: "big day-button" },
+      el("span", {}, day.name), el("span", { class: "muted small" }, day.items.map((i) => i.exercise).join(" · ")));
+    button.addEventListener("click", () => {
+      if (hasDraft && !window.confirm("Tenés una sesión sin terminar. ¿Empezar otra y descartarla?")) return;
+      startDraft(group, {
+        title: `${routine.name} · ${day.name}`,
+        routineDayId: day.id,
+        plan: day.items.map((i) => ({ exercise_id: i.exercise_id, name: i.exercise, sets: i.sets })),
+      });
+    });
+    return button;
+  }));
+}
+
 export async function trainView(app, group) {
   const draft = loadDraft();
-  const free = el("button", { type: "button", class: "primary big" }, "Carga libre");
-  free.addEventListener("click", () => startDraft(group, {}));
-  const routinesSlot = el("div", { id: "routine-days" });
+  const myRoutineId = group.members.find((m) => m.user_id === group.me)?.routine_id;
+  const routines = myRoutineId ? await api.get(`/groups/${group.code}/routines`) : [];
+  const free = el("button", { type: "button", class: "secondary big" }, "Carga libre");
+  free.addEventListener("click", () => {
+    if (draft && !window.confirm("Tenés una sesión sin terminar. ¿Empezar otra y descartarla?")) return;
+    startDraft(group, {});
+  });
   app.replaceChildren(
     pendingCard(group, draft) || "",
-    el("div", { class: "card" }, el("h3", {}, "Entrenar hoy"), routinesSlot, free),
+    el("div", { class: "card" }, el("h3", {}, "Entrenar hoy"),
+      dayButtons(group, routines.find((r) => r.id === myRoutineId), Boolean(draft)), free),
     await historyCard(state.me.unit),
   );
-  return { routinesSlot, startDraft: (options) => startDraft(group, options), hasDraft: Boolean(draft) };
 }

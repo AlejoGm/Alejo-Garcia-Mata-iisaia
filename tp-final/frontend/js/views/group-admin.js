@@ -1,6 +1,7 @@
 import { api } from "../api.js";
 import { forgetGroup, loadGroup } from "../group-shell.js";
 import { busy, el } from "../ui.js";
+import { routinesCard } from "./routines-card.js";
 
 function inviteCard(group) {
   const copy = el("button", { type: "button", class: "secondary" }, "Copiar invitación");
@@ -81,5 +82,5 @@ function leaveCard(group) {
 export async function adminView(app, group) {
   const rerender = async () => adminView(app, await loadGroup(group.code, true));
   app.replaceChildren(inviteCard(group), membersCard(group, rerender), await challengesCard(group, rerender),
-    el("div", { id: "routines-slot" }), leaveCard(group));
+    await routinesCard(group, rerender), leaveCard(group));
 }
