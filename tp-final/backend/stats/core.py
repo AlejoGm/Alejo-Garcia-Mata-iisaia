@@ -73,20 +73,28 @@ def best_1rm(records: list[SetRecord]) -> SetRecord | None:
 
 
 def detect_prs(records: list[SetRecord]) -> dict[int, str]:
-    """Para cada serie que es PR, su tipo: "weight" (más carga, o igual carga con más reps) o "1rm"."""
+    """PRs contra las sesiones anteriores, a lo sumo uno por ejercicio y sesión.
+
+    "weight": la serie más pesada de la sesión supera la mejor anterior (más carga, o igual carga con más reps).
+    "1rm": si no hubo PR de peso, el mejor 1RM estimado de la sesión supera al mejor anterior.
+    La primera sesión de un ejercicio es la línea base.
+    """
+    sessions: dict[tuple, list[SetRecord]] = {}
+    for record in sorted(records, key=chronological_key):
+        sessions.setdefault((record.user_id, record.exercise_id, record.date, record.session_id), []).append(record)
     prs: dict[int, str] = {}
     best_weight: dict[tuple, tuple] = {}
     best_rm: dict[tuple, float] = {}
-    for record in sorted(records, key=chronological_key):
-        key = (record.user_id, record.exercise_id)
-        weight = (record.load, record.reps)
-        rm = record.estimated_1rm
+    for (user_id, exercise_id, _day, _session), sets in sessions.items():
+        key = (user_id, exercise_id)
+        heaviest = best_absolute(sets)
+        top_rm = best_1rm(sets)
         if key in best_weight:
-            if weight > best_weight[key]:
-                prs[record.set_id] = "weight"
-            elif rm is not None and rm > best_rm.get(key, 0):
-                prs[record.set_id] = "1rm"
-        best_weight[key] = max(best_weight.get(key, weight), weight)
-        if rm is not None:
-            best_rm[key] = max(best_rm.get(key, 0), rm)
+            if (heaviest.load, heaviest.reps) > best_weight[key]:
+                prs[heaviest.set_id] = "weight"
+            elif top_rm and top_rm.estimated_1rm > best_rm.get(key, 0):
+                prs[top_rm.set_id] = "1rm"
+        best_weight[key] = max(best_weight.get(key, (0, 0)), (heaviest.load, heaviest.reps))
+        if top_rm:
+            best_rm[key] = max(best_rm.get(key, 0), top_rm.estimated_1rm)
     return prs

@@ -56,6 +56,10 @@ def main() -> None:
                     top = round(base[lifts.index(lift)] * progress / 2.5) * 2.5
                     sets = [{"exercise_id": ids[lift], "weight_kg": top - 10, "reps": 8},
                             {"exercise_id": ids[lift], "weight_kg": top, "reps": rng.choice([3, 4, 5])}]
+                    # Accesorios de la rutina, para que "la última vez" tenga datos en todos los días.
+                    for extra, kg in (("Dominadas", 0), ("Fondos", 0), ("Remo con barra", base[1] * 0.8)):
+                        sets.append({"exercise_id": ids[extra], "weight_kg": round(kg * progress / 2.5) * 2.5,
+                                     "reps": rng.choice([6, 8, 10])})
                     client.post("/api/me/sessions", headers=auth(name), json={
                         "date": (monday + timedelta(days=day)).isoformat(),
                         "bodyweight_kg": round(bw + rng.uniform(-0.8, 0.8), 1), "sets": sets})

@@ -1,6 +1,6 @@
 import { api } from "../api.js";
 import { poll, state } from "../app.js";
-import { el, errorBox, storageGet, storageSet, weight } from "../ui.js";
+import { el, errorBox, num, storageGet, storageSet, weight } from "../ui.js";
 
 const PERIODS = [["month", "Mes"], ["6m", "6 m"], ["12m", "12 m"], ["all", "Todo"], ["custom", "Elegir"]];
 const STATUS = { done: ["cumplido", "ok"], out: ["ya no llega", "bad"], on: ["", ""] };
@@ -50,25 +50,25 @@ function weeklyCard(rows, me) {
       el("td", { class: "num" }, label ? el("span", { class: `pill ${cls}` }, label) : ""));
   });
   return el("div", { class: "card" }, el("h3", {}, "La semana"),
-    el("p", { class: "muted small" }, "Sesiones de lunes a domingo contra el objetivo de cada uno."),
-    table([["Quién"], ["Sesiones", "num"], ["", "num"]], body));
+    el("p", { class: "muted small" }, "Días que entrenó cada uno esta semana, contra su objetivo."),
+    table([["Quién"], ["Días", "num"], ["", "num"]], body));
 }
 
 function strengthCard(item, mode, me, unit) {
   const rows = mode === "dots"
     ? rankRows(item.dots, me, { span: 2, hasData: (e) => e.value !== null,
-      render: (e) => [el("td", { class: "num" }, String(e.value)), el("td", { class: "num muted" }, `${weight(e.weight_kg, unit)}×${e.reps}`)] })
+      render: (e) => [el("td", { class: "num" }, num(e.value)), el("td", { class: "num muted" }, `${weight(e.weight_kg, unit)}×${e.reps}`)] })
     : rankRows(item.absolute, me, { span: 2, hasData: (e) => e.value !== null,
       render: (e) => [el("td", { class: "num" }, weight(e.value, unit)), el("td", { class: "num muted" }, `× ${e.reps}`)] });
   const head = mode === "dots" ? [["#", "num"], ["Quién"], ["DOTS", "num"], ["Serie", "num"]] : [["#", "num"], ["Quién"], ["Carga", "num"], ["Reps", "num"]];
   return el("div", { class: "card" }, el("h3", {}, item.exercise), table(head, rows));
 }
 
-function progressCard(rows, me) {
+function progressCard(rows, me, period) {
   const body = rankRows(rows, me, { span: 1, hasData: (e) => e.pct !== null,
-    render: (e) => [el("td", { class: `num ${e.pct >= 0 ? "ok" : "error"}` }, `${e.pct >= 0 ? "+" : ""}${e.pct}%`)] });
+    render: (e) => [el("td", { class: `num ${e.pct >= 0 ? "ok" : "error"}` }, `${e.pct >= 0 ? "+" : ""}${num(e.pct)}%`)] });
   return el("div", { class: "card" }, el("h3", {}, "Progreso"),
-    el("p", { class: "muted small" }, "Tu mejor 1RM del último mes contra el mes anterior al período, promediado entre tus ejercicios."),
+    el("p", { class: "muted small" }, period === "month" ? "Cuánto subió tu mejor 1RM este mes contra el anterior, en promedio entre tus ejercicios." : "Cuánto subió tu mejor 1RM desde el primer mes del período hasta el último, en promedio entre tus ejercicios."),
     table([["#", "num"], ["Quién"], ["Cambio", "num"]], body));
 }
 
@@ -125,12 +125,16 @@ export async function rankingsView(app, group) {
       ? data.strength.map((item) => strengthCard(item, prefs.mode, group.me, unit))
       : [el("p", { class: "muted" }, "El grupo no tiene ejercicios de desafío.")];
     app.replaceChildren(
+      el("a", { class: "button", href: `#/g/${group.code}/campanas` }, "Campañas del grupo"),
       weeklyCard(data.weekly, group.me),
       periodControls(prefs, update),
-      el("h2", { class: "section-title" }, "Fuerza"), modeToggle(prefs.mode, update), ...strength,
-      progressCard(data.progress, group.me),
+      el("h2", { class: "section-title" }, "Fuerza"), modeToggle(prefs.mode, update),
+      el("p", { class: "muted small" }, prefs.mode === "dots"
+        ? "DOTS es el puntaje del powerlifting que ajusta la fuerza por peso corporal y sexo: compara justo a alguien de 65 kg con alguien de 95."
+        : "Absoluto: el peso más alto que movió cada uno. A igual peso, gana el que hizo más reps."),
+      ...strength,
+      progressCard(data.progress, group.me, prefs.period),
       consistencyCard(data.consistency, group.me),
-      el("a", { class: "button big", href: `#/g/${group.code}/campanas` }, "Campañas del grupo"),
     );
   }
 

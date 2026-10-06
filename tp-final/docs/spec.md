@@ -94,11 +94,10 @@ load = weight_kg + (bodyweight_kg if bodyweight_exercise else 0)
 
 - **Orden cronológico.** Por (`date`, `session_id`, `position`).
 - **Mejor absoluto.** Es la serie con mayor (`load`, `reps`). Si empatan, gana la de fecha más temprana.
-- **PRs.** Se recorren las series de cada usuario y ejercicio en orden cronológico:
-  - **`weight`:** la serie supera al mejor absoluto previo, es decir más `load`, o el mismo `load` con más reps.
-  - **`1rm`:** el 1RM estimado supera al mejor previo, sin ser `weight`.
-  - La primera serie de un usuario en un ejercicio no es PR.
-  - Varias series de una misma sesión se comparan contra lo anterior a cada una.
+- **PRs.** Se comparan contra las sesiones anteriores del usuario en ese ejercicio, a lo sumo uno por ejercicio y sesión (cambio por la devolución del gym-bro):
+  - **`weight`:** la serie más pesada de la sesión supera al mejor absoluto previo, es decir más `load`, o el mismo `load` con más reps.
+  - **`1rm`:** si no hubo PR de peso, el mejor 1RM estimado de la sesión supera al mejor previo.
+  - La primera sesión de un usuario en un ejercicio es la línea base y no tiene PRs.
 - **Exclusión.** Las series que el grupo marcó como dudosas se sacan de la entrada antes de calcular cualquier ranking de ese grupo.
 
 ### Períodos
@@ -121,9 +120,11 @@ Todos reciben las series del período, salvo donde se aclara.
   - **DOTS:** el mejor DOTS de cada usuario en el período, de mayor a menor.
   - **Absoluto:** el mejor absoluto de cada usuario, ordenado por (`load`, `reps`, fecha más temprana).
   - Los miembros sin datos van al final, como "sin datos".
-- **Progreso.** Para cada usuario y ejercicio, el mejor 1RM del último mes del período contra el mejor del mes anterior al período: `100 × (b / a − 1)`. Se promedian los ejercicios con datos en los dos meses, y quien no tiene ninguno va como "sin datos". Con `period=month`, compara ese mes contra el anterior.
+- **Progreso.** `100 × (b / a − 1)` por ejercicio, promediado entre los ejercicios con datos en los dos meses. Quien no tiene ninguno va como "sin datos".
+  - Con `period=month`: el mejor 1RM de ese mes contra el del mes anterior.
+  - Con un período de varios meses: el primer mes con datos del período contra el último.
 - **Semana.** Siempre la semana en curso según el servidor, no depende del período.
-  - **Sesiones:** días distintos con sesión en la semana.
+  - **Días:** días distintos con sesión en la semana. Dos sesiones el mismo día cuentan como un día.
   - **Objetivo:** el vigente esa semana.
   - **Estado:**
     - `done` si las sesiones llegan al objetivo;
@@ -131,7 +132,7 @@ Todos reciben las series del período, salvo donde se aclara.
     - `on` en otro caso.
   - **Orden:** por sesiones y, si empatan, por `sesiones / objetivo`.
 - **Constancia.** Toma las semanas cerradas que tocan el período.
-  - **Porcentaje:** semanas en que se llegó al objetivo vigente, sobre el total de semanas.
+  - **Porcentaje:** semanas en que se llegó al objetivo vigente, sobre el total de semanas. El primer objetivo rige también para las semanas anteriores a fijarlo, así cuentan las sesiones cargadas hacia atrás.
   - **Racha:** semanas cerradas seguidas cumpliendo, hacia atrás desde la última.
   - Las semanas anteriores a la primera sesión del usuario no cuentan.
   - **Orden:** por porcentaje y, si empatan, por racha.
@@ -217,6 +218,7 @@ Todo bajo `/api`, con el token. Los grupos se identifican por `code`.
 | `POST` | `/groups/{code}/duels` | `201` · `409` si ya hay uno pendiente o activo con ese rival · `422` si te retás a vos mismo |
 | `POST` | `/groups/{code}/duels/{id}/accept` | solo el retado · `403` · `409` si no está pendiente |
 | `POST` | `/groups/{code}/duels/{id}/reject` | ídem |
+| `DELETE` | `/groups/{code}/duels/{id}` | el retador cancela un reto pendiente · `204` · `403` · `409` si ya fue aceptado |
 | `GET` | `/groups/{code}/campaigns` | campañas con su tabla de posiciones |
 | `POST` | `/groups/{code}/campaigns` | solo el admin · `201` · `403` · `422` |
 

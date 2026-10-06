@@ -91,11 +91,24 @@ def test_weight_pr_wins_when_both_apply():
     assert detect_prs([base, both]) == {both.set_id: "weight"}
 
 
-def test_sets_in_one_session_compare_against_previous_ones():
+def test_first_session_of_an_exercise_has_no_prs_even_with_heavier_sets():
     s1 = rec(100, 1, D1, session=7, position=0)
     s2 = rec(105, 1, D1, session=7, position=1)
-    s3 = rec(102, 1, D1, session=7, position=2)
-    assert detect_prs([s3, s2, s1]) == {s2.set_id: "weight"}
+    assert detect_prs([s2, s1]) == {}
+
+
+def test_at_most_one_pr_per_exercise_and_session_on_the_heaviest_set():
+    base = rec(100, 1, D1, session=1)
+    lighter = rec(102, 1, D2, session=2, position=0)
+    heaviest = rec(105, 1, D2, session=2, position=1)
+    assert detect_prs([base, lighter, heaviest]) == {heaviest.set_id: "weight"}
+
+
+def test_1rm_pr_goes_to_the_best_estimate_when_no_weight_pr():
+    base = rec(110, 1, D1, session=1)
+    a = rec(90, 8, D2, session=2, position=0)   # 1RM 114
+    b = rec(95, 8, D2, session=2, position=1)   # 1RM 120.3
+    assert detect_prs([base, a, b]) == {b.set_id: "1rm"}
 
 
 def test_prs_are_per_user_and_exercise():

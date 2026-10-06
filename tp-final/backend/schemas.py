@@ -111,6 +111,7 @@ class SessionOut(BaseModel):
     date: date
     bodyweight_kg: float
     routine_day_id: int | None
+    routine_day_name: str | None = None
     sets: list[SetOut]
 
 
@@ -335,4 +336,4 @@ class PersonalStatsOut(BaseModel):
     best_weight_kg: float | None
     best_reps: int | None
     best_1rm: float | None
-    sessions: int
+    sessions: int  # sesiones del período con este ejercicio

@@ -82,7 +82,7 @@ export async function routineEditorView(app, { code, id }) {
       });
     });
     app.replaceChildren(
-      others.length ? el("p", { class: "notice" }, `La siguen: ${others.map((u) => names.get(u)).join(", ")}. Si la cambiás, cambia para ellos.`) : "",
+      others.length ? el("p", { class: "notice" }, `También la siguen: ${others.map((u) => names.get(u)).join(", ")}. Si la cambiás, cambia para ellos.`) : "",
       el("div", { class: "card" }, el("label", {}, "Nombre de la rutina", name)),
       ...draft.days.map(dayCard),
       draft.days.length < 7 ? el("button", { type: "button", class: "secondary big",
@@ -90,5 +90,17 @@ export async function routineEditorView(app, { code, id }) {
       el("div", { class: "actions" }, save, remove, error));
   }
 
-  render();
+  function renderReadOnly() {
+    const follows = routine.followers.map((u) => names.get(u)).filter(Boolean).join(", ") || "nadie";
+    app.replaceChildren(
+      el("div", { class: "card" }, el("h2", {}, routine.name), el("p", { class: "muted small" }, `La siguen: ${follows}`)),
+      ...routine.days.map((day) => el("div", { class: "card" }, el("h3", {}, day.name),
+        el("ul", { class: "list" }, day.items.map((i) => el("li", {}, el("span", {}, i.exercise), el("span", { class: "muted" }, `${i.sets} series`)))))),
+      el("div", { class: "actions" },
+        el("button", { type: "button", class: "secondary big", onclick: render }, "Editar rutina"),
+        el("a", { class: "button big", href: `#/g/${group.code}/grupo` }, "Volver")));
+  }
+
+  if (isNew) render();
+  else renderReadOnly();
 }

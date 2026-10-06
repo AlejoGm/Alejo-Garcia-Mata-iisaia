@@ -2,7 +2,7 @@ import { api } from "../api.js";
 import { poll, state } from "../app.js";
 import { busy, el, errorBox, weight } from "../ui.js";
 
-const LEVELS = { low: ["parejo", "ok"], medium: ["desbalance medio", ""], high: ["desbalance alto", "bad"], none: ["sin datos", ""] };
+const LEVELS = { low: ["parejo", "ok"], medium: ["desbalance medio", ""], high: ["desbalance alto", "bad"], none: ["sin datos para comparar", ""] };
 const MODES = [["absolute", "Absoluto"], ["dots", "DOTS"]];
 const STATUS = { pending: "Pendiente", active: "En curso", finished: "Terminado", rejected: "Rechazado" };
 
@@ -39,14 +39,23 @@ function duelCard(group, duel, unit, refresh) {
     actions = el("div", { class: "row" }, reject, accept);
   } else if (duel.status === "pending") {
     lines.push(el("p", { class: "muted small" }, `Esperando que ${duel.opponent.display_name} acepte.`));
+    if (duel.challenger.user_id === me) {
+      const cancel = el("button", { type: "button", class: "secondary" }, "Cancelar reto");
+      cancel.addEventListener("click", () => busy(cancel, error, async () => { await api.del(`/groups/${group.code}/duels/${duel.id}`); await refresh(); }));
+      actions = cancel;
+    }
   }
   return el("div", { class: `card${duel.status === "pending" && duel.opponent.user_id === me ? " highlight" : ""}` },
     el("div", { class: "spread" }, el("h3", {}, title), el("span", { class: "pill" }, STATUS[duel.status])),
     ...lines, actions, error);
 }
 
+// El formulario sobrevive a los refrescos: no vuelve a Sentadilla/Absoluto después de retar.
+let form = null;
+let notice = "";
+
 async function challengeCard(group, exercises, unit, refresh) {
-  const form = { exercise_id: group.challenges[0]?.id ?? exercises[0].id, mode: "absolute", days: 7 };
+  form ??= { exercise_id: group.challenges[0]?.id ?? exercises[0].id, mode: "absolute", days: 7 };
   const box = el("div", { class: "card" });
   const error = el("p", { class: "error", role: "alert" });
 
@@ -68,13 +77,17 @@ async function challengeCard(group, exercises, unit, refresh) {
         if (r.level === "high" && !window.confirm(`Con ${r.display_name} hay desbalance alto. ¿Retarlo igual?`)) return;
         busy(button, error, async () => {
           await api.post(`/groups/${group.code}/duels`, { opponent_id: r.user_id, ...form });
+          notice = `¡Listo! Retaste a ${r.display_name}. Tiene que aceptar para que arranque.`;
           await refresh();
         });
       });
       return el("li", {}, el("div", {}, el("span", {}, r.display_name), el("p", { class: "muted small" }, `mejor del mes: ${fmt(r.value, form.mode, unit)}`)),
         el("span", { class: `pill ${cls}`, style: "flex:0" }, label), button);
     });
+    const shown = notice;
+    notice = "";
     box.replaceChildren(
+      shown ? el("p", { class: "ok", role: "status" }, shown) : "",
       el("h3", {}, "Retar a alguien"),
       el("label", {}, "Ejercicio", select),
       segmented("duel-mode", MODES, form.mode, (v) => { form.mode = v; render(); }),

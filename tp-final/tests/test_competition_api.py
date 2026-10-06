@@ -77,3 +77,24 @@ def test_campaign_admin_only_and_winner_frozen_after_end(client):
         closed = client.get(f"/api/groups/{code}/campaigns", headers=users["caro"]).json()[0]
     assert closed["status"] == "finished"
     assert closed["winner"]["display_name"] == "beto"
+
+
+def test_challenger_cancels_a_pending_duel(client):
+    code, users = setup_group(client)
+    members = ids(client, code, users["ana"])
+    squat = exercise_id(client, users["ana"], "Sentadilla")
+    duel = client.post(f"/api/groups/{code}/duels", headers=users["ana"],
+                       json={"opponent_id": members["beto"], "exercise_id": squat, "mode": "dots"}).json()
+    assert client.delete(f"/api/groups/{code}/duels/{duel['id']}", headers=users["beto"]).status_code == 403
+    assert client.delete(f"/api/groups/{code}/duels/{duel['id']}", headers=users["ana"]).status_code == 204
+    assert client.get(f"/api/groups/{code}/duels", headers=users["ana"]).json() == []
+
+
+def test_accepted_duel_cannot_be_cancelled(client):
+    code, users = setup_group(client)
+    members = ids(client, code, users["ana"])
+    squat = exercise_id(client, users["ana"], "Sentadilla")
+    duel = client.post(f"/api/groups/{code}/duels", headers=users["ana"],
+                       json={"opponent_id": members["beto"], "exercise_id": squat, "mode": "dots"}).json()
+    client.post(f"/api/groups/{code}/duels/{duel['id']}/accept", headers=users["beto"])
+    assert client.delete(f"/api/groups/{code}/duels/{duel['id']}", headers=users["ana"]).status_code == 409

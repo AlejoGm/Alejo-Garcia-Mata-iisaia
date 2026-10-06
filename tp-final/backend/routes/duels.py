@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 from sqlmodel import Session, or_, select
 
 from backend import stats
@@ -124,3 +124,18 @@ def accept_duel(code: str, duel_id: int, user: UserDep, session: SessionDep) -> 
 @router.post("/groups/{code}/duels/{duel_id}/reject", response_model=DuelOut)
 def reject_duel(code: str, duel_id: int, user: UserDep, session: SessionDep) -> DuelOut:
     return answer(session, code, duel_id, user, accept=False)
+
+
+@router.delete("/groups/{code}/duels/{duel_id}", status_code=204)
+def cancel_duel(code: str, duel_id: int, user: UserDep, session: SessionDep) -> Response:
+    ctx = context(session, code, user)
+    duel = session.get(Duel, duel_id)
+    if duel is None or duel.group_id != ctx.group.id:
+        raise HTTPException(status_code=404, detail="Ese duelo no existe")
+    if duel.challenger_id != user.id:
+        raise HTTPException(status_code=403, detail="Solo quien retó puede cancelar")
+    if duel.status != "pending":
+        raise HTTPException(status_code=409, detail="Solo se cancela un reto que todavía no fue aceptado")
+    session.delete(duel)
+    session.commit()
+    return Response(status_code=204)

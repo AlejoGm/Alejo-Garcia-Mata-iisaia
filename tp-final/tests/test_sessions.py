@@ -24,7 +24,7 @@ def test_session_returns_1rm_dots_and_prs(client):
     assert response.status_code == 201
     sets = response.json()["sets"]
     assert sets[0]["pr"] == "weight"
-    assert sets[1]["pr"] == "1rm"
+    assert sets[1]["pr"] is None  # a lo sumo un PR por ejercicio y sesión
     assert sets[1]["estimated_1rm"] == pytest.approx(120.3, abs=0.05)
     assert sets[0]["dots"] == pytest.approx(66.1, abs=0.1)
 

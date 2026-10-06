@@ -6,7 +6,7 @@ const STATUS = { upcoming: "Por empezar", active: "En curso", finished: "Termina
 function standingsTable(campaign, me) {
   return el("table", {},
     el("thead", {}, el("tr", {}, el("th", { class: "num" }, "#"), el("th", {}, "Quién"),
-      el("th", { class: "num" }, "Puntos"), el("th", { class: "num" }, "1°"))),
+      el("th", { class: "num" }, "Puntos"), el("th", { class: "num" }, "1ros puestos"))),
     el("tbody", {}, campaign.standings.map((s, index) => el("tr", { class: s.user_id === me ? "me" : null },
       el("td", { class: "num" }, String(index + 1)), el("td", {}, s.display_name),
       el("td", { class: "num" }, String(s.points)), el("td", { class: "num muted" }, String(s.firsts))))));
@@ -18,7 +18,7 @@ function campaignCard(campaign, me) {
     el("p", { class: "muted small" }, `${campaign.start} → ${campaign.end} · suman: ${campaign.table_labels.join(", ")}`),
     campaign.winner ? el("p", { class: "ok" }, `Ganó ${campaign.winner.display_name}`) : null,
     standingsTable(campaign, me),
-    el("p", { class: "muted small" }, "Puntos por posición en cada tabla: 10, 8, 6, 5, 4, 3, 2, 1. Desempata la cantidad de primeros puestos."));
+    el("p", { class: "muted small" }, "Cada tabla reparte puntos por posición: 10 al primero, 8 al segundo, 6, 5, 4, 3, 2 y 1. Para sumar, mejorá en las tablas de la campaña. Desempatan los primeros puestos."));
 }
 
 async function createForm(group, refresh) {

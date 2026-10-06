@@ -1,5 +1,5 @@
 import { api } from "../api.js";
-import { state } from "../app.js";
+import { loadMe, state } from "../app.js";
 import { clearDraft, loadDraft, newDraft, saveDraft } from "../draft.js";
 import { busy, el, today, toDisplay } from "../ui.js";
 import { setLine } from "./session-summary.js";
@@ -38,7 +38,7 @@ async function historyCard(unit) {
       });
     });
     return el("details", { class: "session" },
-      el("summary", {}, `${s.date} · ${s.sets.length} series${s.sets.some((x) => x.pr) ? " · PR" : ""}`),
+      el("summary", {}, `${s.date}${s.routine_day_name ? ` · ${s.routine_day_name}` : ""} · ${s.sets.length} series${s.sets.some((x) => x.pr) ? " · PR" : ""}`),
       el("ul", { class: "list" }, s.sets.map((x) => setLine(x, unit))), remove);
   });
   return el("div", { class: "card" }, el("h3", {}, "Tus últimas sesiones"), blocks, error);
@@ -64,6 +64,7 @@ function dayButtons(group, routine, hasDraft) {
 }
 
 export async function trainView(app, group) {
+  await loadMe(true);
   const draft = loadDraft();
   const myRoutineId = group.members.find((m) => m.user_id === group.me)?.routine_id;
   const routines = myRoutineId ? await api.get(`/groups/${group.code}/routines`) : [];

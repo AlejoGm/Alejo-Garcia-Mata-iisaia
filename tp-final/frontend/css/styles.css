@@ -206,7 +206,6 @@ details summary { cursor: pointer; color: var(--accent); font-weight: 600; min-h
 .stepper-row .step { min-height: 64px; font-size: 1.8rem; padding: 0; }
 .save-set { min-height: 64px; font-size: 1.2rem; }
 details.change summary { justify-content: center; }
-.logger-footer { position: sticky; bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--bg); padding: 8px 0; display: flex; flex-direction: column; gap: 8px; }
 details.session { border-top: 1px solid var(--border); padding: 4px 0; }
 details.session summary { color: var(--text); font-weight: 500; }
 
@@ -241,3 +240,20 @@ li.routine { align-items: flex-start; }
 .stat-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .tile { padding: 12px; gap: 4px; }
 .tile strong { font-size: 1.05rem; }
+
+/* Barra de carga fija sobre las pestañas: "Guardar serie" en la zona del pulgar. */
+body.with-logger-bar { padding-bottom: calc(200px + env(safe-area-inset-bottom)); }
+.logger-bar {
+  position: fixed; left: 0; right: 0; bottom: calc(60px + env(safe-area-inset-bottom)); z-index: 9;
+  background: var(--bg); border-top: 1px solid var(--border); padding: 8px 16px; display: flex; flex-direction: column; gap: 6px;
+}
+.logger-bar .bar-row { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; max-width: 720px; width: 100%; margin: 0 auto; }
+.logger-bar .finish { min-height: 64px; }
+.rest { min-height: 40px; background: rgba(74, 222, 128, 0.12); color: var(--ok); border-color: transparent; font-variant-numeric: tabular-nums; }
+.toast { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--surface-2); border-radius: 8px; padding: 4px 8px 4px 12px; }
+.set-edit { flex: 1; justify-content: flex-start; text-align: left; background: transparent; border: 0; padding: 4px 0; min-height: 44px; font-weight: 500; }
+
+@media (min-width: 900px) {
+  .tabs { grid-auto-columns: minmax(0, 150px); justify-content: center; }
+  .logger-bar .bar-row { max-width: 720px; }
+}
