@@ -1,14 +1,11 @@
 import { api } from "./api.js";
 import { setChrome } from "./app.js";
+import { icon } from "./icons.js";
 import { el } from "./ui.js";
 
-const TABS = [
-  ["entrenar", "Entrenar"],
-  ["rankings", "Rankings"],
-  ["feed", "Feed"],
-  ["duelos", "Duelos"],
-  ["grupo", "Grupo"],
-];
+// Dos pestañas a cada lado y Entrenar en el centro, elevado: es lo que se toca en el gimnasio.
+const LEFT = [["rankings", "Rankings", "rankings"], ["feed", "Feed", "feed"]];
+const RIGHT = [["duelos", "Duelos", "duels"], ["grupo", "Grupo", "group"]];
 
 const cache = new Map();
 
@@ -21,8 +18,14 @@ export function forgetGroup(code) {
   cache.delete(code);
 }
 
+function tab(group, [key, label, iconName], active) {
+  return el("a", { href: `#/g/${group.code}/${key}`, class: key === active ? "active" : null,
+    "aria-current": key === active ? "page" : null }, icon(iconName), el("span", {}, label));
+}
+
 export function groupChrome(group, active) {
-  const tabBar = TABS.map(([key, label]) =>
-    el("a", { href: `#/g/${group.code}/${key}`, class: key === active ? "active" : null }, label));
+  const fab = el("a", { href: `#/g/${group.code}/entrenar`, class: `fab${active === "entrenar" ? " active" : ""}`,
+    "aria-label": "Entrenar", "aria-current": active === "entrenar" ? "page" : null }, icon("train", 30));
+  const tabBar = [...LEFT.map((t) => tab(group, t, active)), fab, ...RIGHT.map((t) => tab(group, t, active))];
   setChrome({ heading: group.name, backTo: "#/", tabBar });
 }

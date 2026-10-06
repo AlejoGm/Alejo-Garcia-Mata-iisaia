@@ -2,6 +2,7 @@ import { api } from "./api.js";
 import { initAuth, isLoggedIn } from "./auth.js";
 import { el, errorBox } from "./ui.js";
 import { routes } from "./routes.js";
+import { icon } from "./icons.js";
 
 const app = document.getElementById("app");
 const tabs = document.getElementById("tabs");
@@ -35,8 +36,15 @@ function match(hash) {
   return null;
 }
 
+back.replaceChildren(icon("back"));
+
+function initials(name) {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+}
+
 export function setChrome({ heading = "Gym-bro", backTo = null, tabBar = null } = {}) {
   title.textContent = heading;
+  profileLink.textContent = state.me ? initials(state.me.display_name) : "";
   back.hidden = !backTo;
   if (backTo) back.href = backTo;
   tabs.replaceChildren(...(tabBar || []));
