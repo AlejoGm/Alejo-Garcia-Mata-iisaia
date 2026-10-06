@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv sync)",
+      "Bash(uv run pytest)",
+      "Bash(uv run pytest *)",
+      "Bash(uv run fastapi dev *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Read(./**)",
+      "Edit(./backend/**)",
+      "Edit(./frontend/**)",
+      "Edit(./tests/**)",
+      "Edit(./docs/**)"
+    ],
+    "ask": [
+      "Bash(uv add *)",
+      "Bash(git push *)",
+      "Bash(gh pr merge *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Bash(rm -rf *)"
+    ]
+  }
+}
