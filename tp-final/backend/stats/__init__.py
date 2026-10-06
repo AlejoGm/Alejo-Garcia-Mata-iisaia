@@ -14,3 +14,6 @@ from backend.stats.rankings import (
     goal_in_force, monday, progress_table, progress_windows, strength_table, training_days, week_results,
     weekly_table,
 )
+from backend.stats.personal import (
+    BodyweightPoint, MonthPoint, WeekPoint, bodyweight_series, monthly_series, weekly_series,
+)
