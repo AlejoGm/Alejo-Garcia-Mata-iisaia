@@ -257,3 +257,4 @@ body.with-logger-bar { padding-bottom: calc(200px + env(safe-area-inset-bottom))
   .tabs { grid-auto-columns: minmax(0, 150px); justify-content: center; }
   .logger-bar .bar-row { max-width: 720px; }
 }
+.list li.editing { background: rgba(245, 165, 36, 0.12); border-radius: 8px; }

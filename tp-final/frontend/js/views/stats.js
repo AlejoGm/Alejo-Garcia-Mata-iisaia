@@ -46,18 +46,23 @@ export async function statsView(app) {
     const periods = el("div", { class: "segmented" }, PERIODS.map(([value, label]) => el("label", {},
       el("input", { type: "radio", name: "stats-period", value, checked: prefs.period === value,
         onchange: () => { prefs.period = value; save(); } }), el("span", {}, label))));
-    const name = data.exercises.find((e) => e.id === data.exercise_id)?.name ?? "";
+    const chosen = data.exercises.find((e) => e.id === data.exercise_id);
+    const name = chosen?.name ?? "";
+    const bestText = data.best_weight_kg === null ? "—"
+      : `${chosen?.bodyweight ? (data.best_weight_kg ? `PC + ${weight(data.best_weight_kg, unit)}` : "peso corporal") : weight(data.best_weight_kg, unit)} × ${data.best_reps}`;
+    const thisMonth = new Date().toLocaleDateString("en-CA").slice(0, 7);
 
     app.replaceChildren(
       el("div", { class: "card" }, select, periods),
       el("div", { class: "stat-tiles" },
         el("div", { class: "card tile" }, el("span", { class: "muted small" }, "Mejor serie"),
-          el("strong", {}, data.best_weight_kg !== null ? `${weight(data.best_weight_kg, unit)} × ${data.best_reps}` : "—")),
+          el("strong", {}, bestText)),
         el("div", { class: "card tile" }, el("span", { class: "muted small" }, "Mejor 1RM estimado"), el("strong", {}, weight(data.best_1rm, unit))),
-        el("div", { class: "card tile" }, el("span", { class: "muted small" }, "Sesiones en el período"), el("strong", {}, String(data.sessions)))),
+        el("div", { class: "card tile" }, el("span", { class: "muted small" }, "Sesiones con este ejercicio"), el("strong", {}, String(data.sessions)))),
       el("div", { class: "card" }, el("h3", {}, `${name}: 1RM por mes`),
         legend([["best", "mejor"], ["avg", "promedio de sesiones"]]),
-        lineChart({ label: `1RM por mes de ${name}`, labels: data.months.map((p) => monthShort(p.month)), series: [
+        el("p", { class: "muted small" }, "El mes en curso va marcado con * : todavía puede subir."),
+        lineChart({ label: `1RM por mes de ${name}`, labels: data.months.map((p) => `${monthShort(p.month)}${p.month.startsWith(thisMonth) ? "*" : ""}`), series: [
           { className: "best", values: data.months.map((p) => conv(p.best)) },
           { className: "avg", values: data.months.map((p) => conv(p.average)) }] })),
       el("div", { class: "card" }, el("h3", {}, `${name}: semana a semana`),
