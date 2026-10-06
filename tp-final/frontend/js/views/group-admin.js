@@ -1,10 +1,11 @@
 import { api } from "../api.js";
 import { forgetGroup, loadGroup } from "../group-shell.js";
-import { busy, el } from "../ui.js";
+import { icon } from "../icons.js";
+import { avatar, busy, el } from "../ui.js";
 import { routinesCard } from "./routines-card.js";
 
 function inviteCard(group) {
-  const copy = el("button", { type: "button", class: "secondary" }, "Copiar invitación");
+  const copy = el("button", { type: "button", class: "secondary" }, icon("copy", 18), "Copiar");
   const text = `Sumate a "${group.name}" en Gym-bro con el código ${group.code}: ${window.location.origin}/`;
   copy.addEventListener("click", async () => {
     try {
@@ -16,7 +17,7 @@ function inviteCard(group) {
   });
   return el("div", { class: "card" },
     el("p", { class: "muted small" }, "Código para invitar"),
-    el("div", { class: "spread" }, el("span", { class: "code", style: "font-size:1.8rem" }, group.code), copy),
+    el("div", { class: "spread" }, el("span", { class: "code invite-code" }, group.code), copy),
   );
 }
 
@@ -37,7 +38,7 @@ function membersCard(group, rerender) {
         });
       });
     }
-    return el("li", {}, el("span", {}, m.display_name), tags, kick);
+    return el("li", {}, el("span", { class: "who" }, avatar(m.display_name), m.display_name), tags, kick);
   });
   return el("div", { class: "card" }, el("h3", {}, `Miembros (${group.members.length})`), el("ul", { class: "list" }, items), error);
 }

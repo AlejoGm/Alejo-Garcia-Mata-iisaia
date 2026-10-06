@@ -7,6 +7,11 @@ const PATHS = {
   train: "M6.5 6.5v11M3.5 9v6M17.5 6.5v11M20.5 9v6M6.5 12h11",
   back: "M15 5l-7 7 7 7",
   chart: "M4 19h16M7 15l3.5-4 3 2.5L18 8",
+  trophy: "M8 4h8v5a4 4 0 0 1-8 0V4ZM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M9.5 17h5",
+  clock: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2",
+  bolt: "M13 3 5 14h6l-1 7 8-11h-6l1-7Z",
+  scale: "M5 20h14M12 4v16M6 8l-3 6a3 3 0 0 0 6 0L6 8Zm12 0-3 6a3 3 0 0 0 6 0l-3-6ZM6 8h12",
+  copy: "M9 9h10v10H9zM5 15V5h10",
 };
 
 export function icon(name, size = 24) {

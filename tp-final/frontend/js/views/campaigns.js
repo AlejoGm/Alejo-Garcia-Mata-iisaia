@@ -1,21 +1,28 @@
 import { api } from "../api.js";
-import { busy, el, errorBox, today } from "../ui.js";
+import { icon } from "../icons.js";
+import { avatar, busy, el, errorBox, today } from "../ui.js";
 
 const STATUS = { upcoming: "Por empezar", active: "En curso", finished: "Terminada" };
+
+function shortDate(iso) {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString("es-AR", { day: "numeric", month: "short" });
+}
 
 function standingsTable(campaign, me) {
   return el("table", {},
     el("thead", {}, el("tr", {}, el("th", { class: "num" }, "#"), el("th", {}, "Quién"),
       el("th", { class: "num" }, "Puntos"), el("th", { class: "num" }, "1ros puestos"))),
     el("tbody", {}, campaign.standings.map((s, index) => el("tr", { class: s.user_id === me ? "me" : null },
-      el("td", { class: "num" }, String(index + 1)), el("td", {}, s.display_name),
+      el("td", { class: "num" }, String(index + 1)), el("td", {}, el("span", { class: "who" }, avatar(s.display_name, "sm"), s.display_name)),
       el("td", { class: "num" }, String(s.points)), el("td", { class: "num muted" }, String(s.firsts))))));
 }
 
 function campaignCard(campaign, me) {
   return el("div", { class: `card${campaign.status === "active" ? " highlight" : ""}` },
-    el("div", { class: "spread" }, el("h3", {}, campaign.name), el("span", { class: "pill" }, STATUS[campaign.status])),
-    el("p", { class: "muted small" }, `${campaign.start} → ${campaign.end} · suman: ${campaign.table_labels.join(", ")}`),
+    el("div", { class: "person" }, el("span", { class: "activity-icon hot" }, icon("trophy", 24)),
+      el("span", { class: "person-text" }, el("strong", {}, campaign.name), el("span", { class: "muted small" }, `Del ${shortDate(campaign.start)} al ${shortDate(campaign.end)}`)),
+      el("span", { class: "pill" }, STATUS[campaign.status])),
+    el("p", { class: "muted small" }, `Suman: ${campaign.table_labels.join(", ")}`),
     campaign.winner ? el("p", { class: "ok" }, `Ganó ${campaign.winner.display_name}`) : null,
     standingsTable(campaign, me),
     el("p", { class: "muted small" }, "Cada tabla reparte puntos por posición: 10 al primero, 8 al segundo, 6, 5, 4, 3, 2 y 1. Para sumar, mejorá en las tablas de la campaña. Desempatan los primeros puestos."));

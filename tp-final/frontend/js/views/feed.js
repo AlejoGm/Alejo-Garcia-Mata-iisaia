@@ -1,6 +1,6 @@
 import { api } from "../api.js";
 import { poll, state } from "../app.js";
-import { el, errorBox, weight } from "../ui.js";
+import { avatar, el, errorBox, num, toDisplay } from "../ui.js";
 
 const KINDS = [["fuerza", "💪"], ["fuego", "🔥"], ["dudoso", "🤨"]];
 const PR_LABEL = { weight: "PR de peso", "1rm": "PR de 1RM" };
@@ -32,13 +32,13 @@ function reactionButtons(group, item, refresh) {
 }
 
 function card(group, item, unit, refresh) {
-  return el("div", { class: `card feed-item${item.excluded ? " excluded" : ""}` },
-    el("div", { class: "spread" },
-      el("strong", {}, item.display_name),
-      el("span", { class: "muted small" }, dateLabel(item.date))),
-    el("div", { class: "spread" },
-      el("span", {}, `${item.exercise} · ${weight(item.weight_kg, unit)} × ${item.reps}`),
+  return el("article", { class: `card feed-item${item.excluded ? " excluded" : ""}` },
+    el("div", { class: "person" }, avatar(item.display_name),
+      el("span", { class: "person-text" }, el("strong", {}, item.display_name), el("span", { class: "muted small" }, dateLabel(item.date))),
       el("span", { class: "pill accent" }, PR_LABEL[item.pr])),
+    el("div", { class: "feed-lift" },
+      el("span", { class: "feed-exercise" }, item.exercise),
+      el("span", { class: "feed-number" }, el("strong", {}, num(toDisplay(item.weight_kg, unit))), el("span", {}, `${unit} × ${item.reps}`))),
     item.excluded ? el("p", { class: "small error" }, "No cuenta para los rankings: la mayoría del grupo lo marcó como dudoso.") : null,
     reactionButtons(group, item, refresh));
 }

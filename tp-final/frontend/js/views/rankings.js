@@ -1,6 +1,7 @@
 import { api } from "../api.js";
 import { poll, state } from "../app.js";
-import { el, errorBox, num, storageGet, storageSet, weight } from "../ui.js";
+import { icon } from "../icons.js";
+import { avatar, el, errorBox, num, storageGet, storageSet, weight } from "../ui.js";
 
 const PERIODS = [["month", "Mes"], ["6m", "6 m"], ["12m", "12 m"], ["all", "Todo"], ["custom", "Elegir"]];
 const STATUS = { done: ["cumplido", "ok"], out: ["ya no llega", "bad"], on: ["", ""] };
@@ -36,7 +37,7 @@ function rankRows(entries, me, cells) {
     const cls = [entry.user_id === me ? "me" : "", hasData ? "" : "no-data"].join(" ").trim() || null;
     return el("tr", { class: cls },
       el("td", { class: "num" }, hasData ? String(position) : "—"),
-      el("td", {}, entry.display_name),
+      el("td", {}, el("span", { class: "who" }, avatar(entry.display_name, "sm"), entry.display_name)),
       ...(hasData ? cells.render(entry) : [el("td", { class: "num", colspan: cells.span }, "sin datos")]));
   });
 }
@@ -45,7 +46,7 @@ function weeklyCard(rows, me) {
   const body = rows.map((r) => {
     const [label, cls] = STATUS[r.status];
     return el("tr", { class: r.user_id === me ? "me" : null },
-      el("td", {}, r.display_name),
+      el("td", {}, el("span", { class: "who" }, avatar(r.display_name, "sm"), r.display_name)),
       el("td", { class: "num" }, r.goal ? `${r.sessions} / ${r.goal}` : String(r.sessions)),
       el("td", { class: "num" }, label ? el("span", { class: `pill ${cls}` }, label) : ""));
   });
@@ -80,6 +81,21 @@ function consistencyCard(rows, me) {
   return el("div", { class: "card" }, el("h3", {}, "Constancia"),
     el("p", { class: "muted small" }, "Semanas cerradas en que llegaste a tu objetivo."),
     table([["#", "num"], ["Quién"], ["Semanas", "num"], ["", "num"]], body));
+}
+
+function campaignBanner(group, campaigns) {
+  const active = campaigns.find((c) => c.status === "active");
+  const href = `#/g/${group.code}/campanas`;
+  if (!active) {
+    return el("a", { class: "button", href }, icon("trophy", 20), "Campañas del grupo");
+  }
+  const leader = active.standings[0];
+  const ends = new Date(`${active.end}T00:00:00`).toLocaleDateString("es-AR", { day: "numeric", month: "short" });
+  return el("a", { class: "hero-card", href },
+    el("span", { class: "hero-icon" }, icon("trophy", 30)),
+    el("span", { class: "hero-text" }, el("strong", {}, active.name),
+      el("span", {}, leader && leader.points ? `Va primero ${leader.display_name}` : `Cierra el ${ends}`)),
+    el("span", { class: "hero-cta" }, "Ver"));
 }
 
 function periodControls(prefs, onChange) {
@@ -117,8 +133,10 @@ export async function rankingsView(app, group) {
     if (prefs.period === "month") query.set("month", prefs.month);
     if (prefs.period === "custom") { query.set("from", prefs.from); query.set("to", prefs.to); }
     let data;
+    let campaigns = [];
     try {
-      data = await api.get(`/groups/${group.code}/rankings?${query}`);
+      [data, campaigns] = await Promise.all([api.get(`/groups/${group.code}/rankings?${query}`),
+        api.get(`/groups/${group.code}/campaigns`).catch(() => [])]);
     } catch (err) {
       app.replaceChildren(periodControls(prefs, update), errorBox(err.message));
       return;
@@ -127,7 +145,7 @@ export async function rankingsView(app, group) {
       ? data.strength.map((item) => strengthCard(item, prefs.mode, group.me, unit))
       : [el("p", { class: "muted" }, "El grupo no tiene ejercicios de desafío.")];
     app.replaceChildren(
-      el("a", { class: "button", href: `#/g/${group.code}/campanas` }, "Campañas del grupo"),
+      campaignBanner(group, campaigns),
       weeklyCard(data.weekly, group.me),
       periodControls(prefs, update),
       el("h2", { class: "section-title" }, "Fuerza"), modeToggle(prefs.mode, update),

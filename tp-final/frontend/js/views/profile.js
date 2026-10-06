@@ -1,7 +1,7 @@
 import { api, ApiError } from "../api.js";
 import { logout, suggestedName } from "../auth.js";
 import { loadMe, setChrome, state } from "../app.js";
-import { busy, el } from "../ui.js";
+import { avatar, busy, el } from "../ui.js";
 
 function choice(name, options, selected) {
   return el("div", { class: "segmented", role: "radiogroup" },
@@ -64,5 +64,8 @@ export async function profileView(app) {
     state.me = null;
     window.location.hash = "#/login";
   });
-  app.replaceChildren(form, me ? el("div", { class: "actions" }, out) : "");
+  const header = me ? el("header", { class: "person profile-head" }, avatar(me.display_name, "lg"),
+    el("span", { class: "person-text" }, el("h2", {}, me.display_name),
+      el("span", { class: "muted" }, `Objetivo: ${me.weekly_goal ?? "?"} días por semana`))) : "";
+  app.replaceChildren(header, form, me ? el("div", { class: "actions" }, out) : "");
 }
