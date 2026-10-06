@@ -5,6 +5,7 @@ description = "Tracker de gimnasio para grupos de amigos que se comparan"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi[standard]",
+    "pyjwt[crypto]>=2.15.1",
     "sqlmodel",
 ]
 

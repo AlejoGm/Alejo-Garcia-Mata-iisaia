@@ -1,41 +1,25 @@
-from datetime import date
+from datetime import date, datetime, timezone
 
 from sqlmodel import Field, SQLModel, UniqueConstraint
 
 
-class Group(SQLModel, table=True):
+def now_utc() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    code: str = Field(unique=True, index=True)
-    name: str
+    sub: str = Field(unique=True, index=True)
+    display_name: str
+    sex: str  # "M" o "F", para DOTS
+    unit: str = "kg"
+    created_at: datetime = Field(default_factory=now_utc)
 
 
-class Member(SQLModel, table=True):
-    __table_args__ = (UniqueConstraint("group_id", "nickname"),)
-
-    id: int | None = Field(default=None, primary_key=True)
-    group_id: int = Field(foreign_key="group.id", index=True)
-    nickname: str
-    bodyweight_kg: float
-
-
-class Exercise(SQLModel, table=True):
-    __table_args__ = (UniqueConstraint("group_id", "name"),)
+class GoalChange(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint("user_id", "week"),)
 
     id: int | None = Field(default=None, primary_key=True)
-    group_id: int = Field(foreign_key="group.id", index=True)
-    name: str
-    is_challenge: bool = False
-
-
-class WorkoutSession(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    member_id: int = Field(foreign_key="member.id", index=True)
-    date: date
-
-
-class WorkSet(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    session_id: int = Field(foreign_key="workoutsession.id", index=True)
-    exercise_id: int = Field(foreign_key="exercise.id")
-    weight_kg: float
-    reps: int
+    user_id: int = Field(foreign_key="user.id", index=True)
+    goal: int
+    week: date  # lunes desde el que rige
