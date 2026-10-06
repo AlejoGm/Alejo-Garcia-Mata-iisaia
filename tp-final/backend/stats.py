@@ -306,3 +306,15 @@ def consistency_table(records: list[SetRecord], goals: dict[int, list[tuple[date
         pct = 100 * sum(in_period) / len(in_period) if in_period else None
         entries.append(ConsistencyEntry(user_id, pct, streak, len(in_period)))
     return sorted(entries, key=lambda e: (e.pct is None, -(e.pct or 0), -e.streak, e.user_id))
+
+
+def duel_result(records, sexes, challenger, opponent, exercise_id, mode, start, days, today):
+    raise NotImplementedError
+
+
+def imbalance(a, b):
+    raise NotImplementedError
+
+
+def campaign_points(tables, user_ids):
+    raise NotImplementedError
