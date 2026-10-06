@@ -1,11 +1,13 @@
 import { authMode, login } from "../auth.js";
+import { icon } from "../icons.js";
 import { busy, el } from "../ui.js";
 
 export function loginView(app) {
   const error = el("p", { class: "error", role: "alert" });
   const hero = el("div", { class: "hero" },
+    el("span", { class: "brand-mark" }, icon("train", 34)),
     el("h2", {}, "Entrená con tus bros."),
-    el("p", { class: "muted" }, "Cada uno con su rutina. Comparados de forma justa."),
+    el("p", { class: "muted" }, "Cada uno con su rutina. Comparados de forma justa, con DOTS."),
   );
 
   if (authMode() === "auth0") {

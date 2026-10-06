@@ -1,6 +1,7 @@
 import { api } from "../api.js";
 import { loadMe, state } from "../app.js";
 import { clearDraft, loadDraft, newDraft, saveDraft } from "../draft.js";
+import { icon } from "../icons.js";
 import { busy, el, today, toDisplay } from "../ui.js";
 import { setLine } from "./session-summary.js";
 
@@ -24,12 +25,18 @@ function pendingCard(group, draft) {
     el("div", { class: "row" }, discard, resume));
 }
 
+function dateLabel(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "short" });
+}
+
 async function historyCard(unit) {
   const sessions = await api.get("/me/sessions?limit=5");
   if (!sessions.length) return el("div", { class: "card" }, el("h3", {}, "Tus sesiones"), el("p", { class: "muted" }, "Todavía no cargaste ninguna."));
   const error = el("p", { class: "error", role: "alert" });
   const blocks = sessions.map((s) => {
-    const remove = el("button", { type: "button", class: "danger", style: "flex:0" }, "Borrar");
+    const prs = s.sets.filter((x) => x.pr).length;
+    const remove = el("button", { type: "button", class: "danger" }, "Borrar sesión");
     remove.addEventListener("click", () => {
       if (!window.confirm(`¿Borrar la sesión del ${s.date}? No se puede deshacer.`)) return;
       busy(remove, error, async () => {
@@ -37,11 +44,16 @@ async function historyCard(unit) {
         remove.closest("details").remove();
       });
     });
-    return el("details", { class: "session" },
-      el("summary", {}, `${s.date}${s.routine_day_name ? ` · ${s.routine_day_name}` : ""} · ${s.sets.length} series${s.sets.some((x) => x.pr) ? " · PR" : ""}`),
+    return el("details", { class: "activity" },
+      el("summary", {},
+        el("span", { class: `activity-icon${prs ? " hot" : ""}` }, icon(prs ? "trophy" : "train", 26)),
+        el("span", { class: "activity-text" },
+          el("strong", {}, s.routine_day_name || "Carga libre"),
+          el("span", { class: "muted small" }, prs ? `${dateLabel(s.date)}, ${prs} PR` : dateLabel(s.date))),
+        el("span", { class: "activity-number" }, el("strong", {}, String(s.sets.length)), el("span", {}, "series"))),
       el("ul", { class: "list" }, s.sets.map((x) => setLine(x, unit))), remove);
   });
-  return el("div", { class: "card" }, el("h3", {}, "Tus últimas sesiones"), blocks, error);
+  return el("section", { class: "card" }, el("h3", {}, "Tus últimas sesiones"), el("div", { class: "activity-list" }, blocks), error);
 }
 
 function dayButtons(group, routine, hasDraft) {

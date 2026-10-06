@@ -1,6 +1,7 @@
 import { api } from "../api.js";
 import { setChrome, state } from "../app.js";
 import { lineChart } from "../charts.js";
+import { icon } from "../icons.js";
 import { el, errorBox, storageGet, storageSet, toDisplay, weight } from "../ui.js";
 
 const PERIODS = [["6m", "6 meses"], ["12m", "12 meses"], ["all", "Todo"]];
@@ -49,16 +50,16 @@ export async function statsView(app) {
     const chosen = data.exercises.find((e) => e.id === data.exercise_id);
     const name = chosen?.name ?? "";
     const bestText = data.best_weight_kg === null ? "—"
-      : `${chosen?.bodyweight ? (data.best_weight_kg ? `PC + ${weight(data.best_weight_kg, unit)}` : "peso corporal") : weight(data.best_weight_kg, unit)} × ${data.best_reps}`;
+      : `${chosen?.bodyweight ? (data.best_weight_kg ? `+${weight(data.best_weight_kg, unit)}` : "Sin lastre") : weight(data.best_weight_kg, unit)} × ${data.best_reps}`;
     const thisMonth = new Date().toLocaleDateString("en-CA").slice(0, 7);
 
     app.replaceChildren(
       el("div", { class: "card" }, select, periods),
       el("div", { class: "stat-tiles" },
-        el("div", { class: "card tile" }, el("span", { class: "muted small" }, "Mejor serie"),
+        el("div", { class: "card tile" }, el("span", { class: "tile-icon" }, icon("trophy", 22)), el("span", { class: "muted small" }, "Mejor serie"),
           el("strong", {}, bestText)),
-        el("div", { class: "card tile" }, el("span", { class: "muted small" }, "Mejor 1RM estimado"), el("strong", {}, weight(data.best_1rm, unit))),
-        el("div", { class: "card tile" }, el("span", { class: "muted small" }, "Sesiones con este ejercicio"), el("strong", {}, String(data.sessions)))),
+        el("div", { class: "card tile" }, el("span", { class: "tile-icon mint" }, icon("bolt", 22)), el("span", { class: "muted small" }, "Mejor 1RM estimado"), el("strong", {}, weight(data.best_1rm, unit))),
+        el("div", { class: "card tile" }, el("span", { class: "tile-icon ember" }, icon("clock", 22)), el("span", { class: "muted small" }, "Sesiones con este ejercicio"), el("strong", {}, String(data.sessions)))),
       el("div", { class: "card" }, el("h3", {}, `${name}: 1RM por mes`),
         legend([["best", "mejor"], ["avg", "promedio de sesiones"]]),
         el("p", { class: "muted small" }, "El mes en curso va marcado con * : todavía puede subir."),

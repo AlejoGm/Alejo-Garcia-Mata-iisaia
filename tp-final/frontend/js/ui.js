@@ -83,3 +83,13 @@ export function storageSet(key, value) {
     // Sin storage se pierde el borrador al cerrar la pestaña; la app sigue andando.
   }
 }
+
+// Avatar con iniciales: el tono sale del nombre, siempre dentro de la paleta (lima, menta, brasa, arena).
+const TONES = ["lime", "mint", "ember", "sand"];
+
+export function avatar(name, size = "md") {
+  const letters = String(name).split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("") || "?";
+  let hash = 0;
+  for (const char of String(name)) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return el("span", { class: `avatar-dot ${size} tone-${TONES[hash % TONES.length]}`, "aria-hidden": "true" }, letters);
+}

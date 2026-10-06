@@ -1,6 +1,6 @@
 import { api } from "../api.js";
 import { poll, state } from "../app.js";
-import { busy, el, errorBox, weight } from "../ui.js";
+import { avatar, busy, el, errorBox, num, weight } from "../ui.js";
 
 const LEVELS = { low: ["parejo", "ok"], medium: ["desbalance medio", ""], high: ["desbalance alto", "bad"], none: ["sin datos para comparar", ""] };
 const MODES = [["absolute", "Absoluto"], ["dots", "DOTS"]];
@@ -8,7 +8,7 @@ const STATUS = { pending: "Pendiente", active: "En curso", finished: "Terminado"
 
 function fmt(value, mode, unit) {
   if (value === null || value === undefined) return "—";
-  return mode === "dots" ? `${value} DOTS` : weight(value, unit);
+  return mode === "dots" ? `${num(value)} DOTS` : weight(value, unit);
 }
 
 function segmented(name, options, selected, onChange) {
@@ -20,15 +20,17 @@ function segmented(name, options, selected, onChange) {
 function duelCard(group, duel, unit, refresh) {
   const me = group.me;
   const error = el("p", { class: "error", role: "alert" });
-  const title = `${duel.challenger.display_name} vs ${duel.opponent.display_name}`;
-  const lines = [el("p", { class: "muted small" }, `${duel.exercise} · ${duel.mode === "dots" ? "DOTS" : "Absoluto"} · ${duel.days} días`)];
+  const title = duel.exercise;
+  const lines = [el("p", { class: "muted small" }, `${duel.mode === "dots" ? "DOTS" : "Absoluto"}, ${duel.days} días`)];
+  const side = (p, value) => el("div", { class: `duel-side${duel.winner_id === p.user_id ? " leading" : ""}` },
+    avatar(p.display_name, "lg"), el("strong", {}, p.display_name),
+    duel.status === "active" || duel.status === "finished" ? el("span", { class: "duel-value" }, fmt(value, duel.mode, unit)) : "");
+  lines.push(el("div", { class: "duel-versus" }, side(duel.challenger, duel.challenger_value), el("span", { class: "vs" }, "vs"),
+    side(duel.opponent, duel.opponent_value)));
   if (duel.status === "active" || duel.status === "finished") {
     const winner = duel.winner_id === null ? (duel.status === "finished" ? "Empate" : "Parejo por ahora")
       : `${duel.winner_id === duel.challenger.user_id ? duel.challenger.display_name : duel.opponent.display_name} ${duel.status === "finished" ? "ganó" : "va ganando"}`;
-    lines.push(
-      el("div", { class: "spread" }, el("span", {}, duel.challenger.display_name), el("strong", {}, fmt(duel.challenger_value, duel.mode, unit))),
-      el("div", { class: "spread" }, el("span", {}, duel.opponent.display_name), el("strong", {}, fmt(duel.opponent_value, duel.mode, unit))),
-      el("p", { class: duel.winner_id === me ? "ok" : "" }, `${winner}${duel.end ? ` · cierra el ${duel.end}` : ""}`));
+    lines.push(el("p", { class: duel.winner_id === me ? "ok" : "muted" }, `${winner}${duel.end ? `, cierra el ${new Date(`${duel.end}T00:00:00`).toLocaleDateString("es-AR", { day: "numeric", month: "short" })}` : ""}`));
   }
   let actions = null;
   if (duel.status === "pending" && duel.opponent.user_id === me) {
@@ -81,8 +83,11 @@ async function challengeCard(group, exercises, unit, refresh) {
           await refresh();
         });
       });
-      return el("li", {}, el("div", {}, el("span", {}, r.display_name), el("p", { class: "muted small" }, `mejor del mes: ${fmt(r.value, form.mode, unit)}`)),
-        el("span", { class: `pill ${cls}`, style: "flex:0" }, label), button);
+      return el("li", { class: "rival" }, avatar(r.display_name),
+        el("span", { class: "person-text" }, el("strong", {}, r.display_name),
+          el("span", { class: "muted small" }, `Mejor del mes: ${fmt(r.value, form.mode, unit)}`),
+          el("span", { class: `pill ${cls}` }, label)),
+        button);
     });
     const shown = notice;
     notice = "";
