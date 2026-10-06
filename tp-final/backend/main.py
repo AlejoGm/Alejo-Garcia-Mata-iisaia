@@ -3,6 +3,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from sqlalchemy.exc import OperationalError
 from fastapi.staticfiles import StaticFiles
 
 from backend import config
@@ -20,8 +21,13 @@ log = logging.getLogger("uvicorn.error")
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     create_tables()
-    with Session(engine) as session:
-        seed_exercises(session)
+    try:
+        with Session(engine) as session:
+            seed_exercises(session)
+    except OperationalError as err:
+        # create_all no modifica tablas existentes: una base de una versión anterior queda incompatible.
+        raise RuntimeError(f"La base {config.DB_PATH} es de una versión anterior de la app. "
+                           "Renombrala o borrala y volvé a arrancar.") from err
     if config.AUTH_MODE == "dev":
         log.warning("Auth0 no está configurado: login de desarrollo, sin Google. Ver README.")
     yield
