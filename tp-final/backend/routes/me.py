@@ -7,7 +7,7 @@ from backend import config
 from backend.auth import SessionDep, SubDep, UserDep
 from backend.models import GoalChange, User, WorkoutSession
 from backend.schemas import ConfigOut, ProfileInput, ProfileOut
-from backend.weeks import goal_for_week, monday
+from backend.stats import goal_in_force as goal_for_week, monday
 
 router = APIRouter(prefix="/api")
 
