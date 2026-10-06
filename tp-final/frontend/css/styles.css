@@ -209,3 +209,13 @@ details.change summary { justify-content: center; }
 .logger-footer { position: sticky; bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--bg); padding: 8px 0; display: flex; flex-direction: column; gap: 8px; }
 details.session { border-top: 1px solid var(--border); padding: 4px 0; }
 details.session summary { color: var(--text); font-weight: 500; }
+
+.section-title { margin-top: 8px; }
+.small-seg span { font-size: 0.8rem; min-height: 40px; }
+.page-list { display: flex; flex-direction: column; gap: 12px; }
+.feed-item.excluded { opacity: 0.6; }
+.reactions { display: flex; gap: 8px; }
+.reaction { flex: 1; min-height: 44px; font-size: 1rem; }
+.reaction.active { border-color: var(--accent); background: rgba(245, 165, 36, 0.15); }
+td.ok { color: var(--ok); }
+td.error { color: var(--error); }
