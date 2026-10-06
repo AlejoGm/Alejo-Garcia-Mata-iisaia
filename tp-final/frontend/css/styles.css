@@ -186,3 +186,8 @@ tr.no-data td { color: var(--muted); }
   .page { max-width: 960px; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
 }
+
+.checks { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin: 8px 0; }
+label.check { flex-direction: row; align-items: center; gap: 8px; color: var(--text); font-size: 0.95rem; min-height: 40px; }
+label.check input { width: 20px; min-height: 20px; height: 20px; }
+details summary { cursor: pointer; color: var(--accent); font-weight: 600; min-height: 40px; display: flex; align-items: center; }
