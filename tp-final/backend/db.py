@@ -1,14 +1,16 @@
 from collections.abc import Iterator
-from pathlib import Path
 
+from sqlalchemy import event
 from sqlmodel import Session, SQLModel, create_engine
 
-DB_PATH = Path(__file__).resolve().parent.parent / "gymbro.db"
+from backend.config import DB_PATH
 
-engine = create_engine(
-    f"sqlite:///{DB_PATH}",
-    connect_args={"check_same_thread": False},
-)
+engine = create_engine(f"sqlite:///{DB_PATH}", connect_args={"check_same_thread": False})
+
+
+@event.listens_for(engine, "connect")
+def _enable_foreign_keys(dbapi_connection, _record) -> None:
+    dbapi_connection.execute("PRAGMA foreign_keys=ON")
 
 
 def create_tables() -> None:
