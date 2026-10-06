@@ -3,11 +3,15 @@ import { groupChrome, loadGroup } from "../group-shell.js";
 import { adminView } from "./group-admin.js";
 import { loggerView } from "./logger.js";
 import { trainView } from "./train.js";
+import { rankingsView } from "./rankings.js";
+import { feedView } from "./feed.js";
 
 const views = {
   grupo: adminView,
   entrenar: trainView,
   carga: loggerView,
+  rankings: rankingsView,
+  feed: feedView,
 };
 
 export async function groupView(app, { code, tab }) {
