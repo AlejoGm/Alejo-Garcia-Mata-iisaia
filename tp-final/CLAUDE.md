@@ -22,4 +22,4 @@ Sin `AUTH0_DOMAIN` la app corre en modo dev: login con un nombre, sin Google.
 
 - FastAPI + SQLModel + SQLite. Frontend en HTML, CSS y JS con ES modules, sin build.
 - Archivos de menos de 300 líneas, funciones de menos de 50.
-- La lógica de rankings vive en `backend/stats.py`, sin imports de la base ni de FastAPI.
+- La lógica de rankings vive en `backend/stats/`, sin imports de la base ni de FastAPI.

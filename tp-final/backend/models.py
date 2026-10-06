@@ -102,3 +102,28 @@ class Reaction(SQLModel, table=True):
     set_id: int = Field(foreign_key="workset.id", index=True)
     user_id: int = Field(foreign_key="user.id")
     kind: str  # "fuerza", "fuego" o "dudoso"
+
+
+class Duel(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    group_id: int = Field(foreign_key="group.id", index=True)
+    challenger_id: int = Field(foreign_key="user.id")
+    opponent_id: int = Field(foreign_key="user.id")
+    exercise_id: int = Field(foreign_key="exercise.id")
+    mode: str  # "absolute" o "dots"
+    days: int
+    status: str = "pending"  # "pending", "active" o "rejected"; "finished" se deriva de la fecha
+    created_at: datetime = Field(default_factory=now_utc)
+    start: date | None = None
+
+
+class Campaign(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    group_id: int = Field(foreign_key="group.id", index=True)
+    name: str
+    start: date
+    end: date
+    tables: str  # JSON: lista de claves "dots:<id>", "absolute:<id>", "progress", "consistency"
+    routine_id: int | None = Field(default=None, foreign_key="routine.id")
+    winner_id: int | None = Field(default=None, foreign_key="user.id")
+    frozen_at: datetime | None = None
