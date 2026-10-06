@@ -37,15 +37,16 @@ export function lineChart({ labels, series, label }) {
       root.append(svg("text", { x: x(i), y: H - 10, "text-anchor": "middle", class: "chart-axis" }, text));
     }
   });
-  for (const s of series) {
+  for (const s of [...series].reverse()) {
     let d = "";
+    const dots = [];
     s.values.forEach((v, i) => {
       if (v === null || v === undefined) return;
       const previous = s.values[i - 1];
       d += `${previous === null || previous === undefined || i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)} `;
-      root.append(svg("circle", { cx: x(i), cy: y(v), r: 6, class: `chart-dot ${s.className}` }));
+      dots.push(svg("circle", { cx: x(i), cy: y(v), r: 6, class: `chart-dot ${s.className}` }));
     });
-    root.prepend(svg("path", { d, class: `chart-line ${s.className}` }));
+    root.append(svg("path", { d, class: `chart-line ${s.className}` }), ...dots);
   }
   return root;
 }

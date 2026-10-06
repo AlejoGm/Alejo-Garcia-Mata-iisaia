@@ -67,7 +67,8 @@ def rankings(code: str, user: UserDep, session: SessionDep, period: str = "month
                                    absolute=strength_rows(ctx, stats.strength_table(in_period, sexes, e.id, "absolute")))
                   for e in challenge_exercises(session, ctx.group)],
         progress=[ProgressRow(user_id=e.user_id, display_name=ctx.name(e.user_id), pct=r1(e.pct), exercises=e.exercises)
-                  for e in stats.progress_table(records, ctx.ids, current, baseline)],
+                  for e in (stats.progress_table(records, ctx.ids, current, baseline) if period == "month"
+                            else stats.progress_span(records, ctx.ids, low, high))],
         weekly=[WeeklyRow(user_id=e.user_id, display_name=ctx.name(e.user_id), sessions=e.sessions, goal=e.goal,
                           status=e.status)
                 for e in stats.weekly_table(records, {uid: stats.goal_in_force(c, this_week) for uid, c in changes.items()},

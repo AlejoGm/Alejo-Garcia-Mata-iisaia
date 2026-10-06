@@ -1,32 +1,9 @@
 import { api } from "../api.js";
-import { state } from "../app.js";
+import { loadMe, state } from "../app.js";
 import { clearDraft, loadDraft, saveDraft, setsDone } from "../draft.js";
-import { el, errorBox, toDisplay, toKg, weight } from "../ui.js";
+import { el, errorBox, num, toDisplay, toKg, weight } from "../ui.js";
+import { clock, lastLine, restTimer, stepper, suspicious } from "./logger-parts.js";
 import { sessionSummary } from "./session-summary.js";
-
-function stepper(label, value, step, onChange) {
-  const input = el("input", { type: "number", inputmode: "decimal", value: String(value ?? ""), "aria-label": label });
-  input.addEventListener("input", () => onChange(input.value === "" ? null : Number(input.value)));
-  const bump = (delta) => {
-    const next = Math.max(0, Math.round(((Number(input.value) || 0) + delta) * 100) / 100);
-    input.value = String(next);
-    onChange(next);
-  };
-  return el("div", { class: "stepper" },
-    el("span", { class: "stepper-label" }, label),
-    el("div", { class: "stepper-row" },
-      el("button", { type: "button", class: "step", onclick: () => bump(-step), "aria-label": `Menos ${label}` }, "−"),
-      input,
-      el("button", { type: "button", class: "step", onclick: () => bump(step), "aria-label": `Más ${label}` }, "+")),
-  );
-}
-
-function lastLine(last, unit) {
-  const parts = [];
-  if (last.mine) parts.push(`vos ${weight(last.mine.weight_kg, unit)} × ${last.mine.reps}`);
-  for (const other of last.others) parts.push(`${other.display_name} ${weight(other.weight_kg, unit)} × ${other.reps}`);
-  return parts.length ? `La última vez: ${parts.join(" · ")}` : "Primera vez que alguien del grupo carga este ejercicio.";
-}
 
 export async function loggerView(app, group) {
   const draft = loadDraft();
@@ -38,57 +15,95 @@ export async function loggerView(app, group) {
   const exercises = await api.get("/exercises");
   const byId = new Map(exercises.map((e) => [e.id, e]));
   const lastCache = new Map();
-  const entry = { weight: null, reps: null };
+  const entry = { weight: null, reps: null, confirm: false, limit: false };
+  const bar = { timer: el("button", { type: "button", class: "rest", hidden: true }), toast: el("div", { class: "toast", hidden: true }) };
+  const timer = restTimer((left) => {
+    bar.timer.hidden = left === null;
+    bar.timer.textContent = left === 0 ? "¡Descanso terminado!" : `Descanso ${clock(left ?? 0)} · +30 s`;
+  });
+  bar.timer.addEventListener("click", () => (timer.running() ? timer.add(30) : timer.stop()));
+  let undo = null;
 
-  async function lastFor(exerciseId) {
+  const lastFor = async (exerciseId) => {
     if (!lastCache.has(exerciseId)) {
       lastCache.set(exerciseId, await api.get(`/groups/${group.code}/last?exercise_id=${exerciseId}`).catch(() => null));
     }
     return lastCache.get(exerciseId);
-  }
+  };
+  const persist = () => saveDraft(draft);
+  const planItem = () => draft.plan[draft.step];
 
-  function persist() {
-    saveDraft(draft);
+  async function reference(exerciseId) {
+    const previous = [...draft.sets].reverse().find((s) => s.exercise_id === exerciseId);
+    return previous || (await lastFor(exerciseId))?.mine || null;
   }
 
   async function prefill() {
-    const previous = [...draft.sets].reverse().find((s) => s.exercise_id === draft.exerciseId);
-    const last = previous ? null : await lastFor(draft.exerciseId);
-    const base = previous || last?.mine;
+    const base = await reference(draft.exerciseId);
     const exercise = byId.get(draft.exerciseId);
-    entry.weight = base ? toDisplay(base.weight_kg, unit) : exercise?.bodyweight ? 0 : toDisplay(20, unit);
+    entry.weight = base ? toDisplay(base.weight_kg, unit) : exercise?.bodyweight ? 0 : unit === "lb" ? 45 : 20;
     entry.reps = base ? base.reps : 8;
+    entry.confirm = false;
   }
 
-  function planItem() {
-    return draft.plan[draft.step];
-  }
-
-  function chooseExercise(id) {
+  async function chooseExercise(id) {
     draft.exerciseId = id;
     persist();
-    prefill().then(render);
-  }
-
-  function saveSet() {
-    if (!draft.exerciseId || entry.reps === null || entry.weight === null) return;
-    draft.sets.push({ exercise_id: draft.exerciseId, weight_kg: toKg(entry.weight, unit), reps: entry.reps });
-    const item = planItem();
-    if (item && item.exercise_id === draft.exerciseId && setsDone(draft, item.exercise_id) >= item.sets) {
-      advance();
-    }
-    persist();
+    await prefill();
     render();
   }
 
-  function advance() {
-    if (draft.step < draft.plan.length - 1) {
-      draft.step += 1;
-      draft.exerciseId = planItem().exercise_id;
-      prefill().then(render);
-    } else {
-      draft.step = draft.plan.length;
+  function advanceToNextIncomplete() {
+    const pending = draft.plan.map((item, index) => ({ item, index })).filter(({ item }) => setsDone(draft, item.exercise_id) < item.sets);
+    const next = pending.find(({ index }) => index > draft.step) || pending[0];
+    draft.step = next ? next.index : draft.plan.length;
+    draft.exerciseId = next ? next.item.exercise_id : null;
+  }
+
+  async function saveSet() {
+    if (!draft.exerciseId || !entry.reps || entry.weight === null) return;
+    const weightKg = toKg(entry.weight, unit);
+    if (weightKg > 500) {
+      entry.limit = true;
+      render();
+      return;
     }
+    entry.limit = false;
+    const ref = await reference(draft.exerciseId);
+    if (!entry.confirm && suspicious(weightKg, ref?.weight_kg)) {
+      entry.confirm = true;
+      render();
+      return;
+    }
+    draft.sets.push({ exercise_id: draft.exerciseId, weight_kg: weightKg, reps: entry.reps });
+    const item = planItem();
+    const justCompleted = item && item.exercise_id === draft.exerciseId && setsDone(draft, item.exercise_id) === item.sets;
+    if (justCompleted) {
+      advanceToNextIncomplete();
+      if (draft.exerciseId) await prefill();
+    }
+    entry.confirm = false;
+    persist();
+    timer.start();
+    render();
+  }
+
+  function removeSet(index) {
+    const [removed] = draft.sets.splice(index, 1);
+    persist();
+    clearTimeout(undo?.handle);
+    undo = { removed, index, handle: setTimeout(() => { undo = null; renderBar(); }, 6000) };
+    render();
+  }
+
+  function editSet(index) {
+    const [set] = draft.sets.splice(index, 1);
+    draft.exerciseId = set.exercise_id;
+    entry.weight = toDisplay(set.weight_kg, unit);
+    entry.reps = set.reps;
+    persist();
+    render();
+    window.scrollTo(0, 0);
   }
 
   async function finish(button, slot) {
@@ -99,15 +114,13 @@ export async function loggerView(app, group) {
     }
     button.disabled = true;
     button.textContent = "Guardando...";
-    slot.replaceChildren();
     try {
-      const saved = await api.post("/me/sessions", {
-        date: draft.date,
-        bodyweight_kg: toKg(draft.bodyweight, unit),
-        routine_day_id: draft.routineDayId,
-        sets: draft.sets,
-      });
+      const saved = await api.post("/me/sessions", { date: draft.date, bodyweight_kg: toKg(draft.bodyweight, unit),
+        routine_day_id: draft.routineDayId, sets: draft.sets });
       clearDraft();
+      timer.stop();
+      document.body.classList.remove("with-logger-bar");
+      await loadMe(true);
       sessionSummary(app, group, saved, unit);
     } catch (err) {
       slot.replaceChildren(errorBox(`${err.message} La sesión quedó guardada en este celular: probá de nuevo.`));
@@ -128,83 +141,103 @@ export async function loggerView(app, group) {
   }
 
   function planChips() {
-    if (!draft.plan.length) return null;
+    if (!draft.plan.length) return "";
     return el("div", { class: "chips" }, draft.plan.map((item, index) => {
       const done = setsDone(draft, item.exercise_id);
-      const chip = el("button", { type: "button", class: `chip${index === draft.step ? " active" : ""}${done >= item.sets ? " done" : ""}` },
-        `${item.name} ${done}/${item.sets}`);
-      chip.addEventListener("click", () => {
-        draft.step = index;
-        chooseExercise(item.exercise_id);
-      });
-      return chip;
+      return el("button", { type: "button", class: `chip${index === draft.step ? " active" : ""}${done >= item.sets ? " done" : ""}`,
+        onclick: () => { draft.step = index; chooseExercise(item.exercise_id); } }, `${item.name} ${done}/${item.sets}`);
     }));
   }
 
   async function exerciseCard() {
-    const card = el("div", { class: "card logger" });
     const item = planItem();
     const exercise = byId.get(draft.exerciseId);
     if (!exercise) {
-      card.append(el("h3", {}, draft.plan.length ? "Rutina terminada" : "¿Qué ejercicio hacés?"),
-        el("p", { class: "muted small" }, draft.plan.length ? "Podés sumar otro ejercicio o terminar la sesión." : ""),
+      return el("div", { class: "card logger" },
+        el("h3", {}, draft.plan.length ? "Rutina completa" : "¿Qué ejercicio hacés?"),
+        draft.plan.length ? el("p", { class: "muted small" }, "Sumá otro ejercicio o terminá la sesión.") : "",
         exercisePicker());
-      return card;
     }
-    const doneHere = setsDone(draft, exercise.id);
-    const setLabel = item && item.exercise_id === exercise.id ? `Serie ${Math.min(doneHere + 1, item.sets)} de ${item.sets}` : `Serie ${doneHere + 1}`;
+    const done = setsDone(draft, exercise.id);
+    const label = item && item.exercise_id === exercise.id
+      ? (done < item.sets ? `Serie ${done + 1} de ${item.sets}` : `Serie ${done + 1} (extra)`) : `Serie ${done + 1}`;
     const last = await lastFor(exercise.id);
-    const weightLabel = exercise.bodyweight ? `Lastre (${unit})` : `Peso (${unit})`;
-    card.append(
-      el("div", { class: "spread" }, el("h3", { class: "exercise-name" }, exercise.name), el("span", { class: "pill accent" }, setLabel)),
+    const warning = entry.limit ? el("p", { class: "notice" }, `El máximo es ${weight(500, unit)}. Revisá el peso.`)
+      : entry.confirm ? el("p", { class: "notice" }, `¿Seguro ${weight(toKg(entry.weight, unit), unit)}? Es mucho más que tu referencia. Tocá de nuevo para confirmar.`)
+        : "";
+    return el("div", { class: "card logger" },
+      el("div", { class: "spread" }, el("h3", { class: "exercise-name" }, exercise.name), el("span", { class: "pill accent" }, label)),
       el("p", { class: "muted small" }, last ? lastLine(last, unit) : ""),
+      exercise.bodyweight ? el("p", { class: "muted small" }, "Ejercicio con tu peso: cargá solo el lastre. El 1RM suma tu peso corporal.") : "",
       el("div", { class: "steppers" },
-        stepper(weightLabel, entry.weight, unit === "lb" ? 5 : 2.5, (v) => { entry.weight = v; }),
-        stepper("Reps", entry.reps, 1, (v) => { entry.reps = v; })),
-      el("button", { type: "button", class: "primary big save-set", onclick: saveSet }, "Guardar serie"),
+        stepper(exercise.bodyweight ? `Lastre (${unit})` : `Peso (${unit})`, entry.weight, unit === "lb" ? 5 : 2.5,
+          (v) => { entry.weight = v; entry.confirm = false; entry.limit = false; }),
+        stepper("Reps", entry.reps, 1, (v) => { entry.reps = v; entry.confirm = false; })),
+      warning,
       el("div", { class: "row" },
-        item ? el("button", { type: "button", class: "secondary", onclick: () => { advance(); persist(); render(); } }, "Siguiente ejercicio") : null,
-        el("details", { class: "change" }, el("summary", {}, "Cambiar ejercicio"), exercisePicker())),
-    );
-    return card;
+        item ? el("button", { type: "button", class: "secondary", onclick: async () => { advanceToNextIncomplete(); if (draft.exerciseId) await prefill(); persist(); render(); } }, "Siguiente ejercicio") : "",
+        el("details", { class: "change" }, el("summary", {}, "Cambiar ejercicio"), exercisePicker())));
   }
 
   function setsCard() {
-    if (!draft.sets.length) return null;
+    if (!draft.sets.length) return "";
     const items = draft.sets.map((s, index) => el("li", {},
-      el("span", {}, `${byId.get(s.exercise_id)?.name ?? "?"} · ${weight(s.weight_kg, unit)} × ${s.reps}`),
-      el("button", { type: "button", class: "secondary", style: "flex:0", "aria-label": "Borrar serie",
-        onclick: () => { draft.sets.splice(index, 1); persist(); render(); } }, "×"))).reverse();
-    return el("div", { class: "card" }, el("h3", {}, `Series de hoy (${draft.sets.length})`), el("ul", { class: "list" }, items));
+      el("button", { type: "button", class: "set-edit", onclick: () => editSet(index), "aria-label": "Corregir serie" },
+        `${index + 1}. ${byId.get(s.exercise_id)?.name ?? "?"} · ${weight(s.weight_kg, unit)} × ${s.reps}`),
+      el("button", { type: "button", class: "secondary", style: "flex:0", "aria-label": "Borrar serie", onclick: () => removeSet(index) }, "×")));
+    return el("div", { class: "card" }, el("h3", {}, `Series de hoy (${draft.sets.length})`),
+      el("p", { class: "muted small" }, "Tocá una serie para corregirla."), el("ul", { class: "list" }, items));
   }
 
   function sessionCard() {
+    const summary = el("summary", {});
+    const describe = () => { summary.textContent = `${draft.title} · ${draft.date} · ${draft.bodyweight ? `${num(draft.bodyweight)} ${unit}` : "falta tu peso"}`; };
+    describe();
     const date = el("input", { type: "date", value: draft.date, max: new Date().toLocaleDateString("en-CA") });
-    date.addEventListener("change", () => { draft.date = date.value; persist(); });
+    date.addEventListener("change", () => { draft.date = date.value; persist(); describe(); });
     const bodyweight = el("input", { type: "number", inputmode: "decimal", value: String(draft.bodyweight ?? "") });
-    bodyweight.addEventListener("input", () => { draft.bodyweight = Number(bodyweight.value); persist(); });
-    return el("details", { class: "card", open: !draft.bodyweight },
-      el("summary", {}, `${draft.title} · ${draft.date} · ${draft.bodyweight ? `${draft.bodyweight} ${unit}` : "falta tu peso"}`),
-      el("div", { class: "row" }, el("label", {}, "Fecha", date), el("label", {}, `Peso corporal (${unit})`, bodyweight)));
-  }
-
-  function footer() {
-    const slot = el("div");
-    const finishButton = el("button", { type: "button", class: "primary big", disabled: draft.sets.length === 0 }, `Terminar sesión (${draft.sets.length})`);
-    finishButton.addEventListener("click", () => finish(finishButton, slot));
-    const discard = el("button", { type: "button", class: "secondary" }, "Descartar");
+    bodyweight.addEventListener("input", () => { draft.bodyweight = Number(bodyweight.value) || null; persist(); describe(); });
+    const discard = el("button", { type: "button", class: "danger" }, "Descartar sesión");
     discard.addEventListener("click", () => {
       if (draft.sets.length && !window.confirm("¿Descartar las series de esta sesión?")) return;
       clearDraft();
+      timer.stop();
+      document.body.classList.remove("with-logger-bar");
       window.location.hash = `#/g/${group.code}/entrenar`;
     });
-    return el("div", { class: "logger-footer" }, slot, el("div", { class: "row" }, discard, finishButton));
+    return el("details", { class: "card", open: !draft.bodyweight }, summary,
+      el("div", { class: "row" }, el("label", {}, "Fecha", date), el("label", {}, `Peso corporal (${unit})`, bodyweight)), discard);
+  }
+
+  const slot = el("div");
+  const barNode = el("div", { class: "logger-bar" });
+
+  function renderBar() {
+    const save = el("button", { type: "button", class: "primary big save-set", disabled: !draft.exerciseId, onclick: saveSet },
+      entry.confirm ? `Confirmar ${weight(toKg(entry.weight, unit), unit)}` : "Guardar serie");
+    const finishButton = el("button", { type: "button", class: "secondary finish", disabled: draft.sets.length === 0 }, `Terminar (${draft.sets.length})`);
+    finishButton.addEventListener("click", () => finish(finishButton, slot));
+    bar.toast.hidden = !undo;
+    if (undo) {
+      bar.toast.replaceChildren(el("span", {}, "Serie borrada"), el("button", { type: "button", class: "secondary", onclick: () => {
+        draft.sets.splice(undo.index, 0, undo.removed);
+        clearTimeout(undo.handle);
+        undo = null;
+        persist();
+        render();
+      } }, "Deshacer"));
+    }
+    barNode.replaceChildren(slot, bar.toast, bar.timer, el("div", { class: "bar-row" }, finishButton, save));
   }
 
   async function render() {
-    app.replaceChildren(sessionCard(), planChips() || "", await exerciseCard(), setsCard() || "", footer());
+    app.replaceChildren(sessionCard(), planChips(), await exerciseCard(), setsCard());
+    renderBar();
+    app.append(barNode);
   }
 
+  document.body.classList.add("with-logger-bar");
+  window.addEventListener("hashchange", () => { timer.stop(); document.body.classList.remove("with-logger-bar"); }, { once: true });
   if (draft.exerciseId) await prefill();
   await render();
 }

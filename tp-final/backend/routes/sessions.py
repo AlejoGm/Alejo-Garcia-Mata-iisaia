@@ -22,6 +22,8 @@ def sessions_out(session: Session, user: User, workouts: list[WorkoutSession]) -
     prs = stats.detect_prs(records)
     by_set = {r.set_id: r for r in records}
     names = {e.id: e.name for e in session.exec(select(Exercise))}
+    day_ids = {w.routine_day_id for w in workouts if w.routine_day_id}
+    day_names = {d.id: d.name for d in session.exec(select(RoutineDay).where(RoutineDay.id.in_(day_ids)))}
     sets_by_session: dict[int, list[WorkSet]] = {}
     ids = [w.id for w in workouts]
     for work_set in session.exec(select(WorkSet).where(WorkSet.session_id.in_(ids)).order_by(WorkSet.position)):
@@ -34,6 +36,7 @@ def sessions_out(session: Session, user: User, workouts: list[WorkoutSession]) -
                       dots=round1(stats.set_dots(r, user.sex)), pr=prs.get(s.id))
 
     return [SessionOut(id=w.id, date=w.date, bodyweight_kg=w.bodyweight_kg, routine_day_id=w.routine_day_id,
+                       routine_day_name=day_names.get(w.routine_day_id),
                        sets=[set_out(s) for s in sets_by_session.get(w.id, [])]) for w in workouts]
 
 

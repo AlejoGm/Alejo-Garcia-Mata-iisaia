@@ -41,5 +41,5 @@ def personal_stats(user: UserDep, session: SessionDep, exercise_id: int | None =
         best_weight_kg=best_abs.weight_kg if best_abs else None,
         best_reps=best_abs.reps if best_abs else None,
         best_1rm=round(best_rm.estimated_1rm, 1) if best_rm else None,
-        sessions=len({r.session_id for r in stats.in_range(records, low, high)}),
+        sessions=len({r.session_id for r in stats.in_range(mine, low, high)}),
     )

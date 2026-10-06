@@ -74,6 +74,25 @@ def progress_table(records: list[SetRecord], user_ids: list[int], current: tuple
     return sorted(entries, key=lambda e: (e.pct is None, -(e.pct or 0), e.user_id))
 
 
+def progress_span(records: list[SetRecord], user_ids: list[int], start: date, end: date) -> list[ProgressEntry]:
+    """En un período de varios meses: por ejercicio, el primer mes con datos contra el último."""
+    grouped = by_user(in_range(records, start, end))
+    entries = []
+    for user_id in user_ids:
+        by_month: dict[date, list[SetRecord]] = {}
+        for record in grouped.get(user_id, []):
+            month = month_start(record.date)
+            by_month.setdefault(month, []).append(record)
+        months = {m: best_1rm_by_exercise(rs) for m, rs in by_month.items()}
+        changes = []
+        for exercise in {e for bests in months.values() for e in bests}:
+            with_data = sorted(m for m, bests in months.items() if exercise in bests)
+            if len(with_data) >= 2:
+                changes.append(100 * (months[with_data[-1]][exercise] / months[with_data[0]][exercise] - 1))
+        entries.append(ProgressEntry(user_id, sum(changes) / len(changes) if changes else None, len(changes)))
+    return sorted(entries, key=lambda e: (e.pct is None, -(e.pct or 0), e.user_id))
+
+
 def progress_windows(start: date, end: date) -> tuple[tuple[date, date], tuple[date, date]]:
     """El último mes del período contra el mes anterior a que empiece."""
     return (month_start(end), end), (shift_months(start, -1), start - timedelta(days=1))
@@ -86,8 +105,10 @@ def monday(day: date) -> date:
 
 
 def goal_in_force(changes: list[tuple[date, int]], week: date) -> int | None:
-    current = None
-    for start, goal in sorted(changes):
+    """Objetivo vigente esa semana. El primer objetivo rige también para las semanas anteriores a fijarlo."""
+    ordered = sorted(changes)
+    current = ordered[0][1] if ordered else None
+    for start, goal in ordered:
         if start <= week:
             current = goal
     return current

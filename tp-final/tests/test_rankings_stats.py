@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 
 from backend.stats import (
-    consistency_table, period_range, progress_table, strength_table, weekly_table,
+    consistency_table, period_range, progress_span, progress_table, strength_table, weekly_table,
 )
 from tests.test_stats import rec
 
@@ -141,3 +141,20 @@ def test_consistency_ignores_weeks_before_first_session_and_no_data_goes_last():
     assert table[0].user_id == 1
     assert table[0].weeks == 2  # semanas del 21/9 y del 28/9
     assert table[1].pct is None
+
+
+def test_first_goal_also_applies_to_sessions_logged_before_it():
+    goals = {1: [(date(2026, 9, 28), 1)]}
+    sets = [rec(100, 1, date(2026, 9, 8), user=1), rec(100, 1, date(2026, 9, 15), user=1)]
+    table = consistency_table(sets, goals, start=date(2026, 9, 1), end=date(2026, 9, 20), today=date(2026, 10, 6))
+    assert table[0].weeks == 2
+    assert table[0].pct == pytest.approx(100.0)
+
+
+def test_progress_span_compares_first_and_last_month_with_data_in_the_period():
+    sets = [rec(100, 1, date(2026, 6, 10), user=1), rec(105, 1, date(2026, 8, 10), user=1),
+            rec(110, 1, date(2026, 10, 2), user=1), rec(80, 1, date(2026, 9, 1), user=2)]
+    table = progress_span(sets, [1, 2], start=date(2026, 5, 1), end=date(2026, 10, 31))
+    assert table[0].user_id == 1
+    assert table[0].pct == pytest.approx(10.0)
+    assert table[1].pct is None  # un solo mes con datos

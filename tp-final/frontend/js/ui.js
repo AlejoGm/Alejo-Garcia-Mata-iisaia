@@ -53,8 +53,12 @@ export function toKg(value, unit) {
   return unit === "lb" ? Math.round((number * LB) * 100) / 100 : number;
 }
 
+export function num(value, digits = 1) {
+  return value === null || value === undefined ? "—" : Number(value).toLocaleString("es-AR", { maximumFractionDigits: digits });
+}
+
 export function weight(kg, unit) {
-  return kg === null || kg === undefined ? "—" : `${toDisplay(kg, unit)} ${unit}`;
+  return kg === null || kg === undefined ? "—" : `${num(toDisplay(kg, unit))} ${unit}`;
 }
 
 export function today() {

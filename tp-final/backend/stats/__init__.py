@@ -11,7 +11,7 @@ from backend.stats.periods import (
 )
 from backend.stats.rankings import (
     ConsistencyEntry, ProgressEntry, StrengthEntry, WeeklyEntry, best_1rm_by_exercise, consistency_table,
-    goal_in_force, monday, progress_table, progress_windows, strength_table, training_days, week_results,
+    goal_in_force, monday, progress_span, progress_table, progress_windows, strength_table, training_days, week_results,
     weekly_table,
 )
 from backend.stats.personal import (
