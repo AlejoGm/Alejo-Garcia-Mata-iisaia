@@ -44,7 +44,7 @@ def test_imbalance_levels():
 def test_campaign_points_like_f1_with_firsts_as_tiebreak():
     tables = [[1, 2, 3], [2, 1], [3]]
     standings = campaign_points(tables, [1, 2, 3, 4])
-    assert [(e.user_id, e.points, e.firsts) for e in standings] == [(2, 18, 1), (1, 18, 1), (3, 16, 1), (4, 0, 0)]
+    assert [(e.user_id, e.points, e.firsts) for e in standings] == [(1, 18, 1), (2, 18, 1), (3, 16, 1), (4, 0, 0)]
 
 
 def test_campaign_tie_on_points_and_firsts_keeps_user_order():

@@ -13,7 +13,7 @@ tp-final/
 │   ├── db.py          engine y sesión por request
 │   ├── models.py      tablas
 │   ├── schemas.py     entrada y salida de la API
-│   ├── stats.py       el módulo profundo: funciones puras
+│   ├── stats/         el módulo profundo: funciones puras (core, periods, rankings, competition)
 │   ├── queries.py     lecturas que arman la entrada de stats
 │   └── routes/        un router por recurso
 ├── frontend/
@@ -77,7 +77,7 @@ Lo inválido en el body es `422`; un recurso del path que no existe es `404`.
 
 ## Módulo de estadísticas
 
-`stats.py` no importa nada de la base ni de FastAPI. Recibe listas de `SetRecord` y diccionarios, y devuelve dataclasses.
+`backend/stats/` no importa nada de la base ni de FastAPI. Recibe listas de `SetRecord` y diccionarios, y devuelve dataclasses.
 
 ```python
 SetRecord(set_id, session_id, user_id, exercise_id, date, weight_kg, reps,
@@ -243,6 +243,6 @@ Una sola página con vistas por hash, en ES modules y sin build. Primero está p
 
 ## Tests
 
-- **`tests/test_stats.py`.** Cada regla de arriba con casos borde, escrito antes que la función.
+- **`tests/test_stats.py`, `test_rankings_stats.py` y `test_competition_stats.py`.** Cada regla de arriba con casos borde, escrito antes que la función.
 - **`tests/test_api.py` y siguientes.** Los status codes del contrato con el `TestClient` y una base en memoria, en modo dev.
 - **Frontend.** Se prueba en el navegador con un agente que hace de usuario.
