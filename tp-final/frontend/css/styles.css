@@ -219,3 +219,7 @@ details.session summary { color: var(--text); font-weight: 500; }
 .reaction.active { border-color: var(--accent); background: rgba(245, 165, 36, 0.15); }
 td.ok { color: var(--ok); }
 td.error { color: var(--error); }
+
+.item-row { display: grid; grid-template-columns: 1fr 64px 48px; gap: 6px; }
+.day-button { flex-direction: column; align-items: flex-start; text-align: left; }
+li.routine { align-items: flex-start; }
