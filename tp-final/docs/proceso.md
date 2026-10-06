@@ -35,3 +35,7 @@ El grill tiene una sección con lo que cambió y por qué.
 ## 5. Login con Google y spec
 
 Para la app completa sumé login con Google por Auth0. Eso adelantó las cuentas, que estaban en la v3, y cambió la raíz del modelo: las sesiones pasan a ser del usuario, no del grupo. Lo cerré con un tercer auto-grill y después escribí el [spec](spec.md): modelo de datos, contrato completo, fórmulas y vistas. El spec es la referencia de implementación; si el código se aparta, se corrige uno de los dos en el mismo PR.
+
+## 6. Issues
+
+El spec se partió en 12 issues de cortes verticales: cada uno atraviesa backend, frontend y tests, y deja algo que se puede usar. Van del [#2](https://github.com/AlejoGm/Alejo-Garcia-Mata-iisaia/issues/2) (configurar el agente) al [#13](https://github.com/AlejoGm/Alejo-Garcia-Mata-iisaia/issues/13) (la prueba con el agente gym-bro), y cada PR cierra el suyo.
