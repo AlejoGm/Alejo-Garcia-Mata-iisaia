@@ -64,11 +64,13 @@ function strengthCard(item, mode, me, unit) {
   return el("div", { class: "card" }, el("h3", {}, item.exercise), table(head, rows));
 }
 
-function progressCard(rows, me, period) {
+function progressCard(rows, me, period, month) {
   const body = rankRows(rows, me, { span: 1, hasData: (e) => e.pct !== null,
     render: (e) => [el("td", { class: `num ${e.pct >= 0 ? "ok" : "error"}` }, `${e.pct >= 0 ? "+" : ""}${num(e.pct)}%`)] });
   return el("div", { class: "card" }, el("h3", {}, "Progreso"),
     el("p", { class: "muted small" }, period === "month" ? "Cuánto subió tu mejor 1RM este mes contra el anterior, en promedio entre tus ejercicios." : "Cuánto subió tu mejor 1RM desde el primer mes del período hasta el último, en promedio entre tus ejercicios."),
+    period === "month" && month === currentMonth()
+      ? el("p", { class: "muted small" }, "El mes todavía no terminó: el número es parcial y suele subir a medida que avanza.") : "",
     table([["#", "num"], ["Quién"], ["Cambio", "num"]], body));
 }
 
@@ -133,7 +135,7 @@ export async function rankingsView(app, group) {
         ? "DOTS es el puntaje del powerlifting que ajusta la fuerza por peso corporal y sexo: compara justo a alguien de 65 kg con alguien de 95."
         : "Absoluto: el peso más alto que movió cada uno. A igual peso, gana el que hizo más reps."),
       ...strength,
-      progressCard(data.progress, group.me, prefs.period),
+      progressCard(data.progress, group.me, prefs.period, prefs.month),
       consistencyCard(data.consistency, group.me),
     );
   }

@@ -59,4 +59,17 @@ Todo en el PR que cierra el issue de esta prueba:
 - **Libras.** La barra arranca en 45 lb.
 - **Rutinas.** Se ven en modo lectura, con "Editar" aparte, y el historial muestra el día.
 
-Quedan como issues: la vista de escritorio a dos columnas, agrupar en el feed los PRs de una misma sesión, y que la app sugiera qué día de la rutina toca hoy.
+## Segunda pasada
+
+Volvió a probar como usuario nuevo. Sobre 14 puntos: 11 arreglados y 3 a medias, que se resolvieron en el PR siguiente:
+- **Corregir una serie:** queda en su lugar con un aviso "Editando serie N", y no reinicia el timer.
+- **El campo de peso:** selecciona todo también con tecleo rápido.
+- **"0 kg":** en ejercicios con tu peso ahora dice "peso corporal + lastre".
+
+El mes en curso quedó marcado como parcial en rankings y gráficos.
+
+Lo pendiente quedó en issues:
+- La vista de escritorio a dos columnas.
+- Agrupar en el feed los PRs de una misma sesión.
+- Que la app sugiera qué día de la rutina toca hoy.
+- Confirmar antes de cancelar un reto.

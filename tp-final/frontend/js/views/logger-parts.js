@@ -6,7 +6,10 @@ export function stepper(label, value, step, onChange) {
   const input = el("input", { type: "number", inputmode: "decimal", value: String(value ?? ""), "aria-label": label });
   input.addEventListener("input", () => onChange(input.value === "" ? null : Number(input.value)));
   // Al tocar el campo se selecciona todo: escribir "60" reemplaza en vez de insertarse en el medio.
-  input.addEventListener("focus", () => setTimeout(() => input.select(), 0));
+  // El select() inmediato cubre el tecleo rápido; el pointerup se cancela para que el toque no mueva el cursor.
+  let justFocused = false;
+  input.addEventListener("focus", () => { justFocused = true; input.select(); });
+  input.addEventListener("pointerup", (event) => { if (justFocused) { event.preventDefault(); input.select(); justFocused = false; } });
   const bump = (delta) => {
     const next = Math.max(0, Math.round(((Number(input.value) || 0) + delta) * 100) / 100);
     input.value = String(next);
@@ -21,10 +24,17 @@ export function stepper(label, value, step, onChange) {
   );
 }
 
-export function lastLine(last, unit) {
+/** En ejercicios con tu peso, el peso cargado es lastre: "peso corporal + 10 kg". */
+export function loadText(weightKg, unit, bodyweightExercise) {
+  if (!bodyweightExercise) return weight(weightKg, unit);
+  return weightKg ? `peso corporal + ${weight(weightKg, unit)}` : "peso corporal";
+}
+
+export function lastLine(last, unit, bodyweightExercise = false) {
   const parts = [];
-  if (last.mine) parts.push(`vos ${weight(last.mine.weight_kg, unit)} × ${last.mine.reps}`);
-  for (const other of last.others) parts.push(`${other.display_name} ${weight(other.weight_kg, unit)} × ${other.reps}`);
+  const text = (s) => `${loadText(s.weight_kg, unit, bodyweightExercise)} × ${s.reps}`;
+  if (last.mine) parts.push(`vos ${text(last.mine)}`);
+  for (const other of last.others) parts.push(`${other.display_name} ${text(other)}`);
   return parts.length ? `La última vez: ${parts.join(" · ")}` : "Primera vez que alguien del grupo carga este ejercicio.";
 }
 

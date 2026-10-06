@@ -2,7 +2,7 @@ import { api } from "../api.js";
 import { loadMe, state } from "../app.js";
 import { clearDraft, loadDraft, saveDraft, setsDone } from "../draft.js";
 import { el, errorBox, num, toDisplay, toKg, weight } from "../ui.js";
-import { clock, lastLine, restTimer, stepper, suspicious } from "./logger-parts.js";
+import { clock, lastLine, loadText, restTimer, stepper, suspicious } from "./logger-parts.js";
 import { sessionSummary } from "./session-summary.js";
 
 export async function loggerView(app, group) {
@@ -15,7 +15,7 @@ export async function loggerView(app, group) {
   const exercises = await api.get("/exercises");
   const byId = new Map(exercises.map((e) => [e.id, e]));
   const lastCache = new Map();
-  const entry = { weight: null, reps: null, confirm: false, limit: false };
+  const entry = { weight: null, reps: null, confirm: false, limit: false, editing: null };
   const bar = { timer: el("button", { type: "button", class: "rest", hidden: true }), toast: el("div", { class: "toast", hidden: true }) };
   const timer = restTimer((left) => {
     bar.timer.hidden = left === null;
@@ -75,7 +75,16 @@ export async function loggerView(app, group) {
       render();
       return;
     }
-    draft.sets.push({ exercise_id: draft.exerciseId, weight_kg: weightKg, reps: entry.reps });
+    const set = { exercise_id: draft.exerciseId, weight_kg: weightKg, reps: entry.reps };
+    if (entry.editing !== null) {
+      draft.sets[entry.editing] = set;
+      entry.editing = null;
+      entry.confirm = false;
+      persist();
+      render();
+      return;
+    }
+    draft.sets.push(set);
     const item = planItem();
     const justCompleted = item && item.exercise_id === draft.exerciseId && setsDone(draft, item.exercise_id) === item.sets;
     if (justCompleted) {
@@ -89,6 +98,7 @@ export async function loggerView(app, group) {
   }
 
   function removeSet(index) {
+    entry.editing = null;
     const [removed] = draft.sets.splice(index, 1);
     persist();
     clearTimeout(undo?.handle);
@@ -97,13 +107,19 @@ export async function loggerView(app, group) {
   }
 
   function editSet(index) {
-    const [set] = draft.sets.splice(index, 1);
+    const set = draft.sets[index];
+    entry.editing = index;
     draft.exerciseId = set.exercise_id;
     entry.weight = toDisplay(set.weight_kg, unit);
     entry.reps = set.reps;
-    persist();
     render();
     window.scrollTo(0, 0);
+  }
+
+  async function cancelEdit() {
+    entry.editing = null;
+    await prefill();
+    render();
   }
 
   async function finish(button, slot) {
@@ -162,18 +178,19 @@ export async function loggerView(app, group) {
     const label = item && item.exercise_id === exercise.id
       ? (done < item.sets ? `Serie ${done + 1} de ${item.sets}` : `Serie ${done + 1} (extra)`) : `Serie ${done + 1}`;
     const last = await lastFor(exercise.id);
-    const warning = entry.limit ? el("p", { class: "notice" }, `El máximo es ${weight(500, unit)}. Revisá el peso.`)
-      : entry.confirm ? el("p", { class: "notice" }, `¿Seguro ${weight(toKg(entry.weight, unit), unit)}? Es mucho más que tu referencia. Tocá de nuevo para confirmar.`)
-        : "";
+    const editing = entry.editing !== null
+      ? el("div", { class: "notice spread" }, el("span", {}, `Editando la serie ${entry.editing + 1}`),
+        el("button", { type: "button", class: "secondary", style: "flex:0", onclick: cancelEdit }, "Cancelar"))
+      : "";
     return el("div", { class: "card logger" },
       el("div", { class: "spread" }, el("h3", { class: "exercise-name" }, exercise.name), el("span", { class: "pill accent" }, label)),
-      el("p", { class: "muted small" }, last ? lastLine(last, unit) : ""),
+      editing,
+      el("p", { class: "muted small" }, last ? lastLine(last, unit, exercise.bodyweight) : ""),
       exercise.bodyweight ? el("p", { class: "muted small" }, "Ejercicio con tu peso: cargá solo el lastre. El 1RM suma tu peso corporal.") : "",
       el("div", { class: "steppers" },
         stepper(exercise.bodyweight ? `Lastre (${unit})` : `Peso (${unit})`, entry.weight, unit === "lb" ? 5 : 2.5,
           (v) => { entry.weight = v; entry.confirm = false; entry.limit = false; }),
         stepper("Reps", entry.reps, 1, (v) => { entry.reps = v; entry.confirm = false; })),
-      warning,
       el("div", { class: "row" },
         item ? el("button", { type: "button", class: "secondary", onclick: async () => { advanceToNextIncomplete(); if (draft.exerciseId) await prefill(); persist(); render(); } }, "Siguiente ejercicio") : "",
         el("details", { class: "change" }, el("summary", {}, "Cambiar ejercicio"), exercisePicker())));
@@ -181,9 +198,9 @@ export async function loggerView(app, group) {
 
   function setsCard() {
     if (!draft.sets.length) return "";
-    const items = draft.sets.map((s, index) => el("li", {},
+    const items = draft.sets.map((s, index) => el("li", { class: index === entry.editing ? "editing" : null },
       el("button", { type: "button", class: "set-edit", onclick: () => editSet(index), "aria-label": "Corregir serie" },
-        `${index + 1}. ${byId.get(s.exercise_id)?.name ?? "?"} · ${weight(s.weight_kg, unit)} × ${s.reps}`),
+        `${index + 1}. ${byId.get(s.exercise_id)?.name ?? "?"} · ${loadText(s.weight_kg, unit, byId.get(s.exercise_id)?.bodyweight)} × ${s.reps}`),
       el("button", { type: "button", class: "secondary", style: "flex:0", "aria-label": "Borrar serie", onclick: () => removeSet(index) }, "×")));
     return el("div", { class: "card" }, el("h3", {}, `Series de hoy (${draft.sets.length})`),
       el("p", { class: "muted small" }, "Tocá una serie para corregirla."), el("ul", { class: "list" }, items));
@@ -214,7 +231,10 @@ export async function loggerView(app, group) {
 
   function renderBar() {
     const save = el("button", { type: "button", class: "primary big save-set", disabled: !draft.exerciseId, onclick: saveSet },
-      entry.confirm ? `Confirmar ${weight(toKg(entry.weight, unit), unit)}` : "Guardar serie");
+      entry.confirm ? `Confirmar ${weight(toKg(entry.weight, unit), unit)}` : entry.editing !== null ? "Guardar cambio" : "Guardar serie");
+    const warning = entry.limit ? el("p", { class: "notice" }, `El máximo es ${weight(500, unit)}. Revisá el peso.`)
+      : entry.confirm ? el("p", { class: "notice" }, `¿Seguro ${weight(toKg(entry.weight, unit), unit)}? Es mucho más que tu referencia. Tocá de nuevo para confirmar.`)
+        : "";
     const finishButton = el("button", { type: "button", class: "secondary finish", disabled: draft.sets.length === 0 }, `Terminar (${draft.sets.length})`);
     finishButton.addEventListener("click", () => finish(finishButton, slot));
     bar.toast.hidden = !undo;
@@ -227,7 +247,7 @@ export async function loggerView(app, group) {
         render();
       } }, "Deshacer"));
     }
-    barNode.replaceChildren(slot, bar.toast, bar.timer, el("div", { class: "bar-row" }, finishButton, save));
+    barNode.replaceChildren(slot, warning, bar.toast, bar.timer, el("div", { class: "bar-row" }, finishButton, save));
   }
 
   async function render() {
