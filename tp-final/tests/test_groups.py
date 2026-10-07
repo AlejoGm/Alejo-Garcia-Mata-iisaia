@@ -81,3 +81,11 @@ def test_exercise_names_are_unique_ignoring_case(client):
     response = client.post("/api/exercises", json={"name": "Muscle up", "bodyweight": True}, headers=ana)
     assert response.status_code == 201
     assert response.json()["bodyweight"] is True
+
+
+def test_catalog_names_are_unique_and_seed_is_idempotent(client):
+    from backend.catalog import EXERCISES
+    ana = register(client, "ana")
+    names = [e["name"] for e in client.get("/api/exercises", headers=ana).json()]
+    assert len(names) == len(EXERCISES)
+    assert len({n.lower() for n in names}) == len(names)
