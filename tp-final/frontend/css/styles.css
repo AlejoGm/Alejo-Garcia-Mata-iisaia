@@ -392,3 +392,18 @@ details.activity summary { display: flex; align-items: center; gap: 12px; min-he
   .page:has(.cards-grid), .page:has(.page-list) { max-width: 1240px; }
   .cards-grid, .page-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; align-items: start; }
 }
+
+/* Reordenar ejercicios */
+.sortable-list { display: flex; flex-direction: column; gap: 8px; }
+.item-row { grid-template-columns: 40px 1fr 70px 48px; align-items: center; }
+.sortable-row { transition: transform 0.15s ease; }
+.sortable-row.dragging { transition: none; position: relative; z-index: 2; }
+.sortable-row.dragging select { box-shadow: inset 0 0 0 2px var(--lime), 0 10px 30px rgba(0, 0, 0, 0.5); }
+.drag-handle { width: 40px; min-height: 48px; padding: 0; background: transparent; box-shadow: none; color: var(--muted); font-size: 1.2rem; letter-spacing: -0.2em; cursor: grab; touch-action: none; }
+.drag-handle:active { cursor: grabbing; color: var(--lime); }
+@media (prefers-reduced-motion: reduce) { .sortable-row { transition: none; } }
+.item-row { grid-template-columns: 32px 1fr 56px 40px; gap: 6px; }
+.item-row select { font-size: 0.95rem; padding-right: 6px; }
+.item-row input { padding: 8px; text-align: center; }
+.item-row > button.secondary { width: 40px; padding: 0; }
+.drag-handle { width: 32px; }
