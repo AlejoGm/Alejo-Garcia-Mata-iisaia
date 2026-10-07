@@ -80,3 +80,64 @@ export function lineChart({ labels, series, label }) {
   }
   return root;
 }
+
+/** Curva chica para un indicador: sin ejes, con área degradada. */
+export function sparkline(values, label) {
+  const w = 160;
+  const h = 48;
+  const clean = values.map((v) => v ?? 0);
+  const max = Math.max(...clean, 1);
+  const points = clean.map((v, i) => [(i * w) / Math.max(clean.length - 1, 1), h - 4 - (v / max) * (h - 8)]);
+  const root = svg("svg", { viewBox: `0 0 ${w} ${h}`, class: "spark", role: "img", "aria-label": label, preserveAspectRatio: "none" });
+  const id = `spark-${Math.random().toString(36).slice(2, 8)}`;
+  const defs = svg("defs");
+  const gradient = svg("linearGradient", { id, x1: 0, y1: 0, x2: 0, y2: 1 });
+  gradient.append(svg("stop", { offset: "0%", class: "chart-fill-top" }), svg("stop", { offset: "100%", class: "chart-fill-bottom" }));
+  defs.append(gradient);
+  const d = smooth(points);
+  root.append(defs, svg("path", { d: `${d} L${w},${h} L0,${h} Z`, fill: `url(#${id})` }), svg("path", { d, class: "spark-line" }));
+  return root;
+}
+
+/** Barras verticales con su valor arriba; `highlight` marca las barras propias. */
+export function barChart(items, label) {
+  const w = 600;
+  const h = 260;
+  const top = 34;
+  const bottom = 40;
+  const max = Math.max(...items.map((i) => i.value), 1);
+  const slot = w / items.length;
+  const barW = Math.min(46, slot * 0.6);
+  const root = svg("svg", { viewBox: `0 0 ${w} ${h}`, class: "chart bars", role: "img", "aria-label": label });
+  items.forEach((item, i) => {
+    const x = slot * i + (slot - barW) / 2;
+    const barH = item.value ? Math.max(10, ((h - top - bottom) * item.value) / max) : 10;
+    const y = h - bottom - barH;
+    root.append(svg("rect", { x, y, width: barW, height: barH, rx: barW / 2, class: `bar${item.value ? "" : " empty"}${item.highlight ? " mine" : ""}` }));
+    if (item.value) root.append(svg("text", { x: x + barW / 2, y: y - 10, "text-anchor": "middle", class: "bar-value" }, item.value));
+    root.append(svg("text", { x: x + barW / 2, y: h - 12, "text-anchor": "middle", class: `chart-axis${item.today ? " today" : ""}` }, item.label));
+  });
+  return root;
+}
+
+/** Medidor semicircular con el porcentaje en el centro. */
+export function gauge(pct, label) {
+  const w = 240;
+  const h = 140;
+  const r = 100;
+  const cx = w / 2;
+  const cy = 120;
+  const arc = (fraction) => {
+    const angle = Math.PI * (1 - fraction);
+    return [cx + r * Math.cos(angle), cy - r * Math.sin(angle)];
+  };
+  const [sx, sy] = arc(0);
+  const [ex, ey] = arc(1);
+  const value = Math.max(0, Math.min(1, (pct ?? 0) / 100));
+  const [vx, vy] = arc(value);
+  const root = svg("svg", { viewBox: `0 0 ${w} ${h}`, class: "gauge", role: "img", "aria-label": label });
+  root.append(svg("path", { d: `M${sx},${sy} A${r},${r} 0 0 1 ${ex},${ey}`, class: "gauge-track" }));
+  if (value > 0) root.append(svg("path", { d: `M${sx},${sy} A${r},${r} 0 0 1 ${vx.toFixed(1)},${vy.toFixed(1)}`, class: "gauge-value" }));
+  root.append(svg("text", { x: cx, y: cy - 18, "text-anchor": "middle", class: "gauge-number" }, pct === null || pct === undefined ? "—" : `${Math.round(pct)}%`));
+  return root;
+}

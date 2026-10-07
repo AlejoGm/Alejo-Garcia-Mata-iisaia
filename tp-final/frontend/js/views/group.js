@@ -7,6 +7,7 @@ import { rankingsView } from "./rankings.js";
 import { feedView } from "./feed.js";
 import { duelsView } from "./duels.js";
 import { campaignsView } from "./campaigns.js";
+import { dashboardView } from "./dashboard.js";
 
 const views = {
   grupo: adminView,
@@ -16,11 +17,12 @@ const views = {
   feed: feedView,
   duelos: duelsView,
   campanas: campaignsView,
+  panel: dashboardView,
 };
 
 export async function groupView(app, { code, tab }) {
   const group = await loadGroup(code.toUpperCase(), true);
-  groupChrome(group, { carga: "entrenar", campanas: "rankings" }[tab] || tab);
+  groupChrome(group, { carga: "entrenar", campanas: "rankings", feed: "panel" }[tab] || tab);
   const view = views[tab];
   if (!view) {
     app.replaceChildren(el("div", { class: "card" }, el("p", { class: "muted" }, "Próximamente.")));

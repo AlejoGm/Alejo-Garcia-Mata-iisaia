@@ -76,3 +76,14 @@ Después de los arreglos, el gym-bro volvió a probar como un usuario nuevo. Sob
 También marcó que el progreso del mes en curso sale negativo, porque el mes todavía no terminó. Quedó marcado como parcial en rankings y en el gráfico, sin cambiar la regla de meses de calendario que había elegido.
 
 Lo que no entró quedó en issues.
+
+## 10. Rediseño y panel del grupo
+
+Con dos referencias de apps de fitness se rehízo el frontend: base oscura con brillo verde, acento lima y barra de pestañas con Entrenar al centro. Después se sumó un panel del grupo, con un auto-grill propio (sección "Panel del grupo" del grill):
+- indicadores con curva de 8 semanas;
+- barras por día de la semana;
+- medidor del objetivo del grupo;
+- "Hoy toca", que cierra el issue de sugerir el día de la rutina;
+- líderes del mes, campaña activa y últimos PRs.
+
+Las cuentas nuevas viven en `backend/stats/dashboard.py`, con el test en rojo primero. En escritorio las tarjetas se ordenan en grilla horizontal, y en el celular en una columna. Mientras se probaba apareció que comparar la semana en curso contra una completa daba "-75%" a mitad de semana. Se cambió por mostrar el número de la semana pasada.

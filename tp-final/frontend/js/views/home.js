@@ -57,7 +57,7 @@ function groupList(groups) {
     return el("p", { class: "muted" }, "Todavía no estás en ningún grupo. Creá uno o pedile el código a un amigo.");
   }
   return el("ul", { class: "group-list" }, groups.map((g) => el("li", {},
-    el("a", { href: `#/g/${g.code}/rankings` },
+    el("a", { href: `#/g/${g.code}/panel` },
       el("span", { class: "group-name" }, g.name),
       el("span", { class: "muted small" }, `${g.members} ${g.members === 1 ? "miembro" : "miembros"}${g.is_admin ? ", sos admin" : ""}`)))));
 }

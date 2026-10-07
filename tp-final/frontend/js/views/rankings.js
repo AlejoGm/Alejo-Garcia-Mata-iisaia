@@ -83,7 +83,7 @@ function consistencyCard(rows, me) {
     table([["#", "num"], ["Quién"], ["Semanas", "num"], ["", "num"]], body));
 }
 
-function campaignBanner(group, campaigns) {
+export function campaignBanner(group, campaigns) {
   const active = campaigns.find((c) => c.status === "active");
   const href = `#/g/${group.code}/campanas`;
   if (!active) {
@@ -146,15 +146,14 @@ export async function rankingsView(app, group) {
       : [el("p", { class: "muted" }, "El grupo no tiene ejercicios de desafío.")];
     app.replaceChildren(
       campaignBanner(group, campaigns),
-      weeklyCard(data.weekly, group.me),
-      periodControls(prefs, update),
+      el("div", { class: "cards-grid" }, weeklyCard(data.weekly, group.me), periodControls(prefs, update)),
       el("h2", { class: "section-title" }, "Fuerza"), modeToggle(prefs.mode, update),
       el("p", { class: "muted small" }, prefs.mode === "dots"
         ? "DOTS es el puntaje del powerlifting que ajusta la fuerza por peso corporal y sexo: compara justo a alguien de 65 kg con alguien de 95."
         : "Absoluto: el peso más alto que movió cada uno. A igual peso, gana el que hizo más reps."),
-      ...strength,
-      progressCard(data.progress, group.me, prefs.period, prefs.month),
-      consistencyCard(data.consistency, group.me),
+      el("div", { class: "cards-grid" }, ...strength),
+      el("div", { class: "cards-grid" }, progressCard(data.progress, group.me, prefs.period, prefs.month),
+        consistencyCard(data.consistency, group.me)),
     );
   }
 
