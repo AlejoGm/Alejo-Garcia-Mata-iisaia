@@ -64,3 +64,10 @@ def test_goal_change_is_in_force_after_monday(client):
     with patch("backend.routes.me.date") as fake_date:
         fake_date.today.return_value = next_week
         assert client.get("/api/me", headers=auth("ana")).json()["weekly_goal"] == 5
+
+
+def test_dev_token_accepts_encoded_non_ascii_names(client):
+    headers = {"Authorization": "Bearer dev:Luc%C3%ADa"}
+    response = client.put("/api/me", json={**PROFILE, "display_name": "Lucía"}, headers=headers)
+    assert response.status_code == 200
+    assert client.get("/api/me", headers={"Authorization": "Bearer dev:luc%C3%ADa"}).json()["display_name"] == "Lucía"
