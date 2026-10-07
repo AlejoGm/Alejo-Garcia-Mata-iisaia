@@ -1,5 +1,6 @@
 import { api } from "../api.js";
 import { groupChrome, loadGroup } from "../group-shell.js";
+import { sortable, move } from "../sortable.js";
 import { busy, el } from "../ui.js";
 
 function emptyDay(index) {
@@ -41,19 +42,30 @@ export async function routineEditorView(app, { code, id }) {
     return input;
   }
 
-  function dayCard(day, dayIndex) {
-    const name = el("input", { value: day.name, maxlength: "30", required: true, "aria-label": "Nombre del día" });
-    name.addEventListener("input", () => { day.name = name.value; });
-    const rows = day.items.map((item, itemIndex) => el("div", { class: "item-row" },
+  function itemRows(day) {
+    return day.items.map((item, itemIndex) => el("div", { class: "item-row sortable-row" },
+      el("button", { type: "button", class: "drag-handle", "aria-label": `Mover ejercicio ${itemIndex + 1}: arrastrá o usá las flechas` },
+        el("span", { "aria-hidden": "true" }, "⋮⋮")),
       exerciseSelect(item), setsInput(item),
       el("button", { type: "button", class: "secondary", "aria-label": "Quitar ejercicio",
         onclick: () => { day.items.splice(itemIndex, 1); render(); } }, "×")));
+  }
+
+  function dayCard(day, dayIndex) {
+    const name = el("input", { value: day.name, maxlength: "30", required: true, "aria-label": "Nombre del día" });
+    name.addEventListener("input", () => { day.name = name.value; });
+    const list = el("div", { class: "sortable-list" }, itemRows(day));
+    // Solo se redibujan las filas: la lista sigue siendo la misma y el foco del teclado no se pierde.
+    sortable(list, (from, to) => {
+      move(day.items, from, to);
+      list.replaceChildren(...itemRows(day));
+    });
     return el("div", { class: "card" },
       el("div", { class: "spread" }, name,
         el("button", { type: "button", class: "danger", style: "flex:0",
           onclick: () => { draft.days.splice(dayIndex, 1); render(); } }, "Quitar día")),
-      el("p", { class: "muted small" }, "Ejercicio y series"),
-      ...rows,
+      el("p", { class: "muted small" }, "Ejercicio y series. Arrastrá ⋮⋮ para cambiar el orden."),
+      list,
       el("button", { type: "button", class: "secondary",
         onclick: () => { day.items.push({ exercise_id: null, sets: 3 }); render(); } }, "Agregar ejercicio"));
   }
