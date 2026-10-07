@@ -24,6 +24,12 @@ uv run python -m scripts.seed_demo
 
 Entrando como `gustavo`, `mati` o `caro` se ve el grupo desde adentro. Con cualquier otro nombre se entra como alguien nuevo y uno se une con el código.
 
+Para llenar un grupo que ya existe, el otro script suma cinco participantes de mentira. Siguen la primera rutina del grupo y le agregan 8 semanas de sesiones, PRs, reacciones y duelos. `--as` es el nombre de un miembro del grupo:
+
+```bash
+uv run python -m scripts.seed_group CODIGO --as tu-nombre
+```
+
 Tests (96):
 
 ```bash

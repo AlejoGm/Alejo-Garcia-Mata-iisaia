@@ -64,7 +64,7 @@ export async function login(name) {
     await client.loginWithRedirect({ authorizationParams: { connection: "google-oauth2" } });
     return;
   }
-  storage("set", `dev:${name}`);
+  storage("set", `dev:${encodeURIComponent(name)}`);
 }
 
 export async function getToken() {
@@ -76,7 +76,7 @@ export async function suggestedName() {
     const user = await client.getUser();
     return user?.given_name || user?.name || "";
   }
-  return (storage("get") || "").replace(/^dev:/, "");
+  return decodeURIComponent((storage("get") || "").replace(/^dev:/, ""));
 }
 
 export async function logout() {

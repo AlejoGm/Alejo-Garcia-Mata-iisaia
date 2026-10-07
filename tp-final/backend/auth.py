@@ -1,4 +1,5 @@
 from typing import Annotated
+from urllib.parse import unquote
 
 import jwt
 from fastapi import Depends, Header, HTTPException
@@ -25,7 +26,8 @@ def _unauthorized(detail: str) -> HTTPException:
 
 
 def sub_from_dev_token(token: str) -> str:
-    name = token[len(DEV_PREFIX):].strip().lower()
+    # El nombre viaja codificado (encodeURIComponent): los headers HTTP solo admiten ASCII y "Lucía" no lo es.
+    name = unquote(token[len(DEV_PREFIX):]).strip().lower()
     if not token.startswith(DEV_PREFIX) or not name:
         raise _unauthorized("Token de desarrollo inválido")
     return f"dev|{name}"
