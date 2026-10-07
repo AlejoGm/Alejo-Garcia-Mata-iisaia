@@ -17,3 +17,6 @@ from backend.stats.rankings import (
 from backend.stats.personal import (
     BodyweightPoint, MonthPoint, WeekPoint, bodyweight_series, monthly_series, weekly_series,
 )
+from backend.stats.dashboard import (
+    DayActivity, WeekActivity, day_activity, goal_progress, session_count, volume, weekly_activity,
+)

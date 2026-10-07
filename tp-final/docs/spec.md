@@ -146,6 +146,17 @@ Todos reciben las series del período, salvo donde se aclara.
 - **Por semana.** El mejor 1RM de cada semana del período.
 - **Peso corporal.** El último peso de cada semana.
 
+### Panel del grupo
+
+- **Volumen:** suma de `load × reps` de las series. Sin las dudosas del grupo.
+- **Sesiones:** pares distintos (usuario, fecha).
+- **Serie de 8 semanas:** sesiones y volumen por semana de lunes a domingo, de la más vieja a la actual (incluida, aunque esté en curso).
+- **Días de la semana en curso:** para cada día de lunes a domingo, cuántos miembros distintos entrenaron.
+- **Objetivo del grupo:** `Σ min(días_u, objetivo_u) / Σ objetivo_u`, sobre los miembros con objetivo vigente. Sin objetivos, no hay valor.
+- **PRs del mes:** series con PR (según la regla de PRs) con fecha en el mes en curso; también los del mes anterior, para comparar.
+- **Mejor racha:** el miembro con la racha de constancia más larga.
+- **Líderes:** el primero en DOTS de cada desafío, en el mes en curso.
+
 ### Duelos
 
 - **Plazo.** Va de `start` a `start + days − 1`. `start` es el día en que el retado acepta.
@@ -205,6 +216,7 @@ Todo bajo `/api`, con el token. Los grupos se identifican por `code`.
 | `PUT` | `/groups/{code}/challenges` | `{"exercise_ids": [...]}`, solo el admin · `422` si son más de 4 |
 | `GET` | `/groups/{code}/last?exercise_id` | mi última serie y la de hasta 2 miembros más |
 | `GET` | `/groups/{code}/rankings?period&month&from&to` | fuerza, progreso, semana y constancia |
+| `GET` | `/groups/{code}/dashboard` | indicadores, series de 8 semanas, días de la semana, objetivo del grupo y líderes |
 | `GET` | `/groups/{code}/feed?limit=30` | PRs con reacciones, mi reacción y si quedó excluido |
 | `PUT` | `/groups/{code}/feed/{set_id}/reaction` | `{"kind"}` · `200` · `404` si no está en el feed |
 | `DELETE` | `/groups/{code}/feed/{set_id}/reaction` | `204` |
@@ -234,7 +246,8 @@ Una sola página con vistas por hash, en ES modules y sin build. Primero está p
 | `#/g/CODE/entrenar` | elegir día de rutina o carga libre |
 | `#/g/CODE/carga` | carga guiada o libre, con borrador en `localStorage` |
 | `#/g/CODE/rankings` | selector de período, desafíos con DOTS/absoluto, progreso, semana y constancia |
-| `#/g/CODE/feed` | PRs con reacciones |
+| `#/g/CODE/panel` | portada del grupo: indicadores, gráficos, "Hoy toca", líderes, campaña y últimos PRs |
+| `#/g/CODE/feed` | PRs con reacciones (desde "Ver todo" del panel) |
 | `#/g/CODE/duelos` | duelos, retar y aceptar |
 | `#/g/CODE/campanas` | campañas y su tabla |
 | `#/g/CODE/grupo` | miembros, código, desafíos y rutinas (lo de admin, solo para el admin) |

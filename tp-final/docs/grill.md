@@ -157,3 +157,34 @@ Cualquiera puede retar a cualquiera. El retado ve el nivel antes de aceptar. Hay
 **Libras.** Es una preferencia del perfil, solo de visualización. El formulario acepta libras y las convierte; la API y la base trabajan siempre en kg.
 
 **"Hoy".** Lo define el servidor. La fecha de la sesión la manda el cliente.
+
+## Panel del grupo (cuarta pasada)
+
+Pedido: que el grupo tenga un panel con gráficos y más información, no solo rankings, ordenado en horizontal en escritorio y en vertical en el celular. Lo cerré con un auto-grill, con dashboards de fitness de referencia.
+
+**¿Pestaña nueva o reemplazo?** El panel reemplaza al Feed en la barra y pasa a ser la portada del grupo. Los últimos PRs quedan dentro del panel, con "Ver todo" al feed completo. La barra queda así: Panel, Rankings, Entrenar al centro, Duelos y Grupo.
+
+**¿Qué muestra?** Solo lo que sale de datos que ya tenemos:
+- **Cuatro indicadores** con su curva de las últimas 8 semanas:
+  - sesiones del grupo en la semana;
+  - volumen de la semana;
+  - PRs del mes;
+  - mejor racha de constancia, con su dueño.
+
+  Cada uno se compara con la semana o el mes anterior.
+- **Barras de la semana:** cuántos miembros entrenaron cada día, de lunes a domingo, y los días tuyos marcados.
+- **Medidor del objetivo del grupo:** suma de las sesiones de cada uno, topeadas en su objetivo, sobre la suma de los objetivos. El que entrena de más no tapa al que falta.
+- **"Hoy toca":** el día de tu rutina que sigue al último que hiciste, con sus ejercicios y series. Cierra el issue "Sugerir qué día de la rutina toca hoy".
+- **Líderes del mes:** el primero en DOTS de cada desafío.
+- **La campaña activa y los últimos PRs.**
+
+**¿Qué es el volumen?** La suma de carga × reps de las series, en kg, sin contar las que el grupo marcó como dudosas. En ejercicios con tu peso, la carga incluye el peso corporal, igual que para el 1RM.
+
+**¿Mapa muscular, como el de la referencia?** No. Los ejercicios del catálogo no tienen músculo asignado, e inventarlo sería decoración sin datos.
+
+**¿Dónde se calcula?** Un endpoint `GET /groups/{code}/dashboard`, con las cuentas en `backend/stats/` y TDD, igual que los rankings. "Hoy toca" se arma en el cliente con las sesiones y la rutina, que ya están en la API.
+
+**¿Layout?** En el celular, todo en una columna con los indicadores de a dos. En escritorio, una grilla de 12 columnas:
+- los cuatro indicadores en una fila;
+- abajo las barras, el medidor y "Hoy toca";
+- después los líderes, la campaña y los PRs.
