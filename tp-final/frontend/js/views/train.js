@@ -5,7 +5,7 @@ import { icon } from "../icons.js";
 import { busy, el, today, toDisplay } from "../ui.js";
 import { setLine } from "./session-summary.js";
 
-function startDraft(group, options) {
+export function startDraft(group, options) {
   saveDraft(newDraft({ code: group.code, date: today(), bodyweight: toDisplay(state.me.last_bodyweight_kg, state.me.unit), ...options }));
   window.location.hash = `#/g/${group.code}/carga`;
 }

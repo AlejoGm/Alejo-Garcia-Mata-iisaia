@@ -4,7 +4,7 @@ import { icon } from "./icons.js";
 import { el } from "./ui.js";
 
 // Dos pestañas a cada lado y Entrenar en el centro, elevado: es lo que se toca en el gimnasio.
-const LEFT = [["rankings", "Rankings", "rankings"], ["feed", "Feed", "feed"]];
+const LEFT = [["panel", "Panel", "panel"], ["rankings", "Rankings", "rankings"]];
 const RIGHT = [["duelos", "Duelos", "duels"], ["grupo", "Grupo", "group"]];
 
 const cache = new Map();

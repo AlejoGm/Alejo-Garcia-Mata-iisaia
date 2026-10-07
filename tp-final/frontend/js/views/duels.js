@@ -122,7 +122,7 @@ export async function duelsView(app, group) {
     const cards = duels.filter((d) => d.status !== "rejected").map((d) => duelCard(group, d, unit, refresh));
     app.replaceChildren(await challengeCard(group, exercises, unit, refresh),
       el("h2", { class: "section-title" }, "Duelos"),
-      ...(cards.length ? cards : [el("p", { class: "muted" }, "Todavía no hay duelos.")]));
+      cards.length ? el("div", { class: "cards-grid" }, cards) : el("p", { class: "muted" }, "Todavía no hay duelos."));
   }
 
   await refresh();

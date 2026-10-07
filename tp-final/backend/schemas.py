@@ -337,3 +337,42 @@ class PersonalStatsOut(BaseModel):
     best_reps: int | None
     best_1rm: float | None
     sessions: int  # sesiones del período con este ejercicio
+
+
+class WeekActivityOut(BaseModel):
+    week: date
+    sessions: int
+    volume: float
+
+
+class DayActivityOut(BaseModel):
+    day: date
+    members: int
+    mine: bool
+
+
+class LeaderOut(BaseModel):
+    exercise: str
+    user_id: int
+    display_name: str
+    value: float
+
+
+class StreakOut(BaseModel):
+    user_id: int
+    display_name: str
+    weeks: int
+
+
+class DashboardOut(BaseModel):
+    sessions: int
+    sessions_prev: int
+    volume: float
+    volume_prev: float
+    prs_month: int
+    prs_prev_month: int
+    best_streak: StreakOut | None
+    series: list[WeekActivityOut]
+    days: list[DayActivityOut]
+    goal_pct: float | None
+    leaders: list[LeaderOut]
