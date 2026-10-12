@@ -9,7 +9,9 @@ from backend.groups import challenge_exercises
 from backend.queries import goal_changes, group_records
 from backend.routes.me_stats import achievements_of
 from backend.routes.rankings import GroupContext, context, r1
-from backend.schemas import DashboardOut, DayActivityOut, LeaderOut, MedalOut, StreakOut, WeekActivityOut
+from backend.schemas import (
+    DashboardOut, DayActivityOut, LastWeekOut, LeaderOut, MedalOut, Person, StreakOut, WeekActivityOut,
+)
 
 MEDALS_DAYS = 14
 
@@ -24,9 +26,22 @@ def recent_medals(session: Session, ctx: GroupContext, today: date) -> list[Meda
     return sorted(medals, key=lambda m: m.day, reverse=True)
 
 
-def prs_between(records: list[stats.SetRecord], start: date, end: date) -> int:
-    prs = stats.detect_prs(records)
+def prs_between(records: list[stats.SetRecord], prs: dict[int, str], start: date, end: date) -> int:
     return sum(1 for r in records if r.set_id in prs and start <= r.date <= end)
+
+
+def last_week(ctx: GroupContext, records: list[stats.SetRecord], prs: dict[int, str],
+              changes: dict[int, list[tuple]], today: date) -> LastWeekOut:
+    week = stats.monday(today) - timedelta(days=7)
+    goals = {uid: stats.goal_in_force(c, week) for uid, c in changes.items()}
+    awards = stats.week_awards(records, set(prs), goals, week)
+
+    def people(ids: list[int]) -> list[Person]:
+        return [Person(user_id=uid, display_name=ctx.name(uid)) for uid in ids]
+
+    return LastWeekOut(week=week, most_days=people(awards.most_days), days=awards.days,
+                       most_volume=people(awards.most_volume), volume=round(awards.volume),
+                       most_prs=people(awards.most_prs), prs=awards.prs, goal_met=people(awards.goal_met))
 
 
 @router.get("/groups/{code}/dashboard", response_model=DashboardOut)
@@ -38,6 +53,7 @@ def dashboard(code: str, user: UserDep, session: SessionDep) -> DashboardOut:
     this_week = stats.monday(today)
     changes = goal_changes(session, ctx.ids)
     month_start = stats.month_start(today)
+    prs = stats.detect_prs(records)
     prev_start = stats.shift_months(month_start, -1)
 
     streaks = [e for e in stats.consistency_table(records, changes, prev_start, today, today) if e.streak > 0]
@@ -56,8 +72,8 @@ def dashboard(code: str, user: UserDep, session: SessionDep) -> DashboardOut:
     return DashboardOut(
         sessions=series[-1].sessions, sessions_prev=series[-2].sessions,
         volume=round(series[-1].volume), volume_prev=round(series[-2].volume),
-        prs_month=prs_between(records, month_start, stats.month_end(today)),
-        prs_prev_month=prs_between(records, prev_start, stats.month_end(prev_start)),
+        prs_month=prs_between(records, prs, month_start, stats.month_end(today)),
+        prs_prev_month=prs_between(records, prs, prev_start, stats.month_end(prev_start)),
         best_streak=StreakOut(user_id=best.user_id, display_name=ctx.name(best.user_id), weeks=best.streak) if best else None,
         series=[WeekActivityOut(week=w.week, sessions=w.sessions, volume=round(w.volume)) for w in series],
         days=[DayActivityOut(day=d.day, members=d.members, mine=d.day in mine) for d in stats.day_activity(records, today)],
@@ -65,4 +81,5 @@ def dashboard(code: str, user: UserDep, session: SessionDep) -> DashboardOut:
                                         today)),
         leaders=leaders,
         medals=recent_medals(session, ctx, today),
+        last_week=last_week(ctx, records, prs, changes, today),
     )

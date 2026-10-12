@@ -86,6 +86,29 @@ function prsCard(group, feed, unit) {
       : el("p", { class: "muted" }, "Todavía no hay PRs."));
 }
 
+function dayMonth(iso, plus = 0) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d + plus).toLocaleDateString("es-AR", { day: "numeric", month: "short" });
+}
+
+function award(iconName, tone, label, people, value, wide = false) {
+  return el("div", { class: `award${wide ? " wide" : ""}` },
+    el("div", { class: "kpi-head" }, el("span", { class: `tile-icon ${tone}` }, icon(iconName, 20)), el("span", { class: "muted small" }, label)),
+    people.length ? el("div", { class: "award-people" }, people.map((p) => broLink(p.user_id, p.display_name, "sm")))
+      : el("span", { class: "muted" }, "Nadie"),
+    value ? el("strong", { class: "accent-number" }, value) : "");
+}
+
+function lastWeekCard(week, unit) {
+  return el("section", { class: "card span-8" },
+    el("div", { class: "spread" }, el("h3", {}, "La semana pasada"), el("span", { class: "muted small" }, `${dayMonth(week.week)} al ${dayMonth(week.week, 6)}`)),
+    el("div", { class: "awards" },
+      award("train", "", "Más días", week.most_days, week.days ? `${week.days} días` : ""),
+      award("bolt", "mint", "Más volumen", week.most_volume, week.volume ? volumeText(week.volume, unit) : ""),
+      award("trophy", "ember", "Más PRs", week.most_prs, week.prs ? `${week.prs} ${week.prs === 1 ? "PR" : "PRs"}` : ""),
+      award("clock", "", "Cumplieron su objetivo", week.goal_met, "", true)));
+}
+
 function medalsCard(medals) {
   return el("section", { class: "card span-4" }, el("h3", {}, "Medallas recientes"),
     el("p", { class: "muted small" }, "Las ganadas en los últimos 14 días."),
@@ -127,6 +150,7 @@ export async function dashboardView(app, group) {
       leadersCard(data.leaders),
       el("div", { class: "span-4 stack" }, campaign),
       prsCard(group, feed, unit),
+      lastWeekCard(data.last_week, unit),
       medalsCard(data.medals),
     ));
   }
