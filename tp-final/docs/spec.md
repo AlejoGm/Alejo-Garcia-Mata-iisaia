@@ -12,7 +12,7 @@ tp-final/
 │   ├── auth.py        validación del token y usuario actual
 │   ├── db.py          engine y sesión por request
 │   ├── models.py      tablas
-│   ├── schemas.py     entrada y salida de la API
+│   ├── schemas/       entrada y salida de la API, un módulo por recurso
 │   ├── stats/         el módulo profundo: funciones puras (core, periods, rankings, competition)
 │   ├── queries.py     lecturas que arman la entrada de stats
 │   └── routes/        un router por recurso
