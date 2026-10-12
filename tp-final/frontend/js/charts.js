@@ -33,7 +33,13 @@ export function lineChart({ labels, series, label }) {
   }
   let min = Math.min(...values);
   let max = Math.max(...values);
-  if (min === max) { min -= 1; max += 1; }
+  // Un rango mínimo del 6 % evita que +1 kg parezca un salto enorme.
+  const floor = Math.max(Math.abs(max) * 0.06, 2);
+  if (max - min < floor) {
+    const mid = (max + min) / 2;
+    min = mid - floor / 2;
+    max = mid + floor / 2;
+  }
   const margin = (max - min) * 0.1;
   min -= margin;
   max += margin;

@@ -65,9 +65,26 @@ function duelCard(group, duel, unit, refresh) {
 // El formulario sobrevive a los refrescos: no vuelve a Sentadilla/Absoluto después de retar.
 let form = null;
 let notice = "";
+export const RIVAL_KEY = "gymbro.rival";
 
-async function challengeCard(group, exercises, unit, refresh) {
-  form ??= { exercise_id: group.challenges[0]?.id ?? exercises[0].id, mode: "absolute", days: 7 };
+/** Un reto pedido desde el perfil de un bro: ese rival y ese ejercicio. Se lee una vez. */
+function takeRival() {
+  try {
+    const raw = sessionStorage.getItem(RIVAL_KEY);
+    sessionStorage.removeItem(RIVAL_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function challengeCard(group, exercises, unit, refresh, duels, favorite) {
+  const asked = takeRival();
+  form ??= { exercise_id: favorite ?? group.challenges[0]?.id ?? exercises[0].id, mode: "absolute", days: 7 };
+  if (asked) Object.assign(form, { exercise_id: asked.exercise_id ?? form.exercise_id, mode: "dots" });
+  // Con quién ya hay un reto pendiente o en curso: en vez de "Retar", su estado.
+  const busyWith = new Map(duels.filter((d) => d.status === "pending" || d.status === "active")
+    .flatMap((d) => [[d.challenger.user_id, d.status], [d.opponent.user_id, d.status]]));
   const box = el("div", { class: "card" });
   const error = el("p", { class: "error", role: "alert" });
 
@@ -84,6 +101,11 @@ async function challengeCard(group, exercises, unit, refresh) {
     }
     const list = rivals.rivals.map((r) => {
       const [label, cls] = LEVELS[r.level];
+      if (busyWith.has(r.user_id)) {
+        return el("li", { class: "rival" }, avatar(r.display_name),
+          el("span", { class: "person-text" }, el("strong", {}, r.display_name), el("span", { class: "muted small" }, "Ya tienen un reto")),
+          el("span", { class: "pill" }, STATUS[busyWith.get(r.user_id)]));
+      }
       const button = el("button", { type: "button", class: "primary", style: "flex:0" }, "Retar");
       button.addEventListener("click", () => {
         if (r.level === "high" && !window.confirm(`Con ${r.display_name} hay desbalance alto. ¿Retarlo igual?`)) return;
@@ -93,7 +115,7 @@ async function challengeCard(group, exercises, unit, refresh) {
           await refresh();
         });
       });
-      return el("li", { class: "rival" }, avatar(r.display_name),
+      return el("li", { class: `rival${asked?.user_id === r.user_id ? " asked" : ""}` }, avatar(r.display_name),
         el("span", { class: "person-text" }, el("strong", {}, r.display_name),
           el("span", { class: "muted small" }, `Mejor del mes: ${fmt(r.value, form.mode, unit)}`),
           el("span", { class: `pill ${cls}` }, label)),
@@ -112,7 +134,16 @@ async function challengeCard(group, exercises, unit, refresh) {
       error);
   }
   await render();
+  if (asked) requestAnimationFrame(() => box.querySelector(".asked")?.scrollIntoView({ block: "center" }));
   return box;
+}
+
+/** El ejercicio que más cargaste últimamente: arrancar ahí, no en uno que nunca hiciste. */
+async function favoriteExercise() {
+  const sessions = await api.get("/me/sessions?limit=20").catch(() => []);
+  const counts = new Map();
+  for (const s of sessions) for (const set of s.sets) counts.set(set.exercise_id, (counts.get(set.exercise_id) || 0) + 1);
+  return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 }
 
 export async function duelsView(app, group) {
@@ -120,6 +151,7 @@ export async function duelsView(app, group) {
   const exercises = await api.get("/exercises");
   const challengeIds = new Set(group.challenges.map((c) => c.id));
   exercises.sort((a, b) => Number(challengeIds.has(b.id)) - Number(challengeIds.has(a.id)));
+  const favorite = await favoriteExercise();
 
   async function refresh() {
     let duels;
@@ -129,10 +161,14 @@ export async function duelsView(app, group) {
       app.replaceChildren(errorBox(err.message));
       return;
     }
-    const cards = duels.filter((d) => d.status !== "rejected").map((d) => duelCard(group, d, unit, refresh));
-    app.replaceChildren(await challengeCard(group, exercises, unit, refresh),
+    // Lo que está en juego primero: retos para aceptar y duelos en curso; los terminados al final.
+    const order = (d) => (d.status === "pending" && d.opponent.user_id === group.me ? 0 : { active: 1, pending: 2 }[d.status] ?? 3);
+    const live = duels.filter((d) => d.status !== "rejected").sort((a, b) => order(a) - order(b));
+    const cards = live.map((d) => duelCard(group, d, unit, refresh));
+    app.replaceChildren(
       el("h2", { class: "section-title" }, "Duelos"),
-      cards.length ? el("div", { class: "cards-grid" }, cards) : el("p", { class: "muted" }, "Todavía no hay duelos."));
+      cards.length ? el("div", { class: "cards-grid" }, cards) : el("p", { class: "muted" }, "Todavía no hay duelos."),
+      await challengeCard(group, exercises, unit, refresh, duels, favorite));
   }
 
   await refresh();

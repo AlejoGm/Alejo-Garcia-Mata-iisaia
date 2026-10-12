@@ -73,3 +73,39 @@ Lo pendiente quedó en issues:
 - Agrupar en el feed los PRs de una misma sesión.
 - Que la app sugiera qué día de la rutina toca hoy.
 - Confirmar antes de cancelar un reto.
+
+## Tercera pasada: lo nuevo de la quinta ronda
+
+Probó como "nico", un usuario nuevo que se une al grupo de demo. Cargó dos sesiones (ayer y hoy), usó "Para PR", se equivocó a propósito, y en casa recorrió todo en el celular y en escritorio.
+
+**Mediciones.** La primera sesión, sin historial, le llevó unos 2,6 toques por serie. La segunda, con "Para PR" y los valores precargados, 1,8. Cargar una serie nueva con "Para PR" son 2 toques: el chip y Guardar.
+
+**Lo que más le gustó:** "Para PR", los discos por lado, el cara a cara ("Vos 0 – 3 Bruno"), el feed agrupado y "La semana pasada".
+
+**Qué se cambió:**
+- **La barra fija tapaba Reps al abrir la carga.** Los números suben arriba de todo. "Para PR", los discos y "La última vez" pasan abajo, cerca del pulgar. El fondo de la página crece con la barra cuando aparece el descanso o un aviso, y la tarjeta de la sesión muestra una flecha que dice que se abre.
+- **Campo de peso.** Cada toque selecciona todo, también con el campo ya activo. Un peso absurdo ya no dibuja 800 discos.
+- **Avisos.** "El máximo es 500 kg" se va al corregir el peso, la etiqueta dice "Editando serie 3" mientras se edita, y "Deshacer" dura 10 segundos.
+- **"Para PR"** dice qué es cada chip ("+1 rep" y "+peso") y marca el elegido.
+- **Ejercicios con tu peso.** El feed, el panel y el resumen muestran la carga total y "peso corporal + 5 kg", no un "0 kg" gigante.
+- **Cara a cara.** Cuando gana el que levanta menos kilos, aparece una línea que explica que DOTS ajusta por peso corporal y sexo.
+- **Duelos.**
+  - "Retar" desde un perfil llega con ese rival marcado, en DOTS y en el ejercicio más parejo.
+  - Con quien ya tenés un reto aparece "Pendiente" o "En curso", en lugar de un botón que fallaba en silencio.
+  - Los duelos en juego van arriba.
+  - El ejercicio arranca en el que más cargaste, no en Sentadilla.
+- **Entrenar** marca con "Toca hoy" el día de la rutina que sigue.
+- **Detalles.**
+  - Fechas legibles en todos lados, con el año solo si no es el actual.
+  - Las medallas ganadas mantienen la descripción.
+  - Los nombres linkeados se ven subrayados.
+  - Los gráficos no exageran diferencias de 1 kg y no se agrandan de más en escritorio.
+
+**Lo que no se cambió:**
+- **"PR de peso" con el mismo peso y más reps.** La regla cuenta como PR de peso igual carga con más reps, y el gym-bro esperaba "PR de reps". Cambiar la etiqueta toca una decisión del grill (dos tipos de PR), así que queda para decidir.
+- **Fondos con más de 10 reps no tiene 1RM ni objetivo para PR.** Es a propósito: Epley no es confiable con más de 10 reps, y en ejercicios con tu peso la carga depende del peso del día.
+- **"Peso muerto" no se compite en el demo.** La rutina del demo tiene peso muerto rumano y el desafío es peso muerto convencional. Es un tema de los datos de prueba, no de la app.
+- **Quedaron en issues:**
+  - [Mostrar el progreso hacia cada medalla](https://github.com/AlejoGm/Alejo-Garcia-Mata-iisaia/issues/54)
+  - [Constancia sin datos en la primera semana](https://github.com/AlejoGm/Alejo-Garcia-Mata-iisaia/issues/55)
+  - [Rankings en escritorio: que se entienda qué filtra el período](https://github.com/AlejoGm/Alejo-Garcia-Mata-iisaia/issues/56)

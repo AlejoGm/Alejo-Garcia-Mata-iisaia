@@ -5,6 +5,13 @@ import { icon } from "../icons.js";
 import { busy, el, today, toDisplay } from "../ui.js";
 import { setLine } from "./session-summary.js";
 
+/** El día que sigue al último que hiciste de esta rutina; si nunca hiciste ninguno, el primero. */
+export function nextRoutineDay(routine, sessions) {
+  const dayIds = routine.days.map((d) => d.id);
+  const last = sessions.find((s) => dayIds.includes(s.routine_day_id));
+  return last ? routine.days[(dayIds.indexOf(last.routine_day_id) + 1) % routine.days.length] : routine.days[0];
+}
+
 export function startDraft(group, options) {
   saveDraft(newDraft({ code: group.code, date: today(), bodyweight: toDisplay(state.me.last_bodyweight_kg, state.me.unit), ...options }));
   window.location.hash = `#/g/${group.code}/carga`;
@@ -30,8 +37,8 @@ function dateLabel(iso) {
   return new Date(y, m - 1, d).toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "short" });
 }
 
-async function historyCard(unit) {
-  const sessions = await api.get("/me/sessions?limit=5");
+async function historyCard(unit, allSessions) {
+  const sessions = allSessions.slice(0, 5);
   if (!sessions.length) return el("div", { class: "card" }, el("h3", {}, "Tus sesiones"), el("p", { class: "muted" }, "Todavía no cargaste ninguna."));
   const error = el("p", { class: "error", role: "alert" });
   const blocks = sessions.map((s) => {
@@ -56,13 +63,15 @@ async function historyCard(unit) {
   return el("section", { class: "card" }, el("h3", {}, "Tus últimas sesiones"), el("div", { class: "activity-list" }, blocks), error);
 }
 
-function dayButtons(group, routine, hasDraft) {
+function dayButtons(group, routine, hasDraft, sessions) {
   if (!routine) {
     return el("p", { class: "muted small" }, "No seguís ninguna rutina. Elegí una en Grupo → Rutinas, o cargá libre.");
   }
+  const next = nextRoutineDay(routine, sessions);
   return el("div", { class: "actions" }, el("p", { class: "muted small" }, routine.name), routine.days.map((day) => {
-    const button = el("button", { type: "button", class: "big day-button" },
-      el("span", {}, day.name), el("span", { class: "muted small" }, day.items.map((i) => i.exercise).join(" · ")));
+    const button = el("button", { type: "button", class: `big day-button${day.id === next.id ? " next" : ""}` },
+      el("span", { class: "spread" }, el("span", {}, day.name), day.id === next.id ? el("span", { class: "pill accent" }, "Toca hoy") : ""),
+      el("span", { class: "muted small" }, day.items.map((i) => i.exercise).join(" · ")));
     button.addEventListener("click", () => {
       if (hasDraft && !window.confirm("Tenés una sesión sin terminar. ¿Empezar otra y descartarla?")) return;
       startDraft(group, {
@@ -79,7 +88,7 @@ export async function trainView(app, group) {
   await loadMe(true);
   const draft = loadDraft();
   const myRoutineId = group.members.find((m) => m.user_id === group.me)?.routine_id;
-  const routines = myRoutineId ? await api.get(`/groups/${group.code}/routines`) : [];
+  const [routines, sessions] = await Promise.all([myRoutineId ? api.get(`/groups/${group.code}/routines`) : [], api.get("/me/sessions?limit=20")]);
   const free = el("button", { type: "button", class: "secondary big" }, "Carga libre");
   free.addEventListener("click", () => {
     if (draft && !window.confirm("Tenés una sesión sin terminar. ¿Empezar otra y descartarla?")) return;
@@ -88,7 +97,7 @@ export async function trainView(app, group) {
   app.replaceChildren(
     pendingCard(group, draft) || "",
     el("div", { class: "card" }, el("h3", {}, "Entrenar hoy"),
-      dayButtons(group, routines.find((r) => r.id === myRoutineId), Boolean(draft)), free),
-    await historyCard(state.me.unit),
+      dayButtons(group, routines.find((r) => r.id === myRoutineId), Boolean(draft), sessions), free),
+    await historyCard(state.me.unit, sessions),
   );
 }

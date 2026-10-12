@@ -2,7 +2,7 @@
 
 Alejo García Mata y Gustavo Campero.
 
-Una app web para que un grupo de amigos registre lo que entrena y se compare de forma justa. Cada uno sigue su rutina o la misma que su bro, carga las series desde el celular en el gimnasio, y compite en rankings de fuerza (DOTS y absoluta), progreso, constancia, duelos y campañas. Backend en FastAPI con SQLite, frontend en HTML, CSS y JavaScript sin paso de build, y login con Google por Auth0.
+Una app web para que un grupo de amigos registre lo que entrena y se compare de forma justa. Cada uno sigue su rutina o la misma que su bro, carga las series desde el celular en el gimnasio, y compite en rankings de fuerza (DOTS y absoluta), progreso, constancia, duelos y campañas. Además tiene un panel del grupo, el perfil de cada bro con un cara a cara, medallas, y en la carga un objetivo para romper la marca y los discos por lado. Backend en FastAPI con SQLite, frontend en HTML, CSS y JavaScript sin paso de build, y login con Google por Auth0.
 
 ## Cómo se ejecuta
 
@@ -14,7 +14,7 @@ uv sync
 uv run fastapi dev backend/main.py
 ```
 
-Abrir `http://127.0.0.1:8000`. Sin configurar nada, la app arranca en **modo desarrollo**: se entra con un nombre, sin Google. La base `gymbro.db` se crea al arrancar; para empezar de cero alcanza con borrarla.
+Abrir `http://127.0.0.1:8000`. En el celular se puede agregar a la pantalla de inicio y se abre como una app. Sin configurar nada, la app arranca en **modo desarrollo**: se entra con un nombre, sin Google. La base `gymbro.db` se crea al arrancar; para empezar de cero alcanza con borrarla.
 
 Para ver la app con datos, el script carga un grupo con tres amigos, una rutina, 8 semanas de historia y una campaña, e imprime el código del grupo:
 
@@ -30,7 +30,7 @@ Para llenar un grupo que ya existe, el otro script suma cinco participantes de m
 uv run python -m scripts.seed_group CODIGO --as tu-nombre
 ```
 
-Tests (96):
+Tests (138):
 
 ```bash
 uv run pytest
@@ -58,13 +58,15 @@ tp-final/
 │   ├── auth.py          token de Auth0 (JWKS) o de desarrollo → usuario
 │   ├── models.py        usuarios, grupos, sesiones, series, rutinas, duelos, campañas
 │   ├── queries.py       lecturas que arman la entrada de stats
-│   ├── stats/           reglas de cálculo, funciones puras: core, periods, rankings, competition, personal
+│   ├── schemas/         entrada y salida de la API, un módulo por recurso
+│   ├── stats/           reglas de cálculo, funciones puras: core, periods, rankings, competition, personal,
+│   │                    dashboard, achievements, targets
 │   └── routes/          un router por recurso
 ├── frontend/
 │   ├── index.html       una sola página, vistas por hash
 │   └── js/              api, auth, router, una vista por archivo, gráficos en SVG propio
-├── tests/               96 tests: stats con TDD y status codes de la API
-├── scripts/seed_demo.py
+├── tests/               138 tests: stats con TDD y status codes de la API
+├── scripts/             seed_demo y seed_group, para ver la app con datos
 ├── docs/                pitch, PRD, grill, spec, bitácora y devolución del gym-bro
 └── .claude/             reglas por path, permisos, skill nuevo-ranking y sub-agente gym-bro
 ```

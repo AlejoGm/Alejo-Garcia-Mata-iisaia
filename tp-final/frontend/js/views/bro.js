@@ -2,6 +2,7 @@ import { api } from "../api.js";
 import { state } from "../app.js";
 import { groupChrome, loadGroup } from "../group-shell.js";
 import { medalsCard, shortDate } from "../medals.js";
+import { RIVAL_KEY } from "./duels.js";
 import { avatar, el, errorBox, num, weight } from "../ui.js";
 
 function headCard(bro) {
@@ -15,11 +16,18 @@ function headCard(bro) {
 function faceoffCard(group, bro, unit) {
   const mine = bro.faceoff.filter((f) => f.winner === "mine").length;
   const theirs = bro.faceoff.filter((f) => f.winner === "theirs").length;
+  // Retar en el ejercicio más parejo en DOTS: el duelo con más gracia.
+  const closest = [...bro.faceoff].sort((a, b) => Math.abs(a.mine_dots - a.theirs_dots) - Math.abs(b.mine_dots - b.theirs_dots))[0];
+  const challenge = el("a", { class: "button ghost", href: `#/g/${group.code}/duelos`, onclick: () => {
+    try { sessionStorage.setItem(RIVAL_KEY, JSON.stringify({ user_id: bro.user_id, exercise_id: closest?.exercise_id ?? null })); } catch { /* sin storage, Duelos sin preselección */ }
+  } }, "Retar");
+  const fewerKilos = bro.faceoff.some((f) => (f.winner === "mine") !== (f.mine_1rm > f.theirs_1rm) && f.winner !== "tie" && f.mine_1rm !== f.theirs_1rm);
   const cell = (kg, dots, won) => el("td", { class: `num${won ? " winner" : ""}` }, weight(kg, unit),
     el("span", { class: "dots-note" }, `${num(dots)} DOTS`));
   return el("section", { class: "card" },
-    el("div", { class: "spread" }, el("h3", {}, "Cara a cara"), el("a", { class: "button ghost", href: `#/g/${group.code}/duelos` }, "Retar")),
+    el("div", { class: "spread" }, el("h3", {}, "Cara a cara"), challenge),
     el("p", { class: "muted small" }, "Mejor 1RM de los últimos 6 meses en lo que hicieron los dos. Gana el de más DOTS."),
+    fewerKilos ? el("p", { class: "notice" }, "A veces gana el que levanta menos kilos: DOTS ajusta la marca por el peso corporal y el sexo de cada uno, para comparar parejo.") : "",
     bro.faceoff.length ? [
       el("div", { class: "score" }, el("span", {}, "Vos"), el("strong", {}, `${mine} – ${theirs}`), el("span", {}, bro.display_name)),
       el("table", {}, el("thead", {}, el("tr", {}, el("th", {}, "Ejercicio"), el("th", { class: "num" }, "Vos"), el("th", { class: "num" }, bro.display_name))),
