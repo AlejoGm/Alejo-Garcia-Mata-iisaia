@@ -46,3 +46,16 @@ def test_dashboard_lists_recent_medals(client):
 
     medals = client.get(f"/api/groups/{code}/dashboard", headers=users["ana"]).json()["medals"]
     assert {(m["display_name"], m["key"]) for m in medals} == {("beto", "first"), ("beto", "bench_bw")}
+
+
+def test_dashboard_last_week_awards(client):
+    code, users = setup_group(client)
+    squat = exercise_id(client, users["ana"], "Sentadilla")
+    last_monday = date.today() - timedelta(days=date.today().weekday() + 7)
+    post(client, users["beto"], [{"exercise_id": squat, "weight_kg": 100, "reps": 5}], day=last_monday)
+
+    week = client.get(f"/api/groups/{code}/dashboard", headers=users["ana"]).json()["last_week"]
+    assert week["week"] == last_monday.isoformat()
+    assert [p["display_name"] for p in week["most_days"]] == ["beto"]
+    assert week["volume"] == 500
+    assert week["most_prs"] == []

@@ -1,8 +1,8 @@
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 
-from backend.stats import day_activity, goal_progress, session_count, volume, weekly_activity
+from backend.stats import day_activity, goal_progress, session_count, volume, week_awards, weekly_activity
 from tests.test_stats import rec
 
 WED = date(2026, 10, 7)  # semana del lunes 5/10
@@ -45,3 +45,27 @@ def test_goal_progress_caps_each_member_at_their_goal():
 
 def test_goal_progress_without_goals_is_none():
     assert goal_progress([], {1: None}, today=WED) is None
+
+
+# Semana pasada
+
+def test_week_awards_with_ties_and_goals():
+    week = date(2026, 9, 28)  # lunes
+    records = [
+        rec(100, 5, day=week, user=1), rec(100, 5, day=week + timedelta(days=2), user=1),
+        rec(50, 5, day=week, user=2), rec(50, 5, day=week + timedelta(days=3), user=2),
+        rec(150, 5, day=week + timedelta(days=1), user=3),
+        rec(300, 5, day=week + timedelta(days=7), user=3),  # la semana siguiente no cuenta
+    ]
+    prs = {records[1].set_id, records[4].set_id}
+    awards = week_awards(records, prs, {1: 2, 2: 3, 3: None}, week)
+
+    assert (awards.most_days, awards.days) == ([1, 2], 2)
+    assert (awards.most_volume, awards.volume) == ([1], 1000)
+    assert (awards.most_prs, awards.prs) == ([1, 3], 1)
+    assert awards.goal_met == [1]
+
+
+def test_week_awards_empty_week():
+    awards = week_awards([], set(), {1: 3}, date(2026, 9, 28))
+    assert (awards.most_days, awards.most_volume, awards.most_prs, awards.goal_met) == ([], [], [], [])
