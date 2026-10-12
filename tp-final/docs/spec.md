@@ -156,6 +156,55 @@ Todos reciben las series del período, salvo donde se aclara.
 - **PRs del mes:** series con PR (según la regla de PRs) con fecha en el mes en curso; también los del mes anterior, para comparar.
 - **Mejor racha:** el miembro con la racha de constancia más larga.
 - **Líderes:** el primero en DOTS de cada desafío, en el mes en curso.
+- **Semana pasada:** ver más arriba.
+- **Medallas recientes:** las de los miembros ganadas en los últimos 14 días, de la más nueva a la más vieja.
+
+### Objetivo para PR
+
+Sobre el historial del usuario en un ejercicio sin peso corporal. Con `(L, R)` el mejor absoluto, `M` el mejor 1RM estimado y `s` el salto (2,5 kg, o 5 lb en kg si el perfil está en libras):
+- **Más reps:** `(L, R + 1)`, si `R + 1 ≤ 50`.
+- **Más peso:** `(L + s, r)`, con `r` la menor cantidad de reps entre 1 y 10 cuyo 1RM estimado supera a `M`. Si ninguna alcanza, o no hay `M`, `r = 1`.
+- Sin historial, o en ejercicios con tu peso, no hay objetivo.
+
+### Medallas
+
+Personales, sobre todo el historial del usuario. Cada una tiene el día en que se ganó: el primero en que se cumple la condición.
+
+| Clave | Condición | Día |
+|---|---|---|
+| `first` | una sesión | el de la primera sesión |
+| `sessions_10`, `sessions_50`, `sessions_100` | días distintos entrenados | el día número N |
+| `streak_4`, `streak_12` | semanas cerradas seguidas que cumplen el objetivo vigente | el domingo de la semana N de la racha |
+| `prs_10` | PRs según la regla de PRs | el del PR número 10 |
+| `bench_bw` | press banca con `load ≥ bw` | el de la serie |
+| `squat_1_5` | sentadilla con `load ≥ 1,5 × bw` | ídem |
+| `deadlift_2` | peso muerto con `load ≥ 2 × bw` | ídem |
+| `ton` | `Σ load × reps ≥ 10 000` en una sesión | el de la sesión |
+
+`bw` es el peso corporal de la sesión de la serie.
+
+### Cara a cara
+
+Entre dos miembros, en los ejercicios que hicieron los dos dentro de los últimos 6 meses de calendario, sin las series dudosas del grupo:
+- el mejor 1RM estimado de cada uno, en kg;
+- el mejor DOTS de cada uno, y gana el mayor;
+- el marcador: cuántos ejercicios gana cada uno.
+
+Ejercicios con 1RM en uno solo de los dos no entran.
+
+### Semana pasada
+
+Para la última semana cerrada (lunes a domingo), sin las series dudosas:
+- **Más días:** los miembros con más días entrenados.
+- **Más volumen:** los de mayor volumen.
+- **Más PRs:** los de más PRs con fecha en esa semana.
+- **Objetivo cumplido:** los que llegaron a su objetivo vigente.
+
+Cada premio lista a todos los empatados en el máximo, y queda vacío si el máximo es 0.
+
+### Calendario
+
+Los días con series de las últimas 26 semanas, de lunes a la semana en curso, con la cantidad de series de cada día.
 
 ### Duelos
 
@@ -205,8 +254,8 @@ Todo bajo `/api`, con el token. Los grupos se identifican por `code`.
 | `GET` | `/me/sessions?limit=20` | mis sesiones con series, de la más nueva a la más vieja |
 | `POST` | `/me/sessions` | `201` con 1RM, DOTS y PR por serie · `422` |
 | `DELETE` | `/me/sessions/{id}` | `204` · `404` si no existe o no es mía |
-| `GET` | `/me/stats?exercise_id&period…` | stats personales y series para gráficos |
-| `GET` | `/exercises` | catálogo |
+| `GET` | `/me/stats?exercise_id&period…` | stats personales, series para gráficos, calendario y medallas |
+| `GET` | `/exercises` | catálogo, con `barbell` según el catálogo |
 | `POST` | `/exercises` | `201` · `409` nombre repetido · `422` |
 | `POST` | `/groups` | crea, y quien lo crea queda como admin · `201` |
 | `GET` | `/groups/{code}` | grupo, miembros, desafíos, rutinas y mi rol |
@@ -214,10 +263,11 @@ Todo bajo `/api`, con el token. Los grupos se identifican por `code`.
 | `DELETE` | `/groups/{code}/members/me` | salir · `204` |
 | `DELETE` | `/groups/{code}/members/{user_id}` | sacar a un miembro, solo el admin · `204` · `403` · `404` |
 | `PUT` | `/groups/{code}/challenges` | `{"exercise_ids": [...]}`, solo el admin · `422` si son más de 4 |
-| `GET` | `/groups/{code}/last?exercise_id` | mi última serie y la de hasta 2 miembros más |
+| `GET` | `/groups/{code}/last?exercise_id` | mi última serie, la de hasta 2 miembros más y mi objetivo para PR |
+| `GET` | `/groups/{code}/members/{user_id}` | perfil de un miembro: semana, racha, medallas, cara a cara conmigo y últimas sesiones · `404` si no es miembro |
 | `GET` | `/groups/{code}/rankings?period&month&from&to` | fuerza, progreso, semana y constancia |
-| `GET` | `/groups/{code}/dashboard` | indicadores, series de 8 semanas, días de la semana, objetivo del grupo y líderes |
-| `GET` | `/groups/{code}/feed?limit=30` | PRs con reacciones, mi reacción y si quedó excluido |
+| `GET` | `/groups/{code}/dashboard` | indicadores, series de 8 semanas, días de la semana, objetivo del grupo, líderes, semana pasada y medallas recientes |
+| `GET` | `/groups/{code}/feed?limit=30` | PRs con reacciones, mi reacción y si quedó excluido; el cliente los agrupa por sesión |
 | `PUT` | `/groups/{code}/feed/{set_id}/reaction` | `{"kind"}` · `200` · `404` si no está en el feed |
 | `DELETE` | `/groups/{code}/feed/{set_id}/reaction` | `204` |
 | `GET` | `/groups/{code}/routines` | rutinas con sus días e ítems, y quién sigue cada una |
@@ -247,13 +297,16 @@ Una sola página con vistas por hash, en ES modules y sin build. Primero está p
 | `#/g/CODE/carga` | carga guiada o libre, con borrador en `localStorage` |
 | `#/g/CODE/rankings` | selector de período, desafíos con DOTS/absoluto, progreso, semana y constancia |
 | `#/g/CODE/panel` | portada del grupo: indicadores, gráficos, "Hoy toca", líderes, campaña y últimos PRs |
-| `#/g/CODE/feed` | PRs con reacciones (desde "Ver todo" del panel) |
+| `#/g/CODE/feed` | PRs agrupados por sesión, con reacciones (desde "Ver todo" del panel) |
+| `#/g/CODE/bro/ID` | perfil de un miembro y cara a cara |
 | `#/g/CODE/duelos` | duelos, retar y aceptar |
 | `#/g/CODE/campanas` | campañas y su tabla |
 | `#/g/CODE/grupo` | miembros, código, desafíos y rutinas (lo de admin, solo para el admin) |
-| `#/stats` | mis gráficos por ejercicio, en SVG propio |
+| `#/stats` | mis gráficos por ejercicio, calendario y medallas, en SVG propio |
 
 - **Polling.** Cada 30 segundos en rankings, feed y duelos, solo con la pestaña visible.
+- **Discos.** En ejercicios con barra, debajo del peso: los discos por lado con barra de 20 kg (25, 20, 15, 10, 5, 2,5 y 1,25) o de 45 lb (45, 35, 25, 10, 5 y 2,5).
+- **Instalable.** `manifest.webmanifest` con ícono y color de tema. Sin service worker.
 - **Libras.** Se convierten en la vista con `1 lb = 0,45359237 kg`. Lo que se manda a la API va siempre en kg.
 
 ## Tests

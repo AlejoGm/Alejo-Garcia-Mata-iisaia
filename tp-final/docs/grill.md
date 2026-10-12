@@ -188,3 +188,64 @@ Pedido: que el grupo tenga un panel con gráficos y más información, no solo r
 - los cuatro indicadores en una fila;
 - abajo las barras, el medidor y "Hoy toca";
 - después los líderes, la campaña y los PRs.
+
+## Más completa (quinta pasada)
+
+Pedido: darle otra vuelta a la app para que sea más completa. Lo cerré con un auto-grill, partiendo de qué hace un gym-bro que la app todavía no cubre.
+
+**¿Qué falta?**
+- **En el gimnasio:** saber qué levantar para romper la marca, y cuántos discos poner en la barra.
+- **Mirar al otro:** hoy un bro aparece solo como fila de una tabla. Falta su perfil y un cara a cara.
+- **Logros que no dependan de ganarle a nadie:** medallas.
+- **Cerrar la semana:** quién fue el que más entrenó, levantó y rompió marcas.
+- **Mis stats:** ver la constancia de un vistazo, como un calendario.
+- **Lo pendiente:** agrupar en el feed los PRs de una sesión, confirmar antes de cancelar un reto, e instalarla en el celular.
+
+**¿Qué sugiere el "objetivo para PR"?** Las dos series más chicas que la regla de PRs cuenta como récord, y se cargan con un toque:
+- **Más reps:** tu mejor carga, con una rep más que tu mejor serie con esa carga.
+- **Más peso:** tu mejor carga más un salto (2,5 kg o 5 lb), con las reps justas para superar también tu mejor 1RM estimado. Si con una rep alcanza, sugiere una.
+
+Se calcula sobre todo tu historial, igual que los PRs. En ejercicios con tu peso no hay sugerencia: la carga depende del peso corporal del día. La regla vive en `backend/stats/` con TDD y llega en la respuesta de `/last`.
+
+**¿Calculadora de discos?** Sí, en ejercicios con barra: "por lado: 20 + 10 + 2,5" debajo del peso. Barra de 20 kg o 45 lb, discos comunes de gimnasio. Qué ejercicio usa barra lo dice el catálogo, sin columna nueva en la base, así una base existente sigue sirviendo. Los ejercicios que agrega un usuario no muestran discos.
+
+**¿Perfil del bro?** Tocar un nombre en rankings, panel, feed o miembros lleva a su perfil:
+- su semana contra su objetivo y su racha;
+- sus medallas;
+- el **cara a cara**: en cada ejercicio que hicieron los dos en los últimos 6 meses, el mejor 1RM de cada uno y quién gana en DOTS, con un marcador total;
+- sus últimas sesiones, con el día de rutina, las series y los PRs.
+
+Se cuentan las series del grupo, sin las dudosas, igual que en los rankings. Las sesiones de un miembro ya se veían por el feed y por "la última vez", así que mostrarlas no abre nada nuevo.
+
+**¿Qué medallas?** Hitos fijos, cada uno con el día en que se ganó:
+
+| Medalla | Condición |
+|---|---|
+| Primera sesión | una sesión |
+| 10, 50 y 100 sesiones | días distintos entrenados |
+| 4 y 12 semanas | semanas cerradas seguidas cumpliendo el objetivo |
+| 10 PRs | PRs acumulados |
+| Banca con tu peso | press banca con carga igual o mayor a tu peso del día |
+| Sentadilla 1,5× | sentadilla con 1,5 veces tu peso del día |
+| Peso muerto 2× | peso muerto con el doble de tu peso del día |
+| Tonelada | 10 000 kg de volumen en una sesión |
+
+Las de fuerza son relativas al peso, para que no las ganen solo los pesados. Las medallas son personales: se calculan con todo tu historial, no con lo que filtra cada grupo. Se ven en tu perfil, en el del bro y en el panel, que muestra las ganadas en los últimos 14 días.
+
+**¿Cierre de la semana?** Una tarjeta del panel, "La semana pasada", sobre la última semana cerrada:
+- más días entrenados;
+- más volumen;
+- más PRs;
+- quiénes cumplieron su objetivo.
+
+Un empate muestra a todos los empatados. No suma puntos a nada: es para el chat.
+
+**¿Calendario?** En mis stats, las últimas 26 semanas en una grilla de días, con la intensidad según la cantidad de series. Es lo que más rápido muestra si uno viene constante.
+
+**¿Volumen por músculo?** Sigue afuera, como en el panel. Haría falta asignarle músculo a cada ejercicio, y es una decisión aparte.
+
+**¿Feed agrupado?** Una tarjeta por sesión: la persona, el día, y cada PR en su línea con sus reacciones. Las reacciones siguen siendo por PR, porque el "dudoso" excluye una serie, no una sesión.
+
+**¿Cancelar un reto?** Pide un segundo toque, como "Confirmar" en un peso sospechoso.
+
+**¿Instalable?** Un manifest con ícono y color, para "Agregar a la pantalla de inicio" y abrirla sin la barra del navegador. Sin service worker: el borrador local ya cubre cortes de señal, y el PRD deja afuera la sincronización en segundo plano.
