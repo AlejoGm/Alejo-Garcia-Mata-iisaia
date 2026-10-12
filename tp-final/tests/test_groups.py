@@ -89,3 +89,11 @@ def test_catalog_names_are_unique_and_seed_is_idempotent(client):
     names = [e["name"] for e in client.get("/api/exercises", headers=ana).json()]
     assert len(names) == len(EXERCISES)
     assert len({n.lower() for n in names}) == len(names)
+
+
+def test_manifest_and_icons_are_served(client):
+    manifest = client.get("/manifest.webmanifest")
+    assert manifest.status_code == 200
+    assert manifest.headers["content-type"].startswith("application/manifest+json")
+    for icon in manifest.json()["icons"]:
+        assert client.get(f"/{icon['src']}").status_code == 200
