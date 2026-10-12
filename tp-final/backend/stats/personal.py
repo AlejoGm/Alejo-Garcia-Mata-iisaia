@@ -1,7 +1,7 @@
 """Series para los gráficos personales."""
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 
 from backend.stats.core import SetRecord, chronological_key
 from backend.stats.periods import in_range, month_start, shift_months
@@ -70,3 +70,16 @@ def bodyweight_series(records: list[SetRecord], start: date, end: date) -> list[
     for r in sorted(in_range(records, start, end), key=chronological_key):
         last[monday(r.date)] = r
     return [BodyweightPoint(week, r.bodyweight_kg) for week, r in sorted(last.items())]
+
+
+@dataclass(frozen=True)
+class DayCount:
+    day: date
+    sets: int
+
+
+def training_calendar(records: list[SetRecord], today: date, weeks: int = 26) -> list[DayCount]:
+    """Series por día de las últimas `weeks` semanas, de lunes a hoy. Solo los días entrenados."""
+    start = monday(today) - timedelta(weeks=weeks - 1)
+    counts = Counter(r.date for r in in_range(records, start, today))
+    return [DayCount(day, sets) for day, sets in sorted(counts.items())]

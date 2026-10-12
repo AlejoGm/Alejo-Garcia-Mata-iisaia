@@ -141,3 +141,37 @@ export function gauge(pct, label) {
   root.append(svg("text", { x: cx, y: cy - 18, "text-anchor": "middle", class: "gauge-number" }, pct === null || pct === undefined ? "—" : `${Math.round(pct)}%`));
   return root;
 }
+
+/** Calendario de constancia: una columna por semana, de lunes a domingo, más intenso con más series. */
+export function heatmap(days, weeks = 26) {
+  const cell = 22;
+  const step = 26;
+  const top = 28;
+  const left = 30;
+  const today = new Date();
+  const counts = new Map(days.map((d) => [d.day, d.sets]));
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - ((today.getDay() + 6) % 7) - 7 * (weeks - 1));
+  const root = svg("svg", { viewBox: `0 0 ${left + weeks * step} ${top + 7 * step}`, class: "heatmap", role: "img",
+    "aria-label": `${days.length} días entrenados en las últimas ${weeks} semanas` });
+  ["L", "", "M", "", "V", "", "D"].forEach((text, d) => {
+    if (text) root.append(svg("text", { x: 0, y: top + d * step + 17, class: "heat-label" }, text));
+  });
+  let month = -1;
+  for (let week = 0; week < weeks; week += 1) {
+    for (let d = 0; d < 7; d += 1) {
+      const day = new Date(start.getFullYear(), start.getMonth(), start.getDate() + week * 7 + d);
+      if (day > today) break;
+      if (d === 0 && day.getMonth() !== month && week < weeks - 1) {
+        month = day.getMonth();
+        root.append(svg("text", { x: left + week * step, y: 18, class: "heat-label" }, day.toLocaleDateString("es-AR", { month: "short" })));
+      }
+      const iso = day.toLocaleDateString("en-CA");
+      const sets = counts.get(iso) || 0;
+      const level = sets === 0 ? 0 : sets < 10 ? 1 : sets < 20 ? 2 : 3;
+      const rect = svg("rect", { x: left + week * step, y: top + d * step, width: cell, height: cell, rx: 6, class: `heat l${level}` });
+      rect.append(svg("title", {}, `${day.toLocaleDateString("es-AR")}: ${sets} series`));
+      root.append(rect);
+    }
+  }
+  return root;
+}

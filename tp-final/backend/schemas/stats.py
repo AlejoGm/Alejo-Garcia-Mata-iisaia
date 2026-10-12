@@ -21,6 +21,11 @@ class BodyweightPointOut(BaseModel):
     kg: float
 
 
+class DayCountOut(BaseModel):
+    day: date
+    sets: int
+
+
 class AchievementOut(BaseModel):
     key: str
     title: str
@@ -48,6 +53,7 @@ class PersonalStatsOut(BaseModel):
     best_1rm: float | None
     sessions: int  # sesiones del período con este ejercicio
     achievements: list[AchievementOut]
+    calendar: list[DayCountOut]
 
 
 class WeekActivityOut(BaseModel):
