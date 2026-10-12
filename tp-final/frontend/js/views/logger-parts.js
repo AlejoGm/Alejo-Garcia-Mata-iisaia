@@ -6,10 +6,9 @@ export function stepper(label, value, step, onChange) {
   const input = el("input", { type: "number", inputmode: "decimal", value: String(value ?? ""), "aria-label": label });
   input.addEventListener("input", () => onChange(input.value === "" ? null : Number(input.value)));
   // Al tocar el campo se selecciona todo: escribir "60" reemplaza en vez de insertarse en el medio.
-  // El select() inmediato cubre el tecleo rápido; el pointerup se cancela para que el toque no mueva el cursor.
-  let justFocused = false;
-  input.addEventListener("focus", () => { justFocused = true; input.select(); });
-  input.addEventListener("pointerup", (event) => { if (justFocused) { event.preventDefault(); input.select(); justFocused = false; } });
+    // Vale para cada toque, también con el campo ya activo: en el gimnasio se reemplaza, no se edita un dígito.
+  input.addEventListener("focus", () => input.select());
+  input.addEventListener("pointerup", (event) => { event.preventDefault(); input.select(); });
   const bump = (delta) => {
     const next = Math.max(0, Math.round(((Number(input.value) || 0) + delta) * 100) / 100);
     input.value = String(next);
@@ -102,17 +101,18 @@ export function platesText(total, unit) {
   const result = total ? platesPerSide(total, unit) : null;
   if (!result) return `Menos que la barra sola (${BAR[unit]} ${unit}).`;
   if (!result.plates.length) return `Solo la barra (${BAR[unit]} ${unit}).`;
+  if (result.plates.length > 10) return "Revisá el peso: no entra en la barra.";
   const rest = result.rest ? `, y sobran ${num(result.rest)} ${unit} que no salen con discos` : "";
   return `Por lado: ${result.plates.map((p) => num(p, 2)).join(" + ")}${rest}.`;
 }
 
 /** Botones del objetivo para PR. Si una serie de hoy ya lo alcanzó, lo festeja en vez de sugerir. */
-export function targetButtons(targets, todaySets, unit, onPick) {
+export function targetButtons(targets, todaySets, unit, onPick, isPicked = () => false) {
   if (!targets.length) return "";
   const reached = targets.some((t) => todaySets.some((s) => s.weight_kg >= t.weight_kg - 0.01 && s.reps >= t.reps));
   if (reached) return el("p", { class: "notice" }, "Ya rompiste tu marca hoy.");
   return el("div", { class: "targets" }, el("span", { class: "muted small" }, "Para PR:"),
-    targets.map((t) => el("button", { type: "button", class: "chip target", onclick: () => onPick(t),
+    targets.map((t) => el("button", { type: "button", class: `chip target${isPicked(t) ? " active" : ""}`, onclick: () => onPick(t),
       "aria-label": `Cargar ${num(toDisplay(t.weight_kg, unit))} ${unit} por ${t.reps}` },
-    `${num(toDisplay(t.weight_kg, unit))} × ${t.reps}`)));
+    `${t.kind === "reps" ? "+1 rep" : "+peso"}: ${num(toDisplay(t.weight_kg, unit))} × ${t.reps}`)));
 }

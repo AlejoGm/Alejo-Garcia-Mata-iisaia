@@ -7,7 +7,7 @@ import { shortDate } from "../medals.js";
 import { broLink } from "../group-shell.js";
 import { el, errorBox, num, toDisplay } from "../ui.js";
 import { campaignBanner } from "./rankings.js";
-import { startDraft } from "./train.js";
+import { nextRoutineDay, startDraft } from "./train.js";
 
 const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const PR_LABEL = { weight: "PR de peso", "1rm": "PR de 1RM" };
@@ -52,10 +52,7 @@ async function todayCard(group) {
   const [routines, sessions] = await Promise.all([api.get(`/groups/${group.code}/routines`), api.get("/me/sessions?limit=20")]);
   const routine = routines.find((r) => r.id === myRoutineId);
   if (!routine) return box;
-  const dayIds = routine.days.map((d) => d.id);
-  const last = sessions.find((s) => dayIds.includes(s.routine_day_id));
-  // El día que sigue al último que hiciste de esta rutina; si nunca hiciste ninguno, el primero.
-  const day = last ? routine.days[(dayIds.indexOf(last.routine_day_id) + 1) % routine.days.length] : routine.days[0];
+  const day = nextRoutineDay(routine, sessions);
   const start = el("button", { type: "button", class: "primary" }, loadDraft() ? "Seguir sesión" : `Empezar ${day.name}`);
   start.addEventListener("click", () => {
     if (loadDraft()) { window.location.hash = `#/g/${group.code}/carga`; return; }
@@ -82,7 +79,7 @@ function prsCard(group, feed, unit) {
     el("div", { class: "spread" }, el("h3", {}, "Últimos PRs"), el("a", { class: "button ghost", href: `#/g/${group.code}/feed` }, "Ver todo")),
     feed.length ? el("ul", { class: "list" }, feed.map((p) => el("li", {},
       broLink(p.user_id, p.display_name, "sm", el("span", { class: "person-text" }, el("strong", {}, p.display_name), el("span", { class: "muted small" }, `${p.exercise}, ${PR_LABEL[p.pr]}`))),
-      el("strong", { class: "accent-number" }, `${num(toDisplay(p.weight_kg, unit))}×${p.reps}`))))
+      el("strong", { class: "accent-number" }, `${num(toDisplay(p.load, unit))}×${p.reps}`))))
       : el("p", { class: "muted" }, "Todavía no hay PRs."));
 }
 

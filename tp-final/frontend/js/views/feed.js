@@ -1,7 +1,7 @@
 import { api } from "../api.js";
 import { poll, state } from "../app.js";
 import { broLink } from "../group-shell.js";
-import { el, errorBox, num, toDisplay } from "../ui.js";
+import { el, errorBox, liftText, num, toDisplay } from "../ui.js";
 
 const KINDS = [["fuerza", "💪"], ["fuego", "🔥"], ["dudoso", "🤨"]];
 const PR_LABEL = { weight: "PR de peso", "1rm": "PR de 1RM" };
@@ -33,10 +33,12 @@ function reactionButtons(group, item, refresh) {
 }
 
 function lift(group, item, unit, refresh) {
+  const bodyweight = Math.abs(item.load - item.weight_kg) > 0.01;
   return el("div", { class: `feed-pr${item.excluded ? " excluded" : ""}` },
     el("div", { class: "feed-lift" },
-      el("span", { class: "person-text" }, el("span", { class: "feed-exercise" }, item.exercise), el("span", { class: "muted small" }, PR_LABEL[item.pr])),
-      el("span", { class: "feed-number" }, el("strong", {}, num(toDisplay(item.weight_kg, unit))), el("span", {}, `${unit} × ${item.reps}`))),
+      el("span", { class: "person-text" }, el("span", { class: "feed-exercise" }, item.exercise),
+        el("span", { class: "muted small" }, bodyweight ? `${PR_LABEL[item.pr]}, ${liftText(item.weight_kg, item.load, unit)}` : PR_LABEL[item.pr])),
+      el("span", { class: "feed-number" }, el("strong", {}, num(toDisplay(item.load, unit))), el("span", {}, `${unit} × ${item.reps}`))),
     item.excluded ? el("p", { class: "small error" }, "No cuenta para los rankings: la mayoría del grupo lo marcó como dudoso.") : null,
     reactionButtons(group, item, refresh));
 }

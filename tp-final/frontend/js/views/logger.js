@@ -1,7 +1,7 @@
 import { api } from "../api.js";
 import { loadMe, state } from "../app.js";
 import { clearDraft, loadDraft, saveDraft, setsDone } from "../draft.js";
-import { el, errorBox, num, toDisplay, toKg, weight } from "../ui.js";
+import { dayLabel, el, errorBox, num, toDisplay, toKg, weight } from "../ui.js";
 import { clock, lastLine, loadText, platesText, restTimer, stepper, suspicious, targetButtons } from "./logger-parts.js";
 import { sessionSummary } from "./session-summary.js";
 
@@ -102,7 +102,7 @@ export async function loggerView(app, group) {
     const [removed] = draft.sets.splice(index, 1);
     persist();
     clearTimeout(undo?.handle);
-    undo = { removed, index, handle: setTimeout(() => { undo = null; renderBar(); }, 6000) };
+    undo = { removed, index, handle: setTimeout(() => { undo = null; renderBar(); }, 10000) };
     render();
   }
 
@@ -175,7 +175,7 @@ export async function loggerView(app, group) {
         exercisePicker());
     }
     const done = setsDone(draft, exercise.id);
-    const label = item && item.exercise_id === exercise.id
+    const label = entry.editing !== null ? `Editando serie ${entry.editing + 1}` : item && item.exercise_id === exercise.id
       ? (done < item.sets ? `Serie ${done + 1} de ${item.sets}` : `Serie ${done + 1} (extra)`) : `Serie ${done + 1}`;
     const last = await lastFor(exercise.id);
     const editing = entry.editing !== null
@@ -189,14 +189,16 @@ export async function loggerView(app, group) {
     return el("div", { class: "card logger" },
       el("div", { class: "spread" }, el("h3", { class: "exercise-name" }, exercise.name), el("span", { class: "pill accent" }, label)),
       editing,
-      el("p", { class: "muted small" }, last ? lastLine(last, unit, exercise.bodyweight) : ""),
-      targetButtons(last?.targets ?? [], draft.sets.filter((s) => s.exercise_id === exercise.id), unit, pickTarget),
-      exercise.bodyweight ? el("p", { class: "muted small" }, "Ejercicio con tu peso: cargá solo el lastre. El 1RM suma tu peso corporal.") : "",
       el("div", { class: "steppers" },
         stepper(exercise.bodyweight ? `Lastre (${unit})` : `Peso (${unit})`, entry.weight, unit === "lb" ? 5 : 2.5,
-          (v) => { entry.weight = v; entry.confirm = false; entry.limit = false; showPlates(); }),
-        stepper("Reps", entry.reps, 1, (v) => { entry.reps = v; entry.confirm = false; })),
+          (v) => { const warned = entry.confirm || entry.limit; entry.weight = v; entry.confirm = false; entry.limit = false; showPlates(); if (warned) renderBar(); }),
+        stepper("Reps", entry.reps, 1, (v) => { const warned = entry.confirm; entry.reps = v; entry.confirm = false; if (warned) renderBar(); })),
       plates,
+      // Debajo de los números, cerca del pulgar: lo que ayuda a decidir la serie.
+      targetButtons(last?.targets ?? [], draft.sets.filter((s) => s.exercise_id === exercise.id), unit, pickTarget,
+        (t) => toKg(entry.weight, unit) === t.weight_kg && entry.reps === t.reps),
+      el("p", { class: "muted small" }, last ? lastLine(last, unit, exercise.bodyweight) : ""),
+      exercise.bodyweight ? el("p", { class: "muted small" }, "Ejercicio con tu peso: cargá solo el lastre. El 1RM suma tu peso corporal.") : "",
       el("div", { class: "row" },
         item ? el("button", { type: "button", class: "secondary", onclick: async () => { advanceToNextIncomplete(); if (draft.exerciseId) await prefill(); persist(); render(); } }, "Siguiente ejercicio") : "",
         el("details", { class: "change" }, el("summary", {}, "Cambiar ejercicio"), exercisePicker())));
@@ -214,7 +216,7 @@ export async function loggerView(app, group) {
 
   function sessionCard() {
     const summary = el("summary", {});
-    const describe = () => { summary.textContent = `${draft.title} · ${draft.date} · ${draft.bodyweight ? `${num(draft.bodyweight)} ${unit}` : "falta tu peso"}`; };
+    const describe = () => { summary.textContent = `${draft.title} · ${dayLabel(draft.date)} · ${draft.bodyweight ? `${num(draft.bodyweight)} ${unit}` : "falta tu peso"}`; };
     describe();
     const date = el("input", { type: "date", value: draft.date, max: new Date().toLocaleDateString("en-CA") });
     date.addEventListener("change", () => { draft.date = date.value; persist(); describe(); });
@@ -262,8 +264,11 @@ export async function loggerView(app, group) {
     app.append(barNode);
   }
 
+  // La barra crece con el descanso, los avisos o el deshacer: el fondo de la página crece con ella.
+  const resize = new ResizeObserver(() => document.body.style.setProperty("--logger-bar-h", `${barNode.offsetHeight}px`));
+  resize.observe(barNode);
   document.body.classList.add("with-logger-bar");
-  window.addEventListener("hashchange", () => { timer.stop(); document.body.classList.remove("with-logger-bar"); }, { once: true });
+  window.addEventListener("hashchange", () => { timer.stop(); resize.disconnect(); document.body.classList.remove("with-logger-bar"); }, { once: true });
   if (draft.exerciseId) await prefill();
   await render();
 }

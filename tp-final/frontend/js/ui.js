@@ -93,3 +93,17 @@ export function avatar(name, size = "md") {
   for (const char of String(name)) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
   return el("span", { class: `avatar-dot ${size} tone-${TONES[hash % TONES.length]}`, "aria-hidden": "true" }, letters);
 }
+
+/** "sáb 11 oct"; el año solo si no es el actual. */
+export function dayLabel(iso, withWeekday = true) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const options = { day: "numeric", month: "short", ...(withWeekday ? { weekday: "short" } : {}),
+    ...(y !== new Date().getFullYear() ? { year: "numeric" } : {}) };
+  return new Date(y, m - 1, d).toLocaleDateString("es-AR", options);
+}
+
+/** En ejercicios con tu peso la carga suma el peso corporal: "peso corporal + 5 kg". */
+export function liftText(weightKg, loadKg, unit) {
+  if (loadKg === undefined || loadKg === null || Math.abs(loadKg - weightKg) < 0.01) return weight(weightKg, unit);
+  return weightKg ? `peso corporal + ${weight(weightKg, unit)}` : "peso corporal";
+}

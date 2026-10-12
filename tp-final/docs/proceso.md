@@ -87,3 +87,17 @@ Con dos referencias de apps de fitness se rehízo el frontend: base oscura con b
 - líderes del mes, campaña activa y últimos PRs.
 
 Las cuentas nuevas viven en `backend/stats/dashboard.py`, con el test en rojo primero. En escritorio las tarjetas se ordenan en grilla horizontal, y en el celular en una columna. Mientras se probaba apareció que comparar la semana en curso contra una completa daba "-75%" a mitad de semana. Se cambió por mostrar el número de la semana pasada.
+
+## 11. Más completa: quinta pasada
+
+Pedido abierto: "darle más vuelta de tuerca" a la app. Se cerró con otro auto-grill (sección "Más completa" del grill), que partió de qué hace un gym-bro que la app no cubría. Salieron siete issues nuevos, más los dos pendientes de la segunda pasada del gym-bro, y un PR por cada uno:
+- **Refactor previo.** `schemas.py` pasaba las 300 líneas y se partió en un paquete antes de sumar nada.
+- **En el gimnasio.** Objetivo para PR, con las dos series más chicas que la regla cuenta como récord, y discos por lado.
+- **Social.** Perfil de cada bro con un cara a cara en DOTS, linkeado desde cada nombre, y el feed agrupado por sesión.
+- **Motivación.** Medallas y "La semana pasada" en el panel.
+- **Mis stats.** Calendario de constancia de 26 semanas.
+- **Otros.** Confirmar antes de cancelar un reto, y manifest para instalarla en el celular.
+
+Toda regla nueva fue a `backend/stats/` con el test en rojo primero: `targets.py`, `achievements.py`, el cara a cara en `competition.py`, los premios de la semana en `dashboard.py` y el calendario en `personal.py`. Un test verifica que cada objetivo para PR de verdad cuente como PR según `detect_prs`, para que las dos reglas no se separen.
+
+Después, la tercera pasada del gym-bro (en [devolucion-gym-bro.md](devolucion-gym-bro.md)). Lo más grave no estaba en lo nuevo sino en cómo convivía con lo viejo: los controles que se agregaron a la carga empujaron "Reps" debajo de la barra fija. Se corrigió en el mismo día. Una etiqueta ("PR de reps") quedó sin tocar, porque cambiarla toca una decisión del grill.
