@@ -6,9 +6,12 @@ from backend.auth import SessionDep, UserDep
 from backend.groups import members_with_users, require_member
 from backend.models import Exercise, Reaction, RoutineDay, User, WorkoutSession, WorkSet
 from backend.queries import set_records
-from backend.schemas import LastOut, LastSet, SessionInput, SessionOut, SetOut
+from backend.schemas import LastOut, LastSet, SessionInput, SessionOut, SetOut, TargetOut
 
 router = APIRouter(prefix="/api")
+
+# El salto de peso del objetivo para PR: un par de discos chicos.
+STEP_KG = {"kg": 2.5, "lb": 5 * 0.45359237}
 
 
 def round1(value: float | None) -> float | None:
@@ -110,4 +113,5 @@ def last_sets(code: str, exercise_id: int, user: UserDep, session: SessionDep) -
                                                reps=work_set.reps, date=workout.date)))
     mine = next((entry for u, entry in found if u.id == user.id), None)
     others = sorted((entry for u, entry in found if u.id != user.id), key=lambda e: e.date, reverse=True)[:2]
-    return LastOut(mine=mine, others=others)
+    targets = stats.pr_targets(set_records(session, [user.id], [exercise_id]), STEP_KG[user.unit])
+    return LastOut(mine=mine, others=others, targets=[TargetOut(**t.__dict__) for t in targets])
