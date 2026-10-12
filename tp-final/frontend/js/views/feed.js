@@ -32,16 +32,33 @@ function reactionButtons(group, item, refresh) {
   }));
 }
 
-function card(group, item, unit, refresh) {
-  return el("article", { class: `card feed-item${item.excluded ? " excluded" : ""}` },
-    el("div", { class: "person" }, broLink(item.user_id, item.display_name, "md",
-      el("span", { class: "person-text" }, el("strong", {}, item.display_name), el("span", { class: "muted small" }, dateLabel(item.date)))),
-      el("span", { class: "pill accent" }, PR_LABEL[item.pr])),
+function lift(group, item, unit, refresh) {
+  return el("div", { class: `feed-pr${item.excluded ? " excluded" : ""}` },
     el("div", { class: "feed-lift" },
-      el("span", { class: "feed-exercise" }, item.exercise),
+      el("span", { class: "person-text" }, el("span", { class: "feed-exercise" }, item.exercise), el("span", { class: "muted small" }, PR_LABEL[item.pr])),
       el("span", { class: "feed-number" }, el("strong", {}, num(toDisplay(item.weight_kg, unit))), el("span", {}, `${unit} × ${item.reps}`))),
     item.excluded ? el("p", { class: "small error" }, "No cuenta para los rankings: la mayoría del grupo lo marcó como dudoso.") : null,
     reactionButtons(group, item, refresh));
+}
+
+/** Una tarjeta por sesión: los PRs de la misma persona el mismo día van juntos, cada uno con sus reacciones. */
+function bySession(items) {
+  const sessions = new Map();
+  for (const item of items) {
+    const key = `${item.user_id}|${item.date}`;
+    if (!sessions.has(key)) sessions.set(key, []);
+    sessions.get(key).push(item);
+  }
+  return [...sessions.values()];
+}
+
+function card(group, prs, unit, refresh) {
+  const [first] = prs;
+  return el("article", { class: "card feed-item" },
+    el("div", { class: "person" }, broLink(first.user_id, first.display_name, "md",
+      el("span", { class: "person-text" }, el("strong", {}, first.display_name), el("span", { class: "muted small" }, dateLabel(first.date)))),
+      el("span", { class: "pill accent" }, prs.length === 1 ? "1 PR" : `${prs.length} PRs`)),
+    prs.map((item) => lift(group, item, unit, refresh)));
 }
 
 export async function feedView(app, group) {
@@ -51,7 +68,7 @@ export async function feedView(app, group) {
     try {
       const items = await api.get(`/groups/${group.code}/feed`);
       app.replaceChildren(items.length
-        ? el("div", { class: "page-list" }, items.map((item) => card(group, item, unit, render)))
+        ? el("div", { class: "page-list" }, bySession(items).map((prs) => card(group, prs, unit, render)))
         : el("div", { class: "card" }, el("p", { class: "muted" }, "Todavía no hay PRs. El primero que rompa una marca aparece acá.")));
     } catch (err) {
       app.replaceChildren(errorBox(err.message));

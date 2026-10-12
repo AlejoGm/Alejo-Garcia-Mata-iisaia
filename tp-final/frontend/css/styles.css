@@ -250,7 +250,8 @@ body.with-logger-bar { padding-bottom: calc(var(--tabbar) + 200px + env(safe-are
 .set-edit { flex: 1; justify-content: flex-start; text-align: left; background: transparent; box-shadow: none; padding: 4px 0; min-height: 44px; font-weight: 600; border-radius: var(--r-control); }
 
 /* Feed */
-.feed-item.excluded { opacity: 0.6; }
+.feed-pr { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.feed-pr.excluded { opacity: 0.6; }
 .reactions { display: flex; gap: 8px; }
 .reaction { flex: 1; min-height: 44px; font-size: 1rem; }
 .reaction.active { color: var(--lime); box-shadow: inset 0 0 0 2px var(--lime); background: rgba(200, 245, 59, 0.08); }

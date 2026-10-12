@@ -43,8 +43,17 @@ function duelCard(group, duel, unit, refresh) {
   } else if (duel.status === "pending") {
     lines.push(el("p", { class: "muted small" }, `Esperando que ${duel.opponent.display_name} acepte.`));
     if (duel.challenger.user_id === me) {
+      // Un segundo toque confirma, igual que un peso sospechoso en la carga.
       const cancel = el("button", { type: "button", class: "secondary" }, "Cancelar reto");
-      cancel.addEventListener("click", () => busy(cancel, error, async () => { await api.del(`/groups/${group.code}/duels/${duel.id}`); await refresh(); }));
+      cancel.addEventListener("click", () => {
+        if (!cancel.classList.contains("confirm")) {
+          cancel.classList.add("confirm", "danger");
+          cancel.textContent = "Tocá de nuevo para cancelar";
+          setTimeout(() => { cancel.classList.remove("confirm", "danger"); cancel.textContent = "Cancelar reto"; }, 4000);
+          return;
+        }
+        busy(cancel, error, async () => { await api.del(`/groups/${group.code}/duels/${duel.id}`); await refresh(); });
+      });
       actions = cancel;
     }
   }
