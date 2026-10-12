@@ -89,3 +89,22 @@ def test_last_shows_my_top_set_and_up_to_two_others(client):
     body = client.get(f"/api/groups/{code}/last", params={"exercise_id": bench}, headers=users[0]).json()
     assert body["mine"]["weight_kg"] == 70
     assert [o["display_name"] for o in body["others"]] == ["beto", "caro"]
+
+
+def test_last_includes_my_pr_targets(client):
+    ana = register(client, "ana")
+    code = make_group(client, ana)
+    bench = exercise_id(client, ana, "Press banca")
+    post(client, ana, [{"exercise_id": bench, "weight_kg": 80, "reps": 8}])
+
+    body = client.get(f"/api/groups/{code}/last", params={"exercise_id": bench}, headers=ana).json()
+
+    assert body["targets"] == [{"kind": "reps", "weight_kg": 80, "reps": 9},
+                               {"kind": "weight", "weight_kg": 82.5, "reps": 7}]
+
+
+def test_catalog_marks_barbell_exercises(client):
+    ana = register(client, "ana")
+    catalog = {e["name"]: e for e in client.get("/api/exercises", headers=ana).json()}
+    assert catalog["Press banca"]["barbell"] is True
+    assert catalog["Curl con mancuernas"]["barbell"] is False

@@ -6,7 +6,7 @@ from backend.schemas.groups import (
     GroupInput, GroupSummary, MemberOut, GroupDetail, ChallengesInput,
 )
 from backend.schemas.sessions import (
-    SetInput, SessionInput, SetOut, SessionOut, LastSet, LastOut,
+    SetInput, SessionInput, SetOut, SessionOut, LastSet, TargetOut, LastOut,
 )
 from backend.schemas.rankings import (
     StrengthRow, StrengthExercise, ProgressRow, WeeklyRow, ConsistencyRow, RankingsOut, ReactionKind, ReactionInput,

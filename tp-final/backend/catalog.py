@@ -32,6 +32,12 @@ EXERCISES = [
     ("Core", True), ("Plancha con lastre", True),
 ]
 
+# Los que se hacen con barra olímpica: muestran los discos por lado.
+BARBELL = {
+    "Sentadilla", "Press banca", "Peso muerto", "Press militar", "Press inclinado", "Remo con barra",
+    "Sentadilla frontal", "Hip thrust", "Peso muerto rumano", "Press declinado", "Peso muerto sumo",
+}
+
 DEFAULT_CHALLENGES = ["Sentadilla", "Press banca", "Peso muerto", "Press militar"]
 
 

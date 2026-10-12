@@ -2,7 +2,7 @@ import { api } from "../api.js";
 import { loadMe, state } from "../app.js";
 import { clearDraft, loadDraft, saveDraft, setsDone } from "../draft.js";
 import { el, errorBox, num, toDisplay, toKg, weight } from "../ui.js";
-import { clock, lastLine, loadText, restTimer, stepper, suspicious } from "./logger-parts.js";
+import { clock, lastLine, loadText, platesText, restTimer, stepper, suspicious, targetButtons } from "./logger-parts.js";
 import { sessionSummary } from "./session-summary.js";
 
 export async function loggerView(app, group) {
@@ -182,15 +182,21 @@ export async function loggerView(app, group) {
       ? el("div", { class: "notice spread" }, el("span", {}, `Editando la serie ${entry.editing + 1}`),
         el("button", { type: "button", class: "secondary", style: "flex:0", onclick: cancelEdit }, "Cancelar"))
       : "";
+    const plates = exercise.barbell ? el("p", { class: "muted small plates" }) : "";
+    const showPlates = () => { if (plates) plates.textContent = platesText(entry.weight, unit); };
+    showPlates();
+    const pickTarget = (t) => { entry.weight = toDisplay(t.weight_kg, unit); entry.reps = t.reps; entry.confirm = false; render(); };
     return el("div", { class: "card logger" },
       el("div", { class: "spread" }, el("h3", { class: "exercise-name" }, exercise.name), el("span", { class: "pill accent" }, label)),
       editing,
       el("p", { class: "muted small" }, last ? lastLine(last, unit, exercise.bodyweight) : ""),
+      targetButtons(last?.targets ?? [], draft.sets.filter((s) => s.exercise_id === exercise.id), unit, pickTarget),
       exercise.bodyweight ? el("p", { class: "muted small" }, "Ejercicio con tu peso: cargá solo el lastre. El 1RM suma tu peso corporal.") : "",
       el("div", { class: "steppers" },
         stepper(exercise.bodyweight ? `Lastre (${unit})` : `Peso (${unit})`, entry.weight, unit === "lb" ? 5 : 2.5,
-          (v) => { entry.weight = v; entry.confirm = false; entry.limit = false; }),
+          (v) => { entry.weight = v; entry.confirm = false; entry.limit = false; showPlates(); }),
         stepper("Reps", entry.reps, 1, (v) => { entry.reps = v; entry.confirm = false; })),
+      plates,
       el("div", { class: "row" },
         item ? el("button", { type: "button", class: "secondary", onclick: async () => { advanceToNextIncomplete(); if (draft.exerciseId) await prefill(); persist(); render(); } }, "Siguiente ejercicio") : "",
         el("details", { class: "change" }, el("summary", {}, "Cambiar ejercicio"), exercisePicker())));

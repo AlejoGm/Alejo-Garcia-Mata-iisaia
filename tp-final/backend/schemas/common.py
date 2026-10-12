@@ -1,7 +1,9 @@
 from datetime import date
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import BaseModel, Field, StringConstraints, computed_field
+
+from backend.catalog import BARBELL
 
 Name30 = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=30)]
 
@@ -42,6 +44,11 @@ class ExerciseOut(BaseModel):
     id: int
     name: str
     bodyweight: bool
+
+    @computed_field
+    @property
+    def barbell(self) -> bool:
+        return self.name in BARBELL
 
 
 class Person(BaseModel):

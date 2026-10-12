@@ -163,7 +163,7 @@ Todos reciben las series del período, salvo donde se aclara.
 
 Sobre el historial del usuario en un ejercicio sin peso corporal. Con `(L, R)` el mejor absoluto, `M` el mejor 1RM estimado y `s` el salto (2,5 kg, o 5 lb en kg si el perfil está en libras):
 - **Más reps:** `(L, R + 1)`, si `R + 1 ≤ 50`.
-- **Más peso:** `(L + s, r)`, con `r` la menor cantidad de reps entre 1 y 10 cuyo 1RM estimado supera a `M`. Si ninguna alcanza, o no hay `M`, `r = 1`.
+- **Más peso:** `(L + s, r)`, con `r` la menor cantidad de reps entre 1 y 10 cuyo 1RM estimado supera a `M`. Siempre hay una, porque con 10 reps la carga más pesada supera cualquier 1RM de una carga menor. Si no hay `M` (todas las series tienen más de 10 reps), `r = R`.
 - Sin historial, o en ejercicios con tu peso, no hay objetivo.
 
 ### Medallas

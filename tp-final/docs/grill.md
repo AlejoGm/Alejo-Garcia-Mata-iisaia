@@ -203,7 +203,7 @@ Pedido: darle otra vuelta a la app para que sea más completa. Lo cerré con un 
 
 **¿Qué sugiere el "objetivo para PR"?** Las dos series más chicas que la regla de PRs cuenta como récord, y se cargan con un toque:
 - **Más reps:** tu mejor carga, con una rep más que tu mejor serie con esa carga.
-- **Más peso:** tu mejor carga más un salto (2,5 kg o 5 lb), con las reps justas para superar también tu mejor 1RM estimado. Si con una rep alcanza, sugiere una.
+- **Más peso:** tu mejor carga más un salto (2,5 kg o 5 lb), con las reps justas para superar también tu mejor 1RM estimado.
 
 Se calcula sobre todo tu historial, igual que los PRs. En ejercicios con tu peso no hay sugerencia: la carga depende del peso corporal del día. La regla vive en `backend/stats/` con TDD y llega en la respuesta de `/last`.
 

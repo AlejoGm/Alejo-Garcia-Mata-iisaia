@@ -52,6 +52,13 @@ class LastSet(BaseModel):
     date: date
 
 
+class TargetOut(BaseModel):
+    kind: str
+    weight_kg: float
+    reps: int
+
+
 class LastOut(BaseModel):
     mine: LastSet | None
     others: list[LastSet]
+    targets: list[TargetOut]
