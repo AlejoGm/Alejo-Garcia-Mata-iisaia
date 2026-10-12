@@ -1,7 +1,7 @@
 import { icon } from "../icons.js";
 import { dayLabel, el, liftText, weight } from "../ui.js";
 
-const PR_LABEL = { weight: "PR de peso", "1rm": "PR de 1RM" };
+const PR_LABEL = { weight: "PR de peso", reps: "PR de reps", "1rm": "PR de 1RM" };
 
 export function setLine(s, unit) {
   return el("li", {},

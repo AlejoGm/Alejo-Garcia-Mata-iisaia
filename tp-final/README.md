@@ -86,7 +86,7 @@ Salieron de repasar pregunta por pregunta un grill que el agente había hecho so
 
 **Progreso contra uno mismo en meses de calendario, y constancia contra un objetivo semanal propio.** Comparar contra el récord histórico deja al veterano siempre en negativo. Contar días premia al que va más, no al que cumple su plan.
 
-**Un ranking absoluto y dos tipos de PR.** El grupo igual va a hablar de quién levanta más. Separar "PR de peso" de "PR de 1RM" hace que el feed y las tablas cuenten la misma historia.
+**Un ranking absoluto y tres tipos de PR.** El grupo igual va a hablar de quién levanta más. Separar "PR de peso" de "PR de 1RM" hace que el feed y las tablas cuenten la misma historia. Después de la tercera prueba del gym-bro sumé "PR de reps", para los mismos kilos con más reps, que antes se leía como un error.
 
 **Ranking de la semana en lugar del "cartel de la vergüenza".** Muestra día a día quién va mejor, y marca con "ya no llega" al que perdió la semana.
 

@@ -4,7 +4,7 @@ import { broLink } from "../group-shell.js";
 import { el, errorBox, liftText, num, toDisplay } from "../ui.js";
 
 const KINDS = [["fuerza", "💪"], ["fuego", "🔥"], ["dudoso", "🤨"]];
-const PR_LABEL = { weight: "PR de peso", "1rm": "PR de 1RM" };
+const PR_LABEL = { weight: "PR de peso", reps: "PR de reps", "1rm": "PR de 1RM" };
 
 function dateLabel(iso) {
   const [y, m, d] = iso.split("-").map(Number);

@@ -67,10 +67,11 @@ Al encarar la app entera decidí sumar login con Google por Auth0, que tiene pla
 **¿Hay ranking absoluto?** Sí. Es el peso más alto levantado en una serie, con cualquier cantidad de reps. A igual peso gana el que hizo más reps, y si también empatan, el que lo hizo primero. Se elige con un selector **DOTS / Absoluto** en cada desafío.
 
 **¿Qué es un PR?**
-- **"PR de peso":** más kilos que nunca en ese ejercicio, o los mismos kilos con más reps.
+- **"PR de peso":** más kilos que nunca en ese ejercicio.
+- **"PR de reps":** los mismos kilos de tu mejor serie, con más reps. Antes contaba como "PR de peso" y el gym-bro lo leyó como un error, así que en la quinta pasada lo separé. Cuenta igual que antes; solo cambia la etiqueta.
 - **"PR de 1RM":** subió el 1RM estimado pero no el peso.
 
-Si una serie cumple las dos condiciones, se muestra solo "PR de peso". La primera serie de un ejercicio es línea base, no PR. Los PRs se calculan, no se guardan.
+Si una serie cumple más de una condición, se muestra "PR de peso" o "PR de reps", no "PR de 1RM". La primera serie de un ejercicio es línea base, no PR. Los PRs se calculan, no se guardan.
 
 ## Progreso y períodos
 
