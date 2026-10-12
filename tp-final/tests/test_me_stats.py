@@ -34,3 +34,15 @@ def test_personal_stats_without_sessions(client):
     body = client.get("/api/me/stats", headers=ana).json()
     assert body["exercise_id"] is None
     assert body["months"] == []
+
+
+def test_personal_stats_list_every_achievement_with_its_day(client):
+    ana = register(client, "ana")
+    bench = exercise_id(client, ana, "Press banca")
+    post(client, ana, [{"exercise_id": bench, "weight_kg": 80, "reps": 1}], bodyweight=80)
+
+    medals = {m["key"]: m for m in client.get("/api/me/stats", headers=ana).json()["achievements"]}
+    assert len(medals) == 12
+    assert medals["first"]["day"] == date.today().isoformat()
+    assert medals["bench_bw"]["title"] == "Banca con tu peso"
+    assert medals["sessions_10"]["day"] is None
