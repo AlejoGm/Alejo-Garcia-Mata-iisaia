@@ -1,5 +1,6 @@
 import { api } from "../api.js";
 import { poll, state } from "../app.js";
+import { broLink } from "../group-shell.js";
 import { avatar, busy, el, errorBox, num, weight } from "../ui.js";
 
 const LEVELS = { low: ["parejo", "ok"], medium: ["desbalance medio", ""], high: ["desbalance alto", "bad"], none: ["sin datos para comparar", ""] };
@@ -23,7 +24,7 @@ function duelCard(group, duel, unit, refresh) {
   const title = duel.exercise;
   const lines = [el("p", { class: "muted small" }, `${duel.mode === "dots" ? "DOTS" : "Absoluto"}, ${duel.days} días`)];
   const side = (p, value) => el("div", { class: `duel-side${duel.winner_id === p.user_id ? " leading" : ""}` },
-    avatar(p.display_name, "lg"), el("strong", {}, p.display_name),
+    broLink(p.user_id, p.display_name, "lg", el("strong", {}, p.display_name)),
     duel.status === "active" || duel.status === "finished" ? el("span", { class: "duel-value" }, fmt(value, duel.mode, unit)) : "");
   lines.push(el("div", { class: "duel-versus" }, side(duel.challenger, duel.challenger_value), el("span", { class: "vs" }, "vs"),
     side(duel.opponent, duel.opponent_value)));

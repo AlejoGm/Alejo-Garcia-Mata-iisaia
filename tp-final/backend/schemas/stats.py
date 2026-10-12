@@ -88,3 +88,33 @@ class DashboardOut(BaseModel):
     goal_pct: float | None
     leaders: list[LeaderOut]
     medals: list[MedalOut]
+
+
+class FaceOffOut(BaseModel):
+    exercise_id: int
+    exercise: str
+    mine_1rm: float
+    theirs_1rm: float
+    mine_dots: float
+    theirs_dots: float
+    winner: str
+
+
+class BroSessionOut(BaseModel):
+    date: date
+    routine_day_name: str | None
+    sets: int
+    prs: int
+    exercises: list[str]
+
+
+class BroOut(BaseModel):
+    user_id: int
+    display_name: str
+    is_me: bool
+    weekly_goal: int | None
+    week_days: int
+    streak: int
+    achievements: list[AchievementOut]
+    faceoff: list[FaceOffOut]
+    sessions: list[BroSessionOut]

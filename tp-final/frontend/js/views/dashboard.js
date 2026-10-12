@@ -4,7 +4,8 @@ import { barChart, gauge, sparkline } from "../charts.js";
 import { loadDraft } from "../draft.js";
 import { icon } from "../icons.js";
 import { shortDate } from "../medals.js";
-import { avatar, el, errorBox, num, toDisplay } from "../ui.js";
+import { broLink } from "../group-shell.js";
+import { el, errorBox, num, toDisplay } from "../ui.js";
 import { campaignBanner } from "./rankings.js";
 import { startDraft } from "./train.js";
 
@@ -71,7 +72,7 @@ async function todayCard(group) {
 function leadersCard(leaders) {
   return el("section", { class: "card span-4" }, el("h3", {}, "Líderes del mes"), el("p", { class: "muted small" }, "El primero en DOTS de cada desafío."),
     leaders.length ? el("ul", { class: "list" }, leaders.map((l) => el("li", {},
-      el("span", { class: "who" }, avatar(l.display_name, "sm"), el("span", { class: "person-text" }, el("strong", {}, l.display_name), el("span", { class: "muted small" }, l.exercise))),
+      broLink(l.user_id, l.display_name, "sm", el("span", { class: "person-text" }, el("strong", {}, l.display_name), el("span", { class: "muted small" }, l.exercise))),
       el("strong", { class: "accent-number" }, num(l.value)))))
       : el("p", { class: "muted" }, "Todavía nadie cargó un desafío este mes."));
 }
@@ -80,7 +81,7 @@ function prsCard(group, feed, unit) {
   return el("section", { class: "card span-4" },
     el("div", { class: "spread" }, el("h3", {}, "Últimos PRs"), el("a", { class: "button ghost", href: `#/g/${group.code}/feed` }, "Ver todo")),
     feed.length ? el("ul", { class: "list" }, feed.map((p) => el("li", {},
-      el("span", { class: "who" }, avatar(p.display_name, "sm"), el("span", { class: "person-text" }, el("strong", {}, p.display_name), el("span", { class: "muted small" }, `${p.exercise}, ${PR_LABEL[p.pr]}`))),
+      broLink(p.user_id, p.display_name, "sm", el("span", { class: "person-text" }, el("strong", {}, p.display_name), el("span", { class: "muted small" }, `${p.exercise}, ${PR_LABEL[p.pr]}`))),
       el("strong", { class: "accent-number" }, `${num(toDisplay(p.weight_kg, unit))}×${p.reps}`))))
       : el("p", { class: "muted" }, "Todavía no hay PRs."));
 }
@@ -89,7 +90,7 @@ function medalsCard(medals) {
   return el("section", { class: "card span-4" }, el("h3", {}, "Medallas recientes"),
     el("p", { class: "muted small" }, "Las ganadas en los últimos 14 días."),
     medals.length ? el("ul", { class: "list" }, medals.slice(0, 6).map((m) => el("li", {},
-      el("span", { class: "who" }, avatar(m.display_name, "sm"), el("span", { class: "person-text" }, el("strong", {}, m.display_name), el("span", { class: "muted small" }, m.title))),
+      broLink(m.user_id, m.display_name, "sm", el("span", { class: "person-text" }, el("strong", {}, m.display_name), el("span", { class: "muted small" }, m.title))),
       el("span", { class: "muted small" }, shortDate(m.day)))))
       : el("p", { class: "muted" }, "Nadie ganó una medalla en estas dos semanas."));
 }

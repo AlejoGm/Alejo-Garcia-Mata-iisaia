@@ -1,6 +1,7 @@
 import { api } from "../api.js";
 import { poll, state } from "../app.js";
-import { avatar, el, errorBox, num, toDisplay } from "../ui.js";
+import { broLink } from "../group-shell.js";
+import { el, errorBox, num, toDisplay } from "../ui.js";
 
 const KINDS = [["fuerza", "💪"], ["fuego", "🔥"], ["dudoso", "🤨"]];
 const PR_LABEL = { weight: "PR de peso", "1rm": "PR de 1RM" };
@@ -33,8 +34,8 @@ function reactionButtons(group, item, refresh) {
 
 function card(group, item, unit, refresh) {
   return el("article", { class: `card feed-item${item.excluded ? " excluded" : ""}` },
-    el("div", { class: "person" }, avatar(item.display_name),
-      el("span", { class: "person-text" }, el("strong", {}, item.display_name), el("span", { class: "muted small" }, dateLabel(item.date))),
+    el("div", { class: "person" }, broLink(item.user_id, item.display_name, "md",
+      el("span", { class: "person-text" }, el("strong", {}, item.display_name), el("span", { class: "muted small" }, dateLabel(item.date)))),
       el("span", { class: "pill accent" }, PR_LABEL[item.pr])),
     el("div", { class: "feed-lift" },
       el("span", { class: "feed-exercise" }, item.exercise),

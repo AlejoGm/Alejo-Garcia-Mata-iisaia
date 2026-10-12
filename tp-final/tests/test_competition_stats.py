@@ -1,6 +1,6 @@
 from datetime import date
 
-from backend.stats import campaign_points, duel_result, imbalance
+from backend.stats import FaceOff, campaign_points, duel_result, head_to_head, imbalance
 from tests.test_stats import rec
 
 SEXES = {1: "M", 2: "M"}
@@ -50,3 +50,26 @@ def test_campaign_points_like_f1_with_firsts_as_tiebreak():
 def test_campaign_tie_on_points_and_firsts_keeps_user_order():
     standings = campaign_points([[1, 2], [2, 1]], [1, 2])
     assert [e.user_id for e in standings] == [1, 2]
+
+
+# Cara a cara
+
+def test_head_to_head_only_exercises_both_did_and_winner_by_dots():
+    mine = [rec(100, 1, user=1, exercise=1, bw=90), rec(60, 5, user=1, exercise=2, bw=90),
+            rec(50, 12, user=1, exercise=3)]
+    theirs = [rec(90, 1, user=2, exercise=1, bw=60), rec(70, 5, user=2, exercise=2, bw=60), rec(40, 5, user=2, exercise=3)]
+
+    result = head_to_head(mine, theirs, "M", "M")
+
+    # El 3 no entra: yo no tengo 1RM estimable (12 reps).
+    assert [f.exercise_id for f in result] == [1, 2]
+    squat = result[0]
+    assert (squat.mine_1rm, squat.theirs_1rm) == (100, 90)
+    assert squat.winner == "theirs"  # 90 con 60 kg de peso vale más DOTS que 100 con 90
+    assert result[1].winner == "theirs"
+    assert isinstance(squat, FaceOff)
+
+
+def test_head_to_head_tie():
+    result = head_to_head([rec(100, 1, user=1)], [rec(100, 1, user=2)], "M", "M")
+    assert result[0].winner == "tie"

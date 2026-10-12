@@ -12,7 +12,7 @@ from sqlmodel import Session
 from backend.catalog import seed_exercises
 from backend.db import create_tables, engine
 from backend.routes import (
-    campaigns, dashboard, duels, exercises, groups, me, me_stats, rankings, routines, sessions,
+    bro, campaigns, dashboard, duels, exercises, groups, me, me_stats, rankings, routines, sessions,
 )
 
 FRONTEND_DIR = config.ROOT / "frontend"
@@ -47,6 +47,6 @@ async def revalidate_static(request: Request, call_next):
     return response
 
 # Los routers van antes del montaje en "/", que atrapa todo lo que llega después.
-for module in (me, exercises, groups, sessions, rankings, routines, duels, campaigns, me_stats, dashboard):
+for module in (me, exercises, groups, sessions, rankings, routines, duels, campaigns, me_stats, dashboard, bro):
     app.include_router(module.router)
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")

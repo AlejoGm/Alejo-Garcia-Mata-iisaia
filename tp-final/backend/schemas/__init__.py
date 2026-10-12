@@ -20,5 +20,5 @@ from backend.schemas.competition import (
 )
 from backend.schemas.stats import (
     MonthPointOut, WeekPointOut, BodyweightPointOut, AchievementOut, MedalOut, PersonalStatsOut, WeekActivityOut, DayActivityOut, LeaderOut,
-    StreakOut, DashboardOut,
+    StreakOut, DashboardOut, FaceOffOut, BroSessionOut, BroOut,
 )
