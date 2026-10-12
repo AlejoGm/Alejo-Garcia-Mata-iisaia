@@ -75,7 +75,8 @@ def best_1rm(records: list[SetRecord]) -> SetRecord | None:
 def detect_prs(records: list[SetRecord]) -> dict[int, str]:
     """PRs contra las sesiones anteriores, a lo sumo uno por ejercicio y sesión.
 
-    "weight": la serie más pesada de la sesión supera la mejor anterior (más carga, o igual carga con más reps).
+    "weight": la serie más pesada de la sesión tiene más carga que la mejor anterior.
+    "reps": tiene la misma carga que la mejor anterior, con más reps.
     "1rm": si no hubo PR de peso, el mejor 1RM estimado de la sesión supera al mejor anterior.
     La primera sesión de un ejercicio es la línea base.
     """
@@ -91,7 +92,7 @@ def detect_prs(records: list[SetRecord]) -> dict[int, str]:
         top_rm = best_1rm(sets)
         if key in best_weight:
             if (heaviest.load, heaviest.reps) > best_weight[key]:
-                prs[heaviest.set_id] = "weight"
+                prs[heaviest.set_id] = "weight" if heaviest.load > best_weight[key][0] else "reps"
             elif top_rm and top_rm.estimated_1rm > best_rm.get(key, 0):
                 prs[top_rm.set_id] = "1rm"
         best_weight[key] = max(best_weight.get(key, (0, 0)), (heaviest.load, heaviest.reps))

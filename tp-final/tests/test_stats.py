@@ -79,10 +79,16 @@ def test_weight_pr_and_1rm_pr():
     assert detect_prs([base, rep_pr, weight_pr]) == {rep_pr.set_id: "1rm", weight_pr.set_id: "weight"}
 
 
-def test_same_weight_more_reps_is_weight_pr():
+def test_same_weight_more_reps_is_reps_pr():
     base = rec(100, 3, D1)
     more = rec(100, 5, D2)
-    assert detect_prs([base, more])[more.set_id] == "weight"
+    assert detect_prs([base, more])[more.set_id] == "reps"
+
+
+def test_more_reps_with_a_lighter_top_set_is_not_a_reps_pr():
+    base = rec(100, 3, D1)
+    lighter = rec(95, 6, D2)  # más reps, pero con menos carga: a lo sumo PR de 1RM
+    assert detect_prs([base, lighter]) == {lighter.set_id: "1rm"}
 
 
 def test_weight_pr_wins_when_both_apply():

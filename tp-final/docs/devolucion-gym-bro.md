@@ -102,7 +102,7 @@ Probó como "nico", un usuario nuevo que se une al grupo de demo. Cargó dos ses
   - Los gráficos no exageran diferencias de 1 kg y no se agrandan de más en escritorio.
 
 **Lo que no se cambió:**
-- **"PR de peso" con el mismo peso y más reps.** La regla cuenta como PR de peso igual carga con más reps, y el gym-bro esperaba "PR de reps". Cambiar la etiqueta toca una decisión del grill (dos tipos de PR), así que queda para decidir.
+- **"PR de peso" con el mismo peso y más reps.** Tocaba una decisión del grill, así que lo consulté: Alejo eligió sumar "PR de reps". Se hizo en el PR siguiente.
 - **Fondos con más de 10 reps no tiene 1RM ni objetivo para PR.** Es a propósito: Epley no es confiable con más de 10 reps, y en ejercicios con tu peso la carga depende del peso del día.
 - **"Peso muerto" no se compite en el demo.** La rutina del demo tiene peso muerto rumano y el desafío es peso muerto convencional. Es un tema de los datos de prueba, no de la app.
 - **Quedaron en issues:**

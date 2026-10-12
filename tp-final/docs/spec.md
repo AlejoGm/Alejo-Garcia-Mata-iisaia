@@ -95,8 +95,9 @@ load = weight_kg + (bodyweight_kg if bodyweight_exercise else 0)
 - **Orden cronológico.** Por (`date`, `session_id`, `position`).
 - **Mejor absoluto.** Es la serie con mayor (`load`, `reps`). Si empatan, gana la de fecha más temprana.
 - **PRs.** Se comparan contra las sesiones anteriores del usuario en ese ejercicio, a lo sumo uno por ejercicio y sesión (cambio por la devolución del gym-bro):
-  - **`weight`:** la serie más pesada de la sesión supera al mejor absoluto previo, es decir más `load`, o el mismo `load` con más reps.
-  - **`1rm`:** si no hubo PR de peso, el mejor 1RM estimado de la sesión supera al mejor previo.
+  - **`weight`:** la serie más pesada de la sesión tiene más `load` que el mejor absoluto previo.
+  - **`reps`:** la serie más pesada tiene el mismo `load` que el mejor absoluto previo, con más reps (separado de `weight` en la quinta pasada).
+  - **`1rm`:** si no hubo PR de peso ni de reps, el mejor 1RM estimado de la sesión supera al mejor previo.
   - La primera sesión de un usuario en un ejercicio es la línea base y no tiene PRs.
 - **Exclusión.** Las series que el grupo marcó como dudosas se sacan de la entrada antes de calcular cualquier ranking de ese grupo.
 

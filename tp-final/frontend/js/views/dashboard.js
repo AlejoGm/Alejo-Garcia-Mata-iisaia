@@ -10,7 +10,7 @@ import { campaignBanner } from "./rankings.js";
 import { nextRoutineDay, startDraft } from "./train.js";
 
 const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-const PR_LABEL = { weight: "PR de peso", "1rm": "PR de 1RM" };
+const PR_LABEL = { weight: "PR de peso", reps: "PR de reps", "1rm": "PR de 1RM" };
 
 // La semana en curso no está terminada: se muestra la anterior completa en vez de un porcentaje que desmotiva.
 const lastWeek = (text) => `semana pasada: ${text}`;
