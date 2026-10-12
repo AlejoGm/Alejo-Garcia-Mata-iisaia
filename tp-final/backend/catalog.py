@@ -38,6 +38,9 @@ BARBELL = {
     "Sentadilla frontal", "Hip thrust", "Peso muerto rumano", "Press declinado", "Peso muerto sumo",
 }
 
+# Los levantamientos de las medallas de fuerza.
+LIFTS = {"bench": "Press banca", "squat": "Sentadilla", "deadlift": "Peso muerto"}
+
 DEFAULT_CHALLENGES = ["Sentadilla", "Press banca", "Peso muerto", "Press militar"]
 
 
@@ -50,3 +53,8 @@ def seed_exercises(session: Session) -> None:
         if find_by_name(session, name) is None:
             session.add(Exercise(name=name, bodyweight=bodyweight))
     session.commit()
+
+
+def lift_ids(session: Session) -> dict[str, int]:
+    found = {key: find_by_name(session, name) for key, name in LIFTS.items()}
+    return {key: exercise.id for key, exercise in found.items() if exercise}

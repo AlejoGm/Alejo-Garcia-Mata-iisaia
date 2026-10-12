@@ -21,6 +21,21 @@ class BodyweightPointOut(BaseModel):
     kg: float
 
 
+class AchievementOut(BaseModel):
+    key: str
+    title: str
+    description: str
+    day: date | None
+
+
+class MedalOut(BaseModel):
+    user_id: int
+    display_name: str
+    key: str
+    title: str
+    day: date
+
+
 class PersonalStatsOut(BaseModel):
     period: PeriodOut
     exercises: list[ExerciseOut]
@@ -32,6 +47,7 @@ class PersonalStatsOut(BaseModel):
     best_reps: int | None
     best_1rm: float | None
     sessions: int  # sesiones del período con este ejercicio
+    achievements: list[AchievementOut]
 
 
 class WeekActivityOut(BaseModel):
@@ -71,3 +87,4 @@ class DashboardOut(BaseModel):
     days: list[DayActivityOut]
     goal_pct: float | None
     leaders: list[LeaderOut]
+    medals: list[MedalOut]

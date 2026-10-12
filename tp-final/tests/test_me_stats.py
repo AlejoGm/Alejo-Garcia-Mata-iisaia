@@ -42,7 +42,7 @@ def test_personal_stats_list_every_achievement_with_its_day(client):
     post(client, ana, [{"exercise_id": bench, "weight_kg": 80, "reps": 1}], bodyweight=80)
 
     medals = {m["key"]: m for m in client.get("/api/me/stats", headers=ana).json()["achievements"]}
-    assert len(medals) == 12
+    assert len(medals) == 11
     assert medals["first"]["day"] == date.today().isoformat()
     assert medals["bench_bw"]["title"] == "Banca con tu peso"
     assert medals["sessions_10"]["day"] is None

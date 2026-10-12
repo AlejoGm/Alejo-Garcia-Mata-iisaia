@@ -2,17 +2,32 @@ from collections import Counter
 from datetime import date
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlmodel import select
+from sqlmodel import Session, select
 
 from backend import stats
 from backend.auth import SessionDep, UserDep
+from backend.catalog import lift_ids
 from backend.models import Exercise
-from backend.queries import set_records
+from backend.queries import goal_changes, set_records
 from backend.schemas import (
-    BodyweightPointOut, ExerciseOut, MonthPointOut, PeriodOut, PersonalStatsOut, WeekPointOut,
+    AchievementOut, BodyweightPointOut, ExerciseOut, MonthPointOut, PeriodOut, PersonalStatsOut, WeekPointOut,
 )
 
 router = APIRouter(prefix="/api")
+
+
+def achievements_of(session: Session, user_ids: list[int], today: date) -> dict[int, list[stats.Achievement]]:
+    """Medallas de cada usuario, con todo su historial: son personales, no dependen del grupo."""
+    records = stats.by_user(set_records(session, user_ids))
+    changes = goal_changes(session, user_ids)
+    lifts = lift_ids(session)
+    return {uid: stats.achievements(records.get(uid, []), changes[uid], lifts, today) for uid in user_ids}
+
+
+def achievements_out(earned: list[stats.Achievement]) -> list[AchievementOut]:
+    days = {a.key: a.day for a in earned}
+    return [AchievementOut(key=key, title=title, description=text, day=days.get(key))
+            for key, (title, text) in stats.ACHIEVEMENTS.items()]
 
 
 @router.get("/me/stats", response_model=PersonalStatsOut)
@@ -42,4 +57,5 @@ def personal_stats(user: UserDep, session: SessionDep, exercise_id: int | None =
         best_reps=best_abs.reps if best_abs else None,
         best_1rm=round(best_rm.estimated_1rm, 1) if best_rm else None,
         sessions=len({r.session_id for r in stats.in_range(mine, low, high)}),
+        achievements=achievements_out(achievements_of(session, [user.id], date.today())[user.id]),
     )
