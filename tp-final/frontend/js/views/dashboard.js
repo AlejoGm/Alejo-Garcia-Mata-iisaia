@@ -3,6 +3,7 @@ import { poll, state } from "../app.js";
 import { barChart, gauge, sparkline } from "../charts.js";
 import { loadDraft } from "../draft.js";
 import { icon } from "../icons.js";
+import { shortDate } from "../medals.js";
 import { avatar, el, errorBox, num, toDisplay } from "../ui.js";
 import { campaignBanner } from "./rankings.js";
 import { startDraft } from "./train.js";
@@ -84,6 +85,15 @@ function prsCard(group, feed, unit) {
       : el("p", { class: "muted" }, "Todavía no hay PRs."));
 }
 
+function medalsCard(medals) {
+  return el("section", { class: "card span-4" }, el("h3", {}, "Medallas recientes"),
+    el("p", { class: "muted small" }, "Las ganadas en los últimos 14 días."),
+    medals.length ? el("ul", { class: "list" }, medals.slice(0, 6).map((m) => el("li", {},
+      el("span", { class: "who" }, avatar(m.display_name, "sm"), el("span", { class: "person-text" }, el("strong", {}, m.display_name), el("span", { class: "muted small" }, m.title))),
+      el("span", { class: "muted small" }, shortDate(m.day)))))
+      : el("p", { class: "muted" }, "Nadie ganó una medalla en estas dos semanas."));
+}
+
 export async function dashboardView(app, group) {
   const unit = state.me.unit;
 
@@ -116,6 +126,7 @@ export async function dashboardView(app, group) {
       leadersCard(data.leaders),
       el("div", { class: "span-4 stack" }, campaign),
       prsCard(group, feed, unit),
+      medalsCard(data.medals),
     ));
   }
 

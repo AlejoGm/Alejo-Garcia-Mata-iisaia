@@ -1,15 +1,27 @@
-from datetime import date
+from datetime import date, timedelta
 
 from fastapi import APIRouter
+from sqlmodel import Session
 
 from backend import stats
 from backend.auth import SessionDep, UserDep
 from backend.groups import challenge_exercises
 from backend.queries import goal_changes, group_records
-from backend.routes.rankings import context, r1
-from backend.schemas import DashboardOut, DayActivityOut, LeaderOut, StreakOut, WeekActivityOut
+from backend.routes.me_stats import achievements_of
+from backend.routes.rankings import GroupContext, context, r1
+from backend.schemas import DashboardOut, DayActivityOut, LeaderOut, MedalOut, StreakOut, WeekActivityOut
+
+MEDALS_DAYS = 14
 
 router = APIRouter(prefix="/api")
+
+
+def recent_medals(session: Session, ctx: GroupContext, today: date) -> list[MedalOut]:
+    since = today - timedelta(days=MEDALS_DAYS - 1)
+    medals = [MedalOut(user_id=uid, display_name=ctx.name(uid), key=a.key, title=stats.ACHIEVEMENTS[a.key][0],
+                       day=a.day)
+              for uid, earned in achievements_of(session, ctx.ids, today).items() for a in earned if a.day >= since]
+    return sorted(medals, key=lambda m: m.day, reverse=True)
 
 
 def prs_between(records: list[stats.SetRecord], start: date, end: date) -> int:
@@ -52,4 +64,5 @@ def dashboard(code: str, user: UserDep, session: SessionDep) -> DashboardOut:
         goal_pct=r1(stats.goal_progress(records, {uid: stats.goal_in_force(c, this_week) for uid, c in changes.items()},
                                         today)),
         leaders=leaders,
+        medals=recent_medals(session, ctx, today),
     )

@@ -19,6 +19,6 @@ from backend.schemas.competition import (
     DuelInput, DuelOut, SuggestionOut, SuggestionsOut, CampaignInput, StandingRow, CampaignOut,
 )
 from backend.schemas.stats import (
-    MonthPointOut, WeekPointOut, BodyweightPointOut, PersonalStatsOut, WeekActivityOut, DayActivityOut, LeaderOut,
+    MonthPointOut, WeekPointOut, BodyweightPointOut, AchievementOut, MedalOut, PersonalStatsOut, WeekActivityOut, DayActivityOut, LeaderOut,
     StreakOut, DashboardOut,
 )

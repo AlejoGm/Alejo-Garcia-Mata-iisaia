@@ -37,3 +37,12 @@ def test_dashboard_requires_membership(client):
     from tests.conftest import register
     outsider = register(client, "zoe")
     assert client.get(f"/api/groups/{code}/dashboard", headers=outsider).status_code == 403
+
+
+def test_dashboard_lists_recent_medals(client):
+    code, users = setup_group(client)
+    bench = exercise_id(client, users["ana"], "Press banca")
+    post(client, users["beto"], [{"exercise_id": bench, "weight_kg": 100, "reps": 1}], bodyweight=80)
+
+    medals = client.get(f"/api/groups/{code}/dashboard", headers=users["ana"]).json()["medals"]
+    assert {(m["display_name"], m["key"]) for m in medals} == {("beto", "first"), ("beto", "bench_bw")}

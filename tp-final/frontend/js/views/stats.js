@@ -2,6 +2,7 @@ import { api } from "../api.js";
 import { setChrome, state } from "../app.js";
 import { lineChart } from "../charts.js";
 import { icon } from "../icons.js";
+import { medalsCard } from "../medals.js";
 import { el, errorBox, storageGet, storageSet, toDisplay, weight } from "../ui.js";
 
 const PERIODS = [["6m", "6 meses"], ["12m", "12 meses"], ["all", "Todo"]];
@@ -72,6 +73,7 @@ export async function statsView(app) {
       el("div", { class: "card" }, el("h3", {}, `Peso corporal (${unit})`),
         lineChart({ label: "Peso corporal por semana", labels: data.bodyweight.map((p) => dayShort(p.week)),
           series: [{ className: "bw", values: data.bodyweight.map((p) => conv(p.kg)) }] })),
+      medalsCard(data.achievements),
     );
   }
 
