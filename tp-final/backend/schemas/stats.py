@@ -2,7 +2,7 @@ from datetime import date
 
 from pydantic import BaseModel
 
-from backend.schemas.common import ExerciseOut, PeriodOut
+from backend.schemas.common import ExerciseOut, PeriodOut, Person
 
 
 class MonthPointOut(BaseModel):
@@ -75,6 +75,17 @@ class StreakOut(BaseModel):
     weeks: int
 
 
+class LastWeekOut(BaseModel):
+    week: date
+    most_days: list[Person]
+    days: int
+    most_volume: list[Person]
+    volume: float
+    most_prs: list[Person]
+    prs: int
+    goal_met: list[Person]
+
+
 class DashboardOut(BaseModel):
     sessions: int
     sessions_prev: int
@@ -88,6 +99,7 @@ class DashboardOut(BaseModel):
     goal_pct: float | None
     leaders: list[LeaderOut]
     medals: list[MedalOut]
+    last_week: LastWeekOut
 
 
 class FaceOffOut(BaseModel):

@@ -21,5 +21,6 @@ from backend.stats.personal import (
 from backend.stats.achievements import ACHIEVEMENTS, Achievement, achievements
 from backend.stats.targets import PRTarget, pr_targets
 from backend.stats.dashboard import (
-    DayActivity, WeekActivity, day_activity, goal_progress, session_count, volume, weekly_activity,
+    DayActivity, WeekActivity, WeekAwards, day_activity, goal_progress, session_count, volume, week_awards,
+    weekly_activity,
 )

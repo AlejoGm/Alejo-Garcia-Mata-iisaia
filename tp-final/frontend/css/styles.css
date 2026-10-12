@@ -384,6 +384,7 @@ details.activity summary { display: flex; align-items: center; gap: 12px; min-he
   .dash { grid-template-columns: repeat(12, 1fr); gap: 16px; }
   .dash > * { grid-column: span 12; }
   .dash > .kpi { grid-column: span 3; }
+  .dash > .span-8 { grid-column: span 8; }
   .dash > .span-6 { grid-column: span 6; }
   .dash > .span-4 { grid-column: span 4; }
   .dash > .span-3 { grid-column: span 3; }
@@ -428,3 +429,19 @@ details.activity summary { display: flex; align-items: center; gap: 12px; min-he
 .score strong { font-size: 2.2rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
 td.winner { color: var(--lime); font-weight: 800; }
 .dots-note { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+
+/* La semana pasada */
+.awards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.award { display: flex; flex-direction: column; gap: 10px; padding: 10px; border-radius: var(--r-control); background: var(--surface-2); min-width: 0; }
+.award-people { display: flex; flex-direction: column; gap: 6px; }
+.award-people .bro-link { font-weight: 700; font-size: 0.92rem; }
+.award .accent-number { margin-top: auto; }
+.award.wide { grid-column: span 3; }
+.award.wide .award-people { flex-direction: row; flex-wrap: wrap; gap: 8px 14px; }
+@media (min-width: 900px) {
+  .awards { grid-template-columns: repeat(4, 1fr); }
+  .award.wide { grid-column: span 1; }
+  .award.wide .award-people { flex-direction: column; }
+}
+.award .kpi-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+.award.wide .kpi-head { flex-direction: row; align-items: center; }
