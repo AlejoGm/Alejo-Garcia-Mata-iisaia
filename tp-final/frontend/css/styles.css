@@ -445,3 +445,13 @@ td.winner { color: var(--lime); font-weight: 800; }
 }
 .award .kpi-head { flex-direction: column; align-items: flex-start; gap: 6px; }
 .award.wide .kpi-head { flex-direction: row; align-items: center; }
+
+/* Calendario de constancia */
+.heatmap { width: 100%; height: auto; display: block; }
+.heat-label { fill: var(--muted); font-size: 15px; font-weight: 600; font-family: inherit; }
+.heat, .heat-dot { fill: var(--surface-2); background: var(--surface-2); }
+.heat.l1, .heat-dot.l1 { fill: rgba(200, 245, 59, 0.3); background: rgba(200, 245, 59, 0.3); }
+.heat.l2, .heat-dot.l2 { fill: rgba(200, 245, 59, 0.6); background: rgba(200, 245, 59, 0.6); }
+.heat.l3, .heat-dot.l3 { fill: var(--lime); background: var(--lime); }
+.heat-legend { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+.heat-dot { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }

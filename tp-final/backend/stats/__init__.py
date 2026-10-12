@@ -16,7 +16,8 @@ from backend.stats.rankings import (
     weekly_table,
 )
 from backend.stats.personal import (
-    BodyweightPoint, MonthPoint, WeekPoint, bodyweight_series, monthly_series, weekly_series,
+    BodyweightPoint, DayCount, MonthPoint, WeekPoint, bodyweight_series, monthly_series, training_calendar,
+    weekly_series,
 )
 from backend.stats.achievements import ACHIEVEMENTS, Achievement, achievements
 from backend.stats.targets import PRTarget, pr_targets

@@ -1,6 +1,6 @@
 import { api } from "../api.js";
 import { setChrome, state } from "../app.js";
-import { lineChart } from "../charts.js";
+import { heatmap, lineChart } from "../charts.js";
 import { icon } from "../icons.js";
 import { medalsCard } from "../medals.js";
 import { el, errorBox, storageGet, storageSet, toDisplay, weight } from "../ui.js";
@@ -73,6 +73,10 @@ export async function statsView(app) {
       el("div", { class: "card" }, el("h3", {}, `Peso corporal (${unit})`),
         lineChart({ label: "Peso corporal por semana", labels: data.bodyweight.map((p) => dayShort(p.week)),
           series: [{ className: "bw", values: data.bodyweight.map((p) => conv(p.kg)) }] })),
+      el("div", { class: "card" }, el("h3", {}, "Constancia"),
+        el("p", { class: "muted small" }, `${data.calendar.length} días entrenados en las últimas 26 semanas. Más series, más verde.`),
+        heatmap(data.calendar),
+        el("div", { class: "heat-legend muted small" }, "menos", [0, 1, 2, 3].map((l) => el("span", { class: `heat-dot l${l}` })), "más")),
       medalsCard(data.achievements),
     );
   }
