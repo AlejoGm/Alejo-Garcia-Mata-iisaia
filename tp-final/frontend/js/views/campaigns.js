@@ -1,6 +1,7 @@
 import { api } from "../api.js";
 import { icon } from "../icons.js";
-import { avatar, busy, el, errorBox, today } from "../ui.js";
+import { broLink } from "../group-shell.js";
+import { busy, el, errorBox, today } from "../ui.js";
 
 const STATUS = { upcoming: "Por empezar", active: "En curso", finished: "Terminada" };
 
@@ -13,7 +14,7 @@ function standingsTable(campaign, me) {
     el("thead", {}, el("tr", {}, el("th", { class: "num" }, "#"), el("th", {}, "Quién"),
       el("th", { class: "num" }, "Puntos"), el("th", { class: "num" }, "1ros puestos"))),
     el("tbody", {}, campaign.standings.map((s, index) => el("tr", { class: s.user_id === me ? "me" : null },
-      el("td", { class: "num" }, String(index + 1)), el("td", {}, el("span", { class: "who" }, avatar(s.display_name, "sm"), s.display_name)),
+      el("td", { class: "num" }, String(index + 1)), el("td", {}, broLink(s.user_id, s.display_name)),
       el("td", { class: "num" }, String(s.points)), el("td", { class: "num muted" }, String(s.firsts))))));
 }
 

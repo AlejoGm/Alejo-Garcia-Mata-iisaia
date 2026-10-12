@@ -418,3 +418,13 @@ details.activity summary { display: flex; align-items: center; gap: 12px; min-he
 .medal-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 999px; background: var(--surface); color: var(--muted); }
 .medal.earned { opacity: 1; }
 .medal.earned .medal-icon { background: rgba(200, 245, 59, 0.14); color: var(--lime); box-shadow: 0 0 14px rgba(200, 245, 59, 0.3); }
+
+/* Perfil del bro */
+.bro-link { color: inherit; text-decoration: none; min-width: 0; }
+.bro-link:hover strong, a.bro-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.duel-side .bro-link { flex-direction: column; gap: 6px; }
+.feed-item .bro-link { flex: 1; gap: 12px; }
+.score { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 4px 0; color: var(--muted); font-weight: 700; }
+.score strong { font-size: 2.2rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+td.winner { color: var(--lime); font-weight: 800; }
+.dots-note { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 600; }

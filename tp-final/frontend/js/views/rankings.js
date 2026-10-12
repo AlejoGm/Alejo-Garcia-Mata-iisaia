@@ -1,7 +1,8 @@
 import { api } from "../api.js";
 import { poll, state } from "../app.js";
 import { icon } from "../icons.js";
-import { avatar, el, errorBox, num, storageGet, storageSet, weight } from "../ui.js";
+import { broLink } from "../group-shell.js";
+import { el, errorBox, num, storageGet, storageSet, weight } from "../ui.js";
 
 const PERIODS = [["month", "Mes"], ["6m", "6 m"], ["12m", "12 m"], ["all", "Todo"], ["custom", "Elegir"]];
 const STATUS = { done: ["cumplido", "ok"], out: ["ya no llega", "bad"], on: ["", ""] };
@@ -37,7 +38,7 @@ function rankRows(entries, me, cells) {
     const cls = [entry.user_id === me ? "me" : "", hasData ? "" : "no-data"].join(" ").trim() || null;
     return el("tr", { class: cls },
       el("td", { class: "num" }, hasData ? String(position) : "—"),
-      el("td", {}, el("span", { class: "who" }, avatar(entry.display_name, "sm"), entry.display_name)),
+      el("td", {}, broLink(entry.user_id, entry.display_name)),
       ...(hasData ? cells.render(entry) : [el("td", { class: "num", colspan: cells.span }, "sin datos")]));
   });
 }
@@ -46,7 +47,7 @@ function weeklyCard(rows, me) {
   const body = rows.map((r) => {
     const [label, cls] = STATUS[r.status];
     return el("tr", { class: r.user_id === me ? "me" : null },
-      el("td", {}, el("span", { class: "who" }, avatar(r.display_name, "sm"), r.display_name)),
+      el("td", {}, broLink(r.user_id, r.display_name)),
       el("td", { class: "num" }, r.goal ? `${r.sessions} / ${r.goal}` : String(r.sessions)),
       el("td", { class: "num" }, label ? el("span", { class: `pill ${cls}` }, label) : ""));
   });

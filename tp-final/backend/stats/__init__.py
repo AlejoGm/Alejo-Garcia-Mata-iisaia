@@ -1,6 +1,7 @@
 """Reglas de cálculo de Gym-bro. Funciones puras: no conocen la base ni HTTP (ver docs/spec.md)."""
 from backend.stats.competition import (
-    CAMPAIGN_POINTS, CampaignEntry, DuelResult, best_value, campaign_points, duel_result, imbalance,
+    CAMPAIGN_POINTS, CampaignEntry, DuelResult, FaceOff, best_value, campaign_points, duel_result, head_to_head,
+    imbalance,
 )
 from backend.stats.core import (
     DOTS_COEFFICIENTS, MAX_REPS_FOR_1RM, SetRecord, absolute_key, best_1rm, best_absolute, chronological_key,

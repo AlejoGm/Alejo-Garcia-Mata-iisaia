@@ -1,7 +1,7 @@
 import { api } from "../api.js";
-import { forgetGroup, loadGroup } from "../group-shell.js";
+import { broLink, forgetGroup, loadGroup } from "../group-shell.js";
 import { icon } from "../icons.js";
-import { avatar, busy, el } from "../ui.js";
+import { busy, el } from "../ui.js";
 import { routinesCard } from "./routines-card.js";
 
 function inviteCard(group) {
@@ -38,7 +38,7 @@ function membersCard(group, rerender) {
         });
       });
     }
-    return el("li", {}, el("span", { class: "who" }, avatar(m.display_name), m.display_name), tags, kick);
+    return el("li", {}, broLink(m.user_id, m.display_name, "md"), tags, kick);
   });
   return el("div", { class: "card" }, el("h3", {}, `Miembros (${group.members.length})`), el("ul", { class: "list" }, items), error);
 }
