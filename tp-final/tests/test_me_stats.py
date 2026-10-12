@@ -46,3 +46,12 @@ def test_personal_stats_list_every_achievement_with_its_day(client):
     assert medals["first"]["day"] == date.today().isoformat()
     assert medals["bench_bw"]["title"] == "Banca con tu peso"
     assert medals["sessions_10"]["day"] is None
+
+
+def test_personal_stats_include_the_training_calendar(client):
+    ana = register(client, "ana")
+    bench = exercise_id(client, ana, "Press banca")
+    post(client, ana, [{"exercise_id": bench, "weight_kg": 60, "reps": 5}, {"exercise_id": bench, "weight_kg": 60, "reps": 5}])
+
+    calendar = client.get("/api/me/stats", headers=ana).json()["calendar"]
+    assert calendar == [{"day": date.today().isoformat(), "sets": 2}]

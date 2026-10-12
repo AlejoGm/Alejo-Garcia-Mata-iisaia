@@ -1,8 +1,8 @@
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 
-from backend.stats import bodyweight_series, monthly_series, weekly_series
+from backend.stats import bodyweight_series, monthly_series, training_calendar, weekly_series
 from tests.test_stats import rec
 
 
@@ -39,3 +39,16 @@ def test_bodyweight_takes_last_session_of_each_week():
 def test_series_values_are_rounded_to_one_decimal():
     series = monthly_series([rec(100, 5, date(2026, 9, 2))], 1, date(2026, 9, 1), date(2026, 9, 30))
     assert series[0].best == pytest.approx(116.7)
+
+
+# Calendario
+
+def test_calendar_counts_sets_per_day_within_26_weeks():
+    today = date(2026, 10, 14)  # miércoles; la semana arranca el lunes 12
+    first_monday = date(2026, 4, 20)  # 25 semanas antes
+    records = [rec(50, 5, day=today), rec(50, 5, day=today), rec(60, 5, day=date(2026, 10, 1)),
+               rec(60, 5, day=first_monday), rec(60, 5, day=first_monday - timedelta(days=1))]
+
+    days = training_calendar(records, today)
+
+    assert [(d.day, d.sets) for d in days] == [(first_monday, 1), (date(2026, 10, 1), 1), (today, 2)]
