@@ -94,7 +94,7 @@ export function compareSection(group) {
             series: shown.map((p) => ({ className: color.get(p.user_id), values: (byWeek ? p.week_best : p.months).map(value) })) })),
         el("div", {}, el("h4", {}, "Días entrenados por semana"),
           el("p", { class: "muted small" }, "Las últimas 12 semanas; la actual va en curso."),
-          lineChart({ label: "Días entrenados por semana", area: false, labels: data.weeks.map(dayShort),
+          lineChart({ label: "Días entrenados por semana", area: false, straight: true, labels: data.weeks.map(dayShort),
             series: shown.map((p) => ({ className: color.get(p.user_id), values: p.days })) }))),
     );
   }

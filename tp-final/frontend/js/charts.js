@@ -46,7 +46,7 @@ function valueAxis(root, values) {
   return y;
 }
 
-export function lineChart({ labels, series, label, area = true }) {
+export function lineChart({ labels, series, label, area = true, straight = false }) {
   const values = series.flatMap((s) => s.values).filter((v) => v !== null && v !== undefined);
   const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": label });
   if (!values.length) {
@@ -80,7 +80,8 @@ export function lineChart({ labels, series, label, area = true }) {
     if (current.length) segments.push(current);
     const isMain = order === series.length - 1;
     for (const points of segments) {
-      const d = smooth(points);
+      // Con conteos (días) la curva suavizada puede bajar de 0 entre dos ceros: ahí van rectas.
+      const d = straight ? `M${points.map(([px, py]) => `${px.toFixed(1)},${py.toFixed(1)}`).join(" L")}` : smooth(points);
       if (area && isMain && points.length > 1) {
         const area = `${d} L${points[points.length - 1][0].toFixed(1)},${H - PAD.bottom} L${points[0][0].toFixed(1)},${H - PAD.bottom} Z`;
         root.append(svg("path", { d: area, class: "chart-area", fill: `url(#${gradient.getAttribute("id")})` }));
