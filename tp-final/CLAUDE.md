@@ -16,7 +16,7 @@ uv run pytest
 uv run fastapi dev backend/main.py   # http://127.0.0.1:8000
 ```
 
-Sin `AUTH0_DOMAIN` la app corre en modo dev: login con un nombre, sin Google.
+Sin `AUTH0_DOMAIN` se entra con usuario y contraseña. `GYMBRO_AUTH=dev` vuelve al login con solo un nombre (lo usan los tests y los scripts).
 
 ## Stack y límites
 

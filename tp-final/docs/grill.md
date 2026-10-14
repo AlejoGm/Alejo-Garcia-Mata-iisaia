@@ -293,3 +293,13 @@ Con "reducir movimiento" activado en el sistema, no hay animaciones.
 - **Modo foco:** mientras cargás se esconde la barra de pestañas, para que no compitan dos botones verdes.
 - **El descanso es un texto, no un botón:** "Descanso 1:28", con "+30 s" y "Saltar" como enlaces.
 - **Una sola fila "Tocá para cargar"** con los objetivos de PR y el de pasar al siguiente, y puntos que muestran qué series del ejercicio ya hiciste.
+
+## Cuentas propias (séptima pasada)
+
+Al apagar Auth0 (Google no anda desde el celular sin HTTPS), la app volvió a entrar solo con un nombre, y cualquiera entraba como cualquiera. Alejo pidió login y registro.
+
+- **Usuario y contraseña propios.** Es el modo por defecto sin Auth0. Con Auth0 configurado se sigue entrando con Google.
+- **Contraseña con scrypt,** de la biblioteca estándar, con sal propia. No suma dependencias.
+- **Token de sesión al azar.** En la base se guarda su sha256, no el token. "Cerrar sesión" lo borra. No vence: para un TP local no hace falta.
+- **Mismo `sub` que el modo desarrollo** (`dev|usuario`). Registrarse con un nombre que ya tenía historia se queda con ese usuario. Así Alejo recupera lo suyo y se puede entrar como cualquiera de los datos de prueba registrándose con su nombre. En una app pública eso sería un agujero; acá es a propósito.
+- **Los tokens `dev:` se rechazan** con cuentas propias. Si no, la contraseña no protegería nada. Los tests y los scripts de datos fuerzan el modo `dev` dentro de su propio proceso.

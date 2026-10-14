@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, StringConstraints, computed_field
+from pydantic import BaseModel, Field, StringConstraints, computed_field, field_validator
 
 from backend.catalog import BARBELL
 
@@ -9,7 +9,7 @@ Name30 = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, m
 
 
 class ConfigOut(BaseModel):
-    auth: Literal["auth0", "dev"]
+    auth: Literal["auth0", "local", "dev"]
     domain: str
     client_id: str
     audience: str
@@ -60,3 +60,23 @@ class PeriodOut(BaseModel):
     kind: str
     start: date
     end: date
+
+
+class LoginInput(BaseModel):
+    username: Annotated[str, StringConstraints(min_length=1, max_length=30)]
+    password: Annotated[str, StringConstraints(min_length=1, max_length=128)]
+
+    @field_validator("username", mode="before")
+    @classmethod
+    def normalize(cls, value: str) -> str:
+        return value.strip().lower() if isinstance(value, str) else value
+
+
+class AccountInput(LoginInput):
+    """Al registrarse se piden más cosas que al entrar: usuario de 3 a 30 caracteres simples y contraseña de 6."""
+    username: Annotated[str, StringConstraints(min_length=3, max_length=30, pattern=r"^[a-z0-9._-]+$")]
+    password: Annotated[str, StringConstraints(min_length=6, max_length=128)]
+
+
+class TokenOut(BaseModel):
+    token: str

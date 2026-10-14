@@ -12,7 +12,7 @@ from sqlmodel import Session
 from backend.catalog import seed_exercises
 from backend.db import create_tables, engine
 from backend.routes import (
-    bro, campaigns, dashboard, duels, exercises, groups, me, me_stats, rankings, routines, sessions, standing,
+    accounts, bro, campaigns, dashboard, duels, exercises, groups, me, me_stats, rankings, routines, sessions, standing,
 )
 
 FRONTEND_DIR = config.ROOT / "frontend"
@@ -31,7 +31,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         raise RuntimeError(f"La base {config.DB_PATH} es de una versión anterior de la app. "
                            "Renombrala o borrala y volvé a arrancar.") from err
     if config.AUTH_MODE == "dev":
-        log.warning("Auth0 no está configurado: login de desarrollo, sin Google. Ver README.")
+        log.warning("Login de desarrollo: se entra solo con un nombre, sin contraseña. No usar fuera de esta máquina.")
+    elif config.AUTH_MODE == "local":
+        log.info("Login con usuario y contraseña. Para entrar con Google, configurar Auth0 (ver README).")
     yield
 
 
@@ -47,6 +49,6 @@ async def revalidate_static(request: Request, call_next):
     return response
 
 # Los routers van antes del montaje en "/", que atrapa todo lo que llega después.
-for module in (me, exercises, groups, sessions, rankings, routines, duels, campaigns, me_stats, dashboard, bro, standing):
+for module in (accounts, me, exercises, groups, sessions, rankings, routines, duels, campaigns, me_stats, dashboard, bro, standing):
     app.include_router(module.router)
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")

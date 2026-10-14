@@ -29,8 +29,9 @@ def auth(name: str) -> dict:
 
 
 def main() -> None:
-    if config.AUTH_MODE != "dev":
-        raise SystemExit("El seed solo corre en modo dev (sin AUTH0_DOMAIN).")
+    if config.AUTH_MODE == "auth0":
+        raise SystemExit("El seed no corre con Auth0 configurado: renombrá el .env.")
+    config.AUTH_MODE = "dev"  # el seed carga los datos en este proceso, entrando con nombres
     rng = random.Random(7)
     with TestClient(app) as client:
         for name, sex, _bw, goal, _ in PEOPLE:

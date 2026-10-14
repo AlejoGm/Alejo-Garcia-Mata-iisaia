@@ -14,7 +14,7 @@ uv sync
 uv run fastapi dev backend/main.py
 ```
 
-Abrir `http://127.0.0.1:8000`. En el celular se puede agregar a la pantalla de inicio y se abre como una app. Sin configurar nada, la app arranca en **modo desarrollo**: se entra con un nombre, sin Google. La base `gymbro.db` se crea al arrancar; para empezar de cero alcanza con borrarla.
+Abrir `http://127.0.0.1:8000`. En el celular se puede agregar a la pantalla de inicio y se abre como una app. Sin configurar nada, se entra con **usuario y contraseña**: "Crear cuenta" la primera vez. Registrarse con el nombre de alguien de los datos de prueba (`alejo`, `bruno`…) te da su usuario con toda su historia. Con Auth0 configurado se entra con Google, y con `GYMBRO_AUTH=dev` se vuelve al login de desarrollo, solo con un nombre. La base `gymbro.db` se crea al arrancar; para empezar de cero alcanza con borrarla.
 
 Para ver la app con datos, el script carga un grupo con tres amigos, una rutina, 8 semanas de historia y una campaña, e imprime el código del grupo:
 
@@ -100,7 +100,7 @@ Salieron de repasar pregunta por pregunta un grill que el agente había hecho so
 
 **Duelos de absoluto o DOTS, libres pero con nivel de desbalance.** Un duelo de progreso en 7 días no tiene gracia. Prohibir los desparejos es rígido en un grupo chico, así que la app sugiere rivales y muestra el desbalance.
 
-**Login con Google por Auth0.** Empecé con nickname sin contraseña. Para la app completa lo cambié: así una persona puede estar en varios grupos y nadie carga a nombre de otro. Dejé un modo desarrollo para correrla sin cuenta.
+**Login con Google por Auth0, y cuentas propias sin él.** Empecé con nickname sin contraseña. Para la app completa lo cambié a Google, así una persona puede estar en varios grupos y nadie carga a nombre de otro. Después, como Google no anda desde el celular sin HTTPS, sumé usuario y contraseña propios para cuando no hay Auth0 (contraseña con scrypt, token de sesión que se guarda hasheado). El login de solo un nombre quedó para tests y scripts.
 
 ## Cómo gestioné el contexto
 

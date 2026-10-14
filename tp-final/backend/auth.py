@@ -7,7 +7,8 @@ from sqlmodel import Session, select
 
 from backend import config
 from backend.db import get_session
-from backend.models import User
+from backend.models import AuthToken, User
+from backend.passwords import token_hash
 
 DEV_PREFIX = "dev:"
 
@@ -25,12 +26,16 @@ def _unauthorized(detail: str) -> HTTPException:
     return HTTPException(status_code=401, detail=detail, headers={"WWW-Authenticate": "Bearer"})
 
 
+def local_sub(name: str) -> str:
+    return f"dev|{name}"
+
+
 def sub_from_dev_token(token: str) -> str:
     # El nombre viaja codificado (encodeURIComponent): los headers HTTP solo admiten ASCII y "Lucía" no lo es.
     name = unquote(token[len(DEV_PREFIX):]).strip().lower()
     if not token.startswith(DEV_PREFIX) or not name:
         raise _unauthorized("Token de desarrollo inválido")
-    return f"dev|{name}"
+    return local_sub(name)
 
 
 def sub_from_auth0_token(token: str) -> str:
@@ -48,17 +53,28 @@ def sub_from_auth0_token(token: str) -> str:
     return claims["sub"]
 
 
-def current_sub(authorization: Annotated[str | None, Header()] = None) -> str:
+SessionDep = Annotated[Session, Depends(get_session)]
+
+
+def sub_from_session_token(token: str, session: Session) -> str:
+    stored = session.exec(select(AuthToken).where(AuthToken.token_hash == token_hash(token))).first()
+    if stored is None:
+        raise _unauthorized("La sesión no existe o ya se cerró")
+    return stored.sub
+
+
+def current_sub(authorization: Annotated[str | None, Header()] = None, session: Session = Depends(get_session)) -> str:
     if not authorization or not authorization.lower().startswith("bearer "):
         raise _unauthorized("Falta iniciar sesión")
     token = authorization[7:].strip()
     if config.AUTH_MODE == "dev":
         return sub_from_dev_token(token)
+    if config.AUTH_MODE == "local":
+        return sub_from_session_token(token, session)
     return sub_from_auth0_token(token)
 
 
 SubDep = Annotated[str, Depends(current_sub)]
-SessionDep = Annotated[Session, Depends(get_session)]
 
 
 def current_user(sub: SubDep, session: SessionDep) -> User:

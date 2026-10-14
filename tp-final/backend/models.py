@@ -127,3 +127,16 @@ class Campaign(SQLModel, table=True):
     routine_id: int | None = Field(default=None, foreign_key="routine.id")
     winner_id: int | None = Field(default=None, foreign_key="user.id")
     frozen_at: datetime | None = None
+
+
+class Credential(SQLModel, table=True):
+    username: str = Field(primary_key=True)  # en minúscula
+    sub: str = Field(unique=True)
+    password_hash: str
+    created_at: datetime = Field(default_factory=now_utc)
+
+
+class AuthToken(SQLModel, table=True):
+    token_hash: str = Field(primary_key=True)  # sha256 del token: el token en sí no se guarda
+    sub: str = Field(index=True)
+    created_at: datetime = Field(default_factory=now_utc)

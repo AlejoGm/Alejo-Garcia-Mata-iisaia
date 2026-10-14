@@ -27,13 +27,20 @@ Límites: archivos de menos de 300 líneas, funciones de menos de 50.
 
 ## Auth
 
-- **Configuración.** `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID` y `AUTH0_AUDIENCE` como variables de entorno o en `.env`. Si falta `AUTH0_DOMAIN`, el modo es `dev`.
-- **Lo público.** `GET /api/config` devuelve `{"auth": "auth0" | "dev", "domain", "client_id", "audience"}`. Es lo único público de la API junto con los estáticos.
+- **Configuración.** `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID` y `AUTH0_AUDIENCE` como variables de entorno o en `.env`. Si falta `AUTH0_DOMAIN`, el modo es `local` (usuario y contraseña). `GYMBRO_AUTH=dev` fuerza el modo `dev`, que usan los tests y los scripts de datos.
+- **Lo público.** `GET /api/config` devuelve `{"auth": "auth0" | "local" | "dev", "domain", "client_id", "audience"}`. Es lo único público de la API junto con los estáticos y las rutas de `/api/auth`.
 - **Frontend en modo `auth0`.** Usa `auth0-spa-js` por CDN, con `loginWithRedirect`, la conexión `google-oauth2` y `getTokenSilently` antes de cada request.
+- **Frontend en modo `local`.** "Entrar" o "Crear cuenta" con usuario y contraseña; guarda el token de sesión y lo manda en cada request. "Cerrar sesión" lo invalida en el servidor.
 - **Frontend en modo `dev`.** Pide un nombre y usa el token `dev:<nombre>`.
 - **Backend.** Lee `Authorization: Bearer <token>`.
   - En modo `auth0` valida RS256 con `PyJWKClient` sobre `https://<domain>/.well-known/jwks.json`, con audiencia e issuer, y usa `sub`.
+  - En modo `local` busca el token en `AuthToken` (se guarda su sha256, no el token) y usa su `sub`. Los tokens `dev:` dan `401`.
   - En modo `dev` acepta `dev:<nombre>` y usa `sub = "dev|<nombre en minúscula>"`.
+- **Cuentas locales.**
+  - `POST /api/auth/register {username, password}`: usuario de 3 a 30 caracteres `[a-z0-9._-]` (se pasa a minúscula) y contraseña de 6 a 128. `201` con `{token}` · `409` si el usuario existe · `422`.
+  - `POST /api/auth/login`: `200` con `{token}` · `401` si el usuario o la contraseña no coinciden, sin decir cuál.
+  - `POST /api/auth/logout`: borra el token · `204`.
+  - La contraseña se guarda con scrypt y sal propia en `Credential`. El `sub` de una cuenta local es `dev|<usuario>`, el mismo del modo `dev`: registrarse con un nombre que ya tenía historia se queda con ese usuario.
   - Sin token o con token inválido: `401`.
 - **Usuario.** `current_user` busca el `User` por `sub`. Si no existe, las rutas que necesitan perfil devuelven `409` con `detail` = `"perfil incompleto"`. El frontend, al recibirlo, manda a completar el perfil.
 
@@ -54,6 +61,8 @@ Límites: archivos de menos de 300 líneas, funciones de menos de 50.
 | `WorkSet` | `session_id`, `exercise_id`, `weight_kg`, `reps`, `position` | |
 | `Reaction` | `group_id`, `set_id`, `user_id`, `kind` (`fuerza`/`fuego`/`dudoso`) | único (`group_id`, `set_id`, `user_id`) |
 | `Duel` | `group_id`, `challenger_id`, `opponent_id`, `exercise_id`, `mode` (`absolute`/`dots`), `days` (3/7/14), `status` (`pending`/`active`/`rejected`), `created_at`, `start` | |
+| `Credential` | `username` (minúscula), `sub`, `password_hash`, `created_at` | `username` y `sub` únicos |
+| `AuthToken` | `token_hash`, `sub`, `created_at` | `token_hash` único |
 | `Campaign` | `group_id`, `name`, `start`, `end`, `tables` (JSON), `routine_id`, `winner_id`, `frozen_at` | |
 
 - **Borrar una sesión** borra sus series y las reacciones a esas series.
@@ -309,7 +318,7 @@ Una sola página con vistas por hash, en ES modules y sin build. Primero está p
 
 | Hash | Vista |
 |---|---|
-| `#/login` | login con Google, o el nombre en modo dev |
+| `#/login` | login con Google, entrar o crear cuenta con contraseña, o el nombre en modo dev |
 | `#/perfil` | nombre, sexo, objetivo semanal y unidad; obligatorio en el primer login |
 | `#/` | mis grupos, crear grupo, unirse con código |
 | `#/g/CODE/entrenar` | elegir día de rutina o carga libre |
