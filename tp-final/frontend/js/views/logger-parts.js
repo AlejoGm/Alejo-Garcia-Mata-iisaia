@@ -1,4 +1,5 @@
-import { el, num, toDisplay, weight } from "../ui.js";
+import { pop, vibrate } from "../juice.js";
+import { dayLabel, el, num, toDisplay, weight } from "../ui.js";
 
 export const REST_SECONDS = 90;
 
@@ -12,6 +13,8 @@ export function stepper(label, value, step, onChange) {
   const bump = (delta) => {
     const next = Math.max(0, Math.round(((Number(input.value) || 0) + delta) * 100) / 100);
     input.value = String(next);
+    pop(input);
+    vibrate(8);
     onChange(next);
   };
   return el("div", { class: "stepper" },
@@ -127,4 +130,18 @@ export function pickerSelect(exercises, group, selectedId, onChoose) {
     el("optgroup", { label: "Todos" }, exercises.filter((e) => !challengeIds.has(e.id)).map(option)));
   select.addEventListener("change", () => select.value && onChoose(Number(select.value)));
   return select;
+}
+
+/** Fecha y peso corporal de la sesión, plegados cuando ya están; abiertos si falta el peso. */
+export function sessionDetails(draft, unit, persist, onDiscard) {
+  const summary = el("summary", {});
+  const describe = () => { summary.textContent = `${draft.title} · ${dayLabel(draft.date)} · ${draft.bodyweight ? `${num(draft.bodyweight)} ${unit}` : "falta tu peso"}`; };
+  describe();
+  const date = el("input", { type: "date", value: draft.date, max: new Date().toLocaleDateString("en-CA") });
+  date.addEventListener("change", () => { draft.date = date.value; persist(); describe(); });
+  const bodyweight = el("input", { type: "number", inputmode: "decimal", value: String(draft.bodyweight ?? "") });
+  bodyweight.addEventListener("input", () => { draft.bodyweight = Number(bodyweight.value) || null; persist(); describe(); });
+  const discard = el("button", { type: "button", class: "danger", onclick: onDiscard }, "Descartar sesión");
+  return el("details", { class: "card", open: !draft.bodyweight }, summary,
+    el("div", { class: "row" }, el("label", {}, "Fecha", date), el("label", {}, `Peso corporal (${unit})`, bodyweight)), discard);
 }

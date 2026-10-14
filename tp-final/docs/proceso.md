@@ -101,3 +101,12 @@ Pedido abierto: "darle más vuelta de tuerca" a la app. Se cerró con otro auto-
 Toda regla nueva fue a `backend/stats/` con el test en rojo primero: `targets.py`, `achievements.py`, el cara a cara en `competition.py`, los premios de la semana en `dashboard.py` y el calendario en `personal.py`. Un test verifica que cada objetivo para PR de verdad cuente como PR según `detect_prs`, para que las dos reglas no se separen.
 
 Después, la tercera pasada del gym-bro (en [devolucion-gym-bro.md](devolucion-gym-bro.md)). Lo más grave no estaba en lo nuevo sino en cómo convivía con lo viejo: los controles que se agregaron a la carga empujaron "Reps" debajo de la barra fija. Se corrigió en el mismo día. La etiqueta "PR de reps" tocaba una decisión del grill, así que se consultó antes de cambiarla, y se sumó en un PR aparte con el test en rojo primero.
+
+## 12. Más juego: sexta pasada
+
+Pedido: que se sienta más como un juego, con experiencia de uso y no con features. Se cerró con un auto-grill (sección "Más juego" del grill). La idea central fue llevar la respuesta al momento en que pasan las cosas, en lugar de dejarla para Rankings o el final de la sesión. Antes, en un PR aparte, se sumaron las series por músculo y un seed más grande, con 26 semanas, campañas y duelos fechados.
+- **Posición en vivo.** Al guardar cada serie aparece el PR al instante, el lugar en el grupo, a quién pasaste y la serie que falta para pasar al siguiente, que se carga con un toque. Las reglas (posición con empates e inversa de Epley) están en `backend/stats/standing.py` con TDD, y un endpoint calcula sin guardar.
+- **Fin de nivel.** Números que suben, cuántos lugares subiste por ejercicio, medalla nueva y la semana con la racha.
+- **Animaciones.** Rebote al tocar + o −, "✓ Guardada", confeti con PR o medalla, y vibración. Con "reducir movimiento" no hay animación.
+
+`logger.js` volvió a rozar las 300 líneas dos veces. Se sacaron piezas a `logger-parts.js` y `set-feedback.js` en el mismo PR, en lugar de subir el límite.

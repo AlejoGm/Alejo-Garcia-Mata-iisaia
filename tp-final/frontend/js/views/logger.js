@@ -1,11 +1,13 @@
 import { api } from "../api.js";
 import { loadMe, state } from "../app.js";
 import { clearDraft, loadDraft, saveDraft, setsDone } from "../draft.js";
-import { dayLabel, el, errorBox, num, toDisplay, toKg, weight } from "../ui.js";
-import { clock, lastLine, loadText, pickerSelect, platesText, restTimer, stepper, suspicious, targetButtons } from "./logger-parts.js";
+import { el, errorBox, toDisplay, toKg, weight } from "../ui.js";
+import {
+  clock, lastLine, loadText, pickerSelect, platesText, restTimer, sessionDetails, stepper, suspicious, targetButtons,
+} from "./logger-parts.js";
 import { earnedMedals, sessionSummary } from "./session-summary.js";
 import { feedbackCard, fetchStanding, standingRow, track } from "./set-feedback.js";
-import { celebrate } from "../juice.js";
+import { celebrate, vibrate } from "../juice.js";
 
 export async function loggerView(app, group) {
   const draft = loadDraft();
@@ -26,6 +28,7 @@ export async function loggerView(app, group) {
   bar.timer.addEventListener("click", () => (timer.running() ? timer.add(30) : timer.stop()));
   let undo = null;
   let feedback = null;
+  let justSaved = null;
   let feedbackTimer = null;
 
   const lastFor = async (exerciseId) => {
@@ -89,6 +92,9 @@ export async function loggerView(app, group) {
       return;
     }
     draft.sets.push(set);
+    vibrate(25);
+    clearTimeout(justSaved);
+    justSaved = setTimeout(() => { justSaved = null; renderBar(); }, 900);
     showStanding(set);
     const item = planItem();
     const justCompleted = item && item.exercise_id === draft.exerciseId && setsDone(draft, item.exercise_id) === item.sets;
@@ -231,32 +237,22 @@ export async function loggerView(app, group) {
       el("p", { class: "muted small" }, "Tocá una serie para corregirla."), el("ul", { class: "list" }, items));
   }
 
-  function sessionCard() {
-    const summary = el("summary", {});
-    const describe = () => { summary.textContent = `${draft.title} · ${dayLabel(draft.date)} · ${draft.bodyweight ? `${num(draft.bodyweight)} ${unit}` : "falta tu peso"}`; };
-    describe();
-    const date = el("input", { type: "date", value: draft.date, max: new Date().toLocaleDateString("en-CA") });
-    date.addEventListener("change", () => { draft.date = date.value; persist(); describe(); });
-    const bodyweight = el("input", { type: "number", inputmode: "decimal", value: String(draft.bodyweight ?? "") });
-    bodyweight.addEventListener("input", () => { draft.bodyweight = Number(bodyweight.value) || null; persist(); describe(); });
-    const discard = el("button", { type: "button", class: "danger" }, "Descartar sesión");
-    discard.addEventListener("click", () => {
-      if (draft.sets.length && !window.confirm("¿Descartar las series de esta sesión?")) return;
-      clearDraft();
-      timer.stop();
-      document.body.classList.remove("with-logger-bar");
-      window.location.hash = `#/g/${group.code}/entrenar`;
-    });
-    return el("details", { class: "card", open: !draft.bodyweight }, summary,
-      el("div", { class: "row" }, el("label", {}, "Fecha", date), el("label", {}, `Peso corporal (${unit})`, bodyweight)), discard);
-  }
+  const sessionCard = () => sessionDetails(draft, unit, persist, () => {
+    if (draft.sets.length && !window.confirm("¿Descartar las series de esta sesión?")) return;
+    clearDraft();
+    timer.stop();
+    document.body.classList.remove("with-logger-bar");
+    window.location.hash = `#/g/${group.code}/entrenar`;
+  });
 
   const slot = el("div");
   const barNode = el("div", { class: "logger-bar" });
 
   function renderBar() {
     const save = el("button", { type: "button", class: "primary big save-set", disabled: !draft.exerciseId, onclick: saveSet },
-      entry.confirm ? `Confirmar ${weight(toKg(entry.weight, unit), unit)}` : entry.editing !== null ? "Guardar cambio" : "Guardar serie");
+      entry.confirm ? `Confirmar ${weight(toKg(entry.weight, unit), unit)}` : entry.editing !== null ? "Guardar cambio"
+        : justSaved ? "✓ Guardada" : "Guardar serie");
+    if (justSaved) save.classList.add("saved");
     const warning = entry.limit ? el("p", { class: "notice" }, `El máximo es ${weight(500, unit)}. Revisá el peso.`)
       : entry.confirm ? el("p", { class: "notice" }, `¿Seguro ${weight(toKg(entry.weight, unit), unit)}? Es mucho más que tu referencia. Tocá de nuevo para confirmar.`)
         : "";
