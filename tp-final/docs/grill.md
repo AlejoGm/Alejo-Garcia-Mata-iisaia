@@ -306,7 +306,7 @@ Al apagar Auth0 (Google no anda desde el celular sin HTTPS), la app volvió a en
 
 **Comparar en el panel.** A Alejo le gustaban más las gráficas de mis stats que las tablas, pero quería verlas contra el resto. El panel suma "Comparar":
 - **Una línea por miembro,** con un color fijo para cada uno. Se prenden y apagan tocando su nombre. Arranca con vos y los tres que mejor vienen.
-- **Fuerza por mes** en el ejercicio que elijas, en DOTS por defecto (es la comparación justa) o en kilos, con el mismo período que en mis stats.
+- **Fuerza por mes** en el ejercicio que elijas, con el mismo período que en mis stats. Se puede ver en DOTS (por defecto, porque es la comparación justa), en 1RM estimado o en **peso máximo**. Este último lo pidió Alejo: el peso más alto levantado, tal cual, sin cálculos.
 - **Días por semana** en las últimas 12 semanas, para ver la constancia de todos de un vistazo.
 
 Mis stats sigue igual para lo personal (peso corporal, series por músculo, calendario y medallas).

@@ -16,14 +16,20 @@ def month_list(start: date, end: date) -> list[date]:
 
 def monthly_best_by_user(records: list[SetRecord], exercise_id: int, start: date, end: date, sexes: dict[int, str],
                          metric: str) -> dict[int, list[float | None]]:
-    """Por miembro, el mejor 1RM estimado (o su DOTS) de cada mes del período. None si ese mes no hay dato."""
+    """Por miembro, lo mejor de cada mes del período: la carga más alta levantada ("max", sin cálculos y con
+    cualquier cantidad de reps), el mejor 1RM estimado ("1rm") o su DOTS ("dots"). None si ese mes no hay dato."""
     months = month_list(start, end)
     index = {m: i for i, m in enumerate(months)}
     lines: dict[int, list[float | None]] = {uid: [None] * len(months) for uid in sexes}
     for r in in_range(records, start, end):
-        if r.exercise_id != exercise_id or r.user_id not in lines or r.estimated_1rm is None:
+        if r.exercise_id != exercise_id or r.user_id not in lines:
             continue
-        value = r.estimated_1rm if metric == "1rm" else set_dots(r, sexes[r.user_id])
+        if metric == "max":
+            value = r.load
+        elif r.estimated_1rm is None:
+            continue
+        else:
+            value = r.estimated_1rm if metric == "1rm" else set_dots(r, sexes[r.user_id])
         slot = index[month_start(r.date)]
         current = lines[r.user_id][slot]
         lines[r.user_id][slot] = value if current is None else max(current, value)

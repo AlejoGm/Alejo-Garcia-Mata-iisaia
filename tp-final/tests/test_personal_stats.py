@@ -98,3 +98,10 @@ def test_weekly_days_by_user_counts_distinct_days():
     weeks, days = weekly_days_by_user(records, [1, 2], today, weeks=2)
     assert weeks == [date(2026, 10, 5), date(2026, 10, 12)]
     assert days == {1: [0, 2], 2: [1, 0]}
+
+
+def test_monthly_best_by_user_max_weight_is_raw_and_counts_any_reps():
+    records = [rec(100, 5, day=date(2026, 9, 3), user=1), rec(120, 1, day=date(2026, 9, 9), user=1),
+               rec(60, 15, day=date(2026, 9, 9), user=2)]  # 15 reps: sin 1RM, pero el peso cuenta
+    result = monthly_best_by_user(records, 1, date(2026, 9, 1), date(2026, 9, 30), {1: "M", 2: "M"}, "max")
+    assert result == {1: [120], 2: [60]}

@@ -6,7 +6,7 @@ import { el, errorBox, storageGet, storageSet, toDisplay } from "../ui.js";
 
 const COLORS = 10;  // p0..p9 en el CSS: cada miembro tiene siempre el mismo color
 const PERIODS = [["6m", "6 meses"], ["12m", "12 meses"], ["all", "Todo"]];
-const METRICS = [["dots", "DOTS"], ["1rm", "Kilos (1RM)"]];
+const METRICS = [["max", "Peso máximo"], ["1rm", "1RM estimado"], ["dots", "DOTS"]];
 
 function monthShort(iso) {
   const [y, m] = iso.split("-").map(Number);
@@ -56,7 +56,7 @@ export function compareSection(group) {
     const shown = data.people.filter((p) => selected.has(p.user_id));
     const exercise = data.exercises.find((e) => e.id === data.exercise_id);
     const unit = state.me.unit;
-    const value = (v) => (v === null ? null : prefs.metric === "1rm" ? toDisplay(v, unit) : v);
+    const value = (v) => (v === null ? null : prefs.metric === "dots" ? v : toDisplay(v, unit));
 
     const select = el("select", { "aria-label": "Ejercicio" }, data.exercises.map((e) =>
       el("option", { value: String(e.id), selected: e.id === data.exercise_id }, e.name)));
@@ -72,7 +72,12 @@ export function compareSection(group) {
       },
     }, el("span", { class: "swatch" }), p.user_id === group.me ? "Vos" : p.display_name)));
 
-    const what = prefs.metric === "dots" ? "DOTS del mejor 1RM" : `mejor 1RM en ${unit}`;
+    const what = { max: `peso máximo en ${unit}`, "1rm": `1RM estimado en ${unit}`, dots: "DOTS del mejor 1RM" }[prefs.metric];
+    const note = {
+      max: "El peso más alto que levantó cada uno, tal cual, con cualquier cantidad de reps.",
+      "1rm": "Calculado con Epley a partir del peso y las reps (hasta 10): cuánto levantaría a una sola rep.",
+      dots: "El 1RM estimado ajustado por peso corporal y sexo: compara parejo entre personas distintas.",
+    }[prefs.metric];
     box.replaceChildren(
       el("div", { class: "spread" }, el("h3", {}, "Comparar"), el("span", { class: "muted small" }, "Tocá un nombre para sumarlo o sacarlo")),
       people,
@@ -80,7 +85,7 @@ export function compareSection(group) {
         segmented("compare-period", PERIODS, prefs.period, (v) => { prefs.period = v; save(); render(); })),
       el("div", { class: "compare-charts" },
         el("div", {}, el("h4", {}, `${exercise?.name ?? ""}: ${what}, por mes`),
-          prefs.metric === "dots" ? el("p", { class: "muted small" }, "DOTS ajusta por peso corporal y sexo: compara parejo entre personas distintas.") : "",
+          el("p", { class: "muted small" }, note),
           lineChart({ label: `${exercise?.name}, ${what} por mes`, area: false, labels: data.months.map(monthShort),
             series: shown.map((p) => ({ className: color.get(p.user_id), values: p.months.map(value) })) })),
         el("div", {}, el("h4", {}, "Días entrenados por semana"),
