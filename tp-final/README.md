@@ -24,13 +24,13 @@ uv run python -m scripts.seed_demo
 
 Entrando como `gustavo`, `mati` o `caro` se ve el grupo desde adentro. Con cualquier otro nombre se entra como alguien nuevo y uno se une con el código.
 
-Para llenar un grupo que ya existe, el otro script suma cinco participantes de mentira. Siguen la primera rutina del grupo y le agregan 8 semanas de sesiones, PRs, reacciones y duelos. `--as` es el nombre de un miembro del grupo:
+Para llenar un grupo que ya existe, el otro script suma ocho participantes de mentira. Siguen la primera rutina del grupo con 26 semanas de historia, que incluyen progreso, semanas de descarga, cortes, PRs y reacciones. También agrega duelos terminados, en curso y pendientes, y, si el que corre el script es admin, dos campañas cerradas con ganador y la del mes. `--as` es el nombre de un miembro del grupo, y `--weeks` cambia la cantidad de semanas:
 
 ```bash
 uv run python -m scripts.seed_group CODIGO --as tu-nombre
 ```
 
-Tests (138):
+Tests (142):
 
 ```bash
 uv run pytest
@@ -65,7 +65,7 @@ tp-final/
 ├── frontend/
 │   ├── index.html       una sola página, vistas por hash
 │   └── js/              api, auth, router, una vista por archivo, gráficos en SVG propio
-├── tests/               138 tests: stats con TDD y status codes de la API
+├── tests/               142 tests: stats con TDD y status codes de la API
 ├── scripts/             seed_demo y seed_group, para ver la app con datos
 ├── docs/                pitch, PRD, grill, spec, bitácora y devolución del gym-bro
 └── .claude/             reglas por path, permisos, skill nuevo-ranking y sub-agente gym-bro
