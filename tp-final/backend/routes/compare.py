@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api")
 
 @router.get("/groups/{code}/compare", response_model=CompareOut)
 def compare(code: str, user: UserDep, session: SessionDep, exercise_id: int | None = None,
-            metric: Literal["1rm", "dots"] = "dots", period: str = "6m") -> CompareOut:
+            metric: Literal["max", "1rm", "dots"] = "dots", period: str = "6m") -> CompareOut:
     ctx = context(session, code, user)
     records = group_records(session, ctx.group.id, ctx.ids)
     today = date.today()
@@ -25,8 +25,8 @@ def compare(code: str, user: UserDep, session: SessionDep, exercise_id: int | No
         low, high = stats.period_range(period, today, first=min((r.date for r in records), default=None))
     except ValueError as err:
         raise HTTPException(status_code=422, detail=str(err)) from err
-    # Solo los ejercicios con 1RM estimable, del más cargado en el grupo al menos.
-    counts = Counter(r.exercise_id for r in records if r.estimated_1rm is not None)
+    # Del más cargado en el grupo al menos. Con 1RM o DOTS, solo los que tienen 1RM estimable.
+    counts = Counter(r.exercise_id for r in records if metric == "max" or r.estimated_1rm is not None)
     found = {e.id: e for e in session.exec(select(Exercise).where(Exercise.id.in_(list(counts))))}
     chosen = exercise_id if exercise_id in counts else (counts.most_common(1)[0][0] if counts else None)
     sexes = {uid: u.sex for uid, u in ctx.users.items()}

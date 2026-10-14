@@ -236,9 +236,9 @@ Para una serie todavía no guardada (ejercicio, peso, reps y peso corporal del d
 ### Comparar en el panel
 
 Para un ejercicio y un período, sin las series dudosas del grupo:
-- **Fuerza por mes:** para cada miembro y cada mes del período, el mejor 1RM estimado, o su DOTS (`metric = 1rm | dots`). Sin dato ese mes, `null`.
+- **Fuerza por mes:** para cada miembro y cada mes del período, la carga más alta levantada con cualquier cantidad de reps (`max`), el mejor 1RM estimado (`1rm`) o su DOTS (`dots`). Sin dato ese mes, `null`.
 - **Días por semana:** para cada miembro, los días distintos entrenados en cada una de las últimas 12 semanas, de la más vieja a la actual.
-- **Ejercicios:** los que tienen 1RM estimable en el grupo, del más cargado al menos. Si no se pide uno, el primero.
+- **Ejercicios:** del más cargado en el grupo al menos; con `1rm` o `dots`, solo los que tienen 1RM estimable. Si no se pide uno, el primero.
 
 ### Duelos
 
