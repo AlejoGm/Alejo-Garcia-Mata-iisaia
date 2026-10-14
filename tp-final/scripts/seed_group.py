@@ -203,8 +203,9 @@ def seed(code: str, reader_name: str, weeks: int, me: bool) -> None:
 
 
 def main() -> None:
-    if config.AUTH_MODE != "dev":
-        raise SystemExit("El seed solo corre en modo dev (sin AUTH0_DOMAIN).")
+    if config.AUTH_MODE == "auth0":
+        raise SystemExit("El seed no corre con Auth0 configurado: renombrá el .env.")
+    config.AUTH_MODE = "dev"  # el seed carga los datos en este proceso, entrando con nombres
     parser = argparse.ArgumentParser(description="Puebla un grupo existente con participantes de mentira.")
     parser.add_argument("code", help="código del grupo")
     parser.add_argument("--as", dest="reader", required=True, help="nombre dev de un miembro del grupo")

@@ -23,7 +23,8 @@ AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN", "")
 AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID", "")
 AUTH0_AUDIENCE = os.environ.get("AUTH0_AUDIENCE", "")
 
-# Sin Auth0 configurado la app corre con login de desarrollo.
-AUTH_MODE = "auth0" if AUTH0_DOMAIN else "dev"
+# Con Auth0 configurado se entra con Google; si no, con usuario y contraseña. "dev" (entrar solo con un nombre)
+# queda para los tests y los scripts de datos, o con GYMBRO_AUTH=dev.
+AUTH_MODE = "auth0" if AUTH0_DOMAIN else os.environ.get("GYMBRO_AUTH", "local")
 
 DB_PATH = Path(os.environ.get("GYMBRO_DB", ROOT / "gymbro.db"))
