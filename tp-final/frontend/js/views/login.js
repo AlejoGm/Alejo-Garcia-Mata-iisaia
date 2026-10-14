@@ -20,7 +20,6 @@ export function loginView(app) {
   const name = el("input", { name: "name", required: true, maxlength: "30", autocomplete: "nickname" });
   const button = el("button", { class: "primary big", type: "submit" }, "Entrar");
   const form = el("form", { class: "card" },
-    el("p", { class: "notice" }, "Modo desarrollo: el servidor no tiene Auth0 configurado, así que se entra solo con un nombre."),
     el("label", {}, "Tu nombre", name),
     button,
     error,
