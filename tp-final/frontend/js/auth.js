@@ -45,6 +45,11 @@ export async function initAuth() {
     authorizationParams: { audience: config.audience, redirect_uri: returnUrl() },
   });
   const params = new URLSearchParams(window.location.search);
+  if (params.has("error")) {
+    // Auth0 vuelve con el motivo en la URL: se limpia y se muestra, en vez de dejar el login sin explicación.
+    window.history.replaceState({}, "", returnUrl() + "#/login");
+    throw new Error(`Auth0 rechazó el login: ${params.get("error_description") || params.get("error")}`);
+  }
   if (params.has("code") && params.has("state")) {
     await client.handleRedirectCallback();
     window.history.replaceState({}, "", returnUrl() + "#/");
