@@ -233,6 +233,13 @@ Para una serie todavía no guardada (ejercicio, peso, reps y peso corporal del d
 - **A quién pasé:** los miembros cuyo valor era mayor o igual que el mío antes de la serie y queda por debajo del de la serie.
 - **El siguiente:** el miembro con el menor valor que siga por encima del mío. Para pasarlo, a mis mismas reps: el 1RM que hace falta es `dots_siguiente × poly(bw) / 500`, y el peso es `1RM / (1 + reps / 30)` (igual al 1RM con 1 rep), redondeado hacia arriba al salto de discos (2,5 kg o 5 lb) hasta superarlo. En ejercicios con tu peso no se calcula el peso.
 
+### Comparar en el panel
+
+Para un ejercicio y un período, sin las series dudosas del grupo:
+- **Fuerza por mes:** para cada miembro y cada mes del período, el mejor 1RM estimado, o su DOTS (`metric = 1rm | dots`). Sin dato ese mes, `null`.
+- **Días por semana:** para cada miembro, los días distintos entrenados en cada una de las últimas 12 semanas, de la más vieja a la actual.
+- **Ejercicios:** los que tienen 1RM estimable en el grupo, del más cargado al menos. Si no se pide uno, el primero.
+
 ### Duelos
 
 - **Plazo.** Va de `start` a `start + days − 1`. `start` es el día en que el retado acepta.
@@ -292,6 +299,7 @@ Todo bajo `/api`, con el token. Los grupos se identifican por `code`.
 | `PUT` | `/groups/{code}/challenges` | `{"exercise_ids": [...]}`, solo el admin · `422` si son más de 4 |
 | `GET` | `/groups/{code}/last?exercise_id` | mi última serie, la de hasta 2 miembros más y mi objetivo para PR |
 | `POST` | `/groups/{code}/standing` | `{exercise_id, weight_kg, reps, bodyweight_kg}`: PR, posición antes y después, a quién pasé y la serie para pasar al siguiente, sin guardar nada · `200` · `422` |
+| `GET` | `/groups/{code}/compare?exercise_id&metric&period` | líneas por miembro: fuerza por mes y días por semana · `422` con métrica o período inválidos |
 | `GET` | `/groups/{code}/members/{user_id}` | perfil de un miembro: semana, racha, medallas, cara a cara conmigo y últimas sesiones · `404` si no es miembro |
 | `GET` | `/groups/{code}/rankings?period&month&from&to` | fuerza, progreso, semana y constancia |
 | `GET` | `/groups/{code}/dashboard` | indicadores, series de 8 semanas, días de la semana, objetivo del grupo, líderes, semana pasada y medallas recientes |
@@ -324,7 +332,7 @@ Una sola página con vistas por hash, en ES modules y sin build. Primero está p
 | `#/g/CODE/entrenar` | elegir día de rutina o carga libre |
 | `#/g/CODE/carga` | carga guiada o libre, con borrador en `localStorage`; al guardar cada serie, PR y posición en vivo |
 | `#/g/CODE/rankings` | selector de período, desafíos con DOTS/absoluto, progreso, semana y constancia |
-| `#/g/CODE/panel` | portada del grupo: indicadores, gráficos, "Hoy toca", líderes, campaña y últimos PRs |
+| `#/g/CODE/panel` | portada del grupo: indicadores, gráficos, "Hoy toca", comparar entre miembros, líderes, campaña y últimos PRs |
 | `#/g/CODE/feed` | PRs agrupados por sesión, con reacciones (desde "Ver todo" del panel) |
 | `#/g/CODE/bro/ID` | perfil de un miembro y cara a cara |
 | `#/g/CODE/duelos` | duelos, retar y aceptar |

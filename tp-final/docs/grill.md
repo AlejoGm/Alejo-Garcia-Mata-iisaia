@@ -303,3 +303,10 @@ Al apagar Auth0 (Google no anda desde el celular sin HTTPS), la app volvió a en
 - **Token de sesión al azar.** En la base se guarda su sha256, no el token. "Cerrar sesión" lo borra. No vence: para un TP local no hace falta.
 - **Mismo `sub` que el modo desarrollo** (`dev|usuario`). Registrarse con un nombre que ya tenía historia se queda con ese usuario. Así Alejo recupera lo suyo y se puede entrar como cualquiera de los datos de prueba registrándose con su nombre. En una app pública eso sería un agujero; acá es a propósito.
 - **Los tokens `dev:` se rechazan** con cuentas propias. Si no, la contraseña no protegería nada. Los tests y los scripts de datos fuerzan el modo `dev` dentro de su propio proceso.
+
+**Comparar en el panel.** A Alejo le gustaban más las gráficas de mis stats que las tablas, pero quería verlas contra el resto. El panel suma "Comparar":
+- **Una línea por miembro,** con un color fijo para cada uno. Se prenden y apagan tocando su nombre. Arranca con vos y los tres que mejor vienen.
+- **Fuerza por mes** en el ejercicio que elijas, en DOTS por defecto (es la comparación justa) o en kilos, con el mismo período que en mis stats.
+- **Días por semana** en las últimas 12 semanas, para ver la constancia de todos de un vistazo.
+
+Mis stats sigue igual para lo personal (peso corporal, series por músculo, calendario y medallas).

@@ -535,3 +535,31 @@ button.link:disabled, button.ghost:disabled { color: var(--muted); }
 .session-details summary::after { content: ""; width: 7px; height: 7px; margin-right: 4px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); }
 .session-details[open] summary::after { transform: rotate(-135deg); }
 .session-details[open] { display: flex; flex-direction: column; gap: 10px; }
+
+/* Comparar en el panel: un color fijo por miembro */
+.p0 { --c: #c8f53b; }
+.p1 { --c: #34d399; }
+.p2 { --c: #ff6b4a; }
+.p3 { --c: #e8d9a8; }
+.p4 { --c: #60a5fa; }
+.p5 { --c: #a78bfa; }
+.p6 { --c: #f472b6; }
+.p7 { --c: #fbbf24; }
+.p8 { --c: #22d3ee; }
+.p9 { --c: #fda4af; }
+.chart-line[class*=" p"] { stroke: var(--c); stroke-width: 3; }
+.chart-dot[class*=" p"] { fill: var(--ink); stroke: var(--c); stroke-width: 2.5; }
+.compare { gap: 14px; }
+.compare h4 { margin: 0 0 4px; font-size: 1rem; }
+.people-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.person-chip { flex: none; min-height: 40px; padding: 6px 14px 6px 10px; gap: 8px; font-size: 0.9rem; color: var(--muted); background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.person-chip .swatch { width: 12px; height: 12px; border-radius: 999px; box-shadow: inset 0 0 0 2px var(--c); }
+.person-chip.on { color: var(--text); box-shadow: inset 0 0 0 1.5px var(--c); background: color-mix(in srgb, var(--c) 10%, transparent); }
+.person-chip.on .swatch { background: var(--c); }
+.compare-controls { display: flex; flex-direction: column; gap: 10px; }
+.compare-charts { display: grid; gap: 18px; }
+@media (min-width: 900px) {
+  .compare-controls { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; align-items: center; }
+  .compare-charts { grid-template-columns: 1.4fr 1fr; }
+  .dash > .span-12 { grid-column: span 12; }
+}

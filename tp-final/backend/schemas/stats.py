@@ -143,3 +143,21 @@ class BroOut(BaseModel):
     achievements: list[AchievementOut]
     faceoff: list[FaceOffOut]
     sessions: list[BroSessionOut]
+
+
+class ComparePerson(BaseModel):
+    user_id: int
+    display_name: str
+    months: list[float | None]  # mejor del mes, alineado con CompareOut.months
+    days: list[int]  # días entrenados por semana, alineado con CompareOut.weeks
+    goal: int | None
+
+
+class CompareOut(BaseModel):
+    period: PeriodOut
+    metric: str
+    exercise_id: int | None
+    exercises: list[ExerciseOut]
+    months: list[date]
+    weeks: list[date]
+    people: list[ComparePerson]

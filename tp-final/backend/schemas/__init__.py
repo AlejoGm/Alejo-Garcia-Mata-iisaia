@@ -1,6 +1,7 @@
 """Modelos de entrada y salida de la API, por recurso."""
 from backend.schemas.common import (
-    Name30, LoginInput, AccountInput, TokenOut, ConfigOut, ProfileInput, ProfileOut, Name40, ExerciseInput, ExerciseOut, Person, PeriodOut,
+    Name30, ConfigOut, ProfileInput, ProfileOut, Name40, ExerciseInput, ExerciseOut, Person, PeriodOut, LoginInput,
+    AccountInput, TokenOut,
 )
 from backend.schemas.groups import (
     GroupInput, GroupSummary, MemberOut, GroupDetail, ChallengesInput,
@@ -19,6 +20,7 @@ from backend.schemas.competition import (
     DuelInput, DuelOut, SuggestionOut, SuggestionsOut, CampaignInput, StandingRow, CampaignOut,
 )
 from backend.schemas.stats import (
-    MonthPointOut, WeekPointOut, BodyweightPointOut, DayCountOut, MuscleSetsOut, AchievementOut, MedalOut, PersonalStatsOut, WeekActivityOut, DayActivityOut, LeaderOut,
-    StreakOut, LastWeekOut, DashboardOut, FaceOffOut, BroSessionOut, BroOut,
+    MonthPointOut, WeekPointOut, BodyweightPointOut, DayCountOut, MuscleSetsOut, AchievementOut, MedalOut,
+    PersonalStatsOut, WeekActivityOut, DayActivityOut, LeaderOut, StreakOut, LastWeekOut, DashboardOut, FaceOffOut,
+    BroSessionOut, BroOut, ComparePerson, CompareOut,
 )
