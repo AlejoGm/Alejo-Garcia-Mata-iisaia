@@ -3,7 +3,7 @@ from datetime import date, timedelta
 import pytest
 
 from backend.stats import (
-    bodyweight_series, monthly_best_by_user, monthly_series, muscle_sets, session_best_by_user, training_calendar,
+    bodyweight_series, monthly_best_by_user, monthly_series, muscle_sets, training_calendar, weekly_best_by_user,
     weekly_days_by_user,
     weekly_series,
 )
@@ -108,14 +108,15 @@ def test_monthly_best_by_user_max_weight_is_raw_and_counts_any_reps():
     assert result == {1: [120], 2: [60]}
 
 
-def test_session_best_by_user_one_point_per_session_in_order():
+def test_weekly_best_by_user_aligned_to_the_weeks_of_the_period():
     records = [
-        rec(100, 5, day=date(2026, 9, 3), user=1, session=1), rec(110, 1, day=date(2026, 9, 3), user=1, session=1),
-        rec(105, 2, day=date(2026, 9, 10), user=1, session=2),
-        rec(60, 15, day=date(2026, 9, 5), user=2, session=3),
-        rec(70, 5, day=date(2026, 8, 30), user=2, session=4),  # fuera del período
+        rec(100, 5, day=date(2026, 9, 7), user=1), rec(110, 1, day=date(2026, 9, 9), user=1),   # semana del 7
+        rec(105, 2, day=date(2026, 9, 21), user=1),                                              # semana del 21
+        rec(60, 15, day=date(2026, 9, 15), user=2),                                              # semana del 14
+        rec(70, 5, day=date(2026, 8, 30), user=2),                                               # fuera del período
     ]
     sexes = {1: "M", 2: "M"}
-    result = session_best_by_user(records, 1, date(2026, 9, 1), date(2026, 9, 30), sexes, "max")
-    assert result == {1: [(date(2026, 9, 3), 110), (date(2026, 9, 10), 105)], 2: [(date(2026, 9, 5), 60)]}
-    assert session_best_by_user(records, 1, date(2026, 9, 1), date(2026, 9, 30), sexes, "1rm")[2] == []
+    weeks, lines = weekly_best_by_user(records, 1, date(2026, 9, 7), date(2026, 9, 27), sexes, "max")
+    assert weeks == [date(2026, 9, 7), date(2026, 9, 14), date(2026, 9, 21)]
+    assert lines == {1: [110, None, 105], 2: [None, 60, None]}
+    assert weekly_best_by_user(records, 1, date(2026, 9, 7), date(2026, 9, 27), sexes, "1rm")[1][2] == [None] * 3

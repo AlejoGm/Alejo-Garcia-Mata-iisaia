@@ -31,13 +31,16 @@ def compare(code: str, user: UserDep, session: SessionDep, exercise_id: int | No
     chosen = exercise_id if exercise_id in counts else (counts.most_common(1)[0][0] if counts else None)
     sexes = {uid: u.sex for uid, u in ctx.users.items()}
     lines = stats.monthly_best_by_user(records, chosen, low, high, sexes, metric) if chosen else {}
+    best_weeks, week_lines = stats.weekly_best_by_user(records, chosen, low, min(high, today), sexes, metric) \
+        if chosen else ([], {})
     weeks, days = stats.weekly_days_by_user(records, ctx.ids, today)
     changes = goal_changes(session, ctx.ids)
     this_week = stats.monday(today)
     return CompareOut(
         period=PeriodOut(kind=period, start=low, end=high), metric=metric, exercise_id=chosen,
         exercises=[ExerciseOut.model_validate(found[eid], from_attributes=True) for eid, _ in counts.most_common()],
-        months=stats.month_list(low, high), weeks=weeks,
+        months=stats.month_list(low, high), weeks=weeks, best_weeks=best_weeks,
         people=[ComparePerson(user_id=uid, display_name=ctx.name(uid), months=lines.get(uid, []), days=days[uid],
+                              week_best=week_lines.get(uid, []),
                               goal=stats.goal_in_force(changes[uid], this_week)) for uid in ctx.ids],
     )

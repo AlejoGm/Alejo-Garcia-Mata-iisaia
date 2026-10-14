@@ -24,13 +24,8 @@ function smooth(points) {
   return d;
 }
 
-export function lineChart({ labels, series, label, area = true }) {
-  const values = series.flatMap((s) => s.values).filter((v) => v !== null && v !== undefined);
-  const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": label });
-  if (!values.length) {
-    root.append(svg("text", { x: W / 2, y: H / 2, "text-anchor": "middle", class: "chart-empty" }, "Sin datos en este período"));
-    return root;
-  }
+/** Escala vertical con tres líneas de referencia. Devuelve la función valor → y. */
+function valueAxis(root, values) {
   let min = Math.min(...values);
   let max = Math.max(...values);
   // Un rango mínimo del 6 % evita que +1 kg parezca un salto enorme.
@@ -43,13 +38,23 @@ export function lineChart({ labels, series, label, area = true }) {
   const margin = (max - min) * 0.1;
   min -= margin;
   max += margin;
-  const x = (i) => PAD.left + (labels.length === 1 ? (W - PAD.left - PAD.right) / 2 : (i * (W - PAD.left - PAD.right)) / (labels.length - 1));
   const y = (v) => PAD.top + ((max - v) * (H - PAD.top - PAD.bottom)) / (max - min);
-
   for (const v of [max - margin, (max + min) / 2, min + margin]) {
     root.append(svg("line", { x1: PAD.left, x2: W - PAD.right, y1: y(v), y2: y(v), class: "chart-grid" }));
     root.append(svg("text", { x: PAD.left - 8, y: y(v) + 7, "text-anchor": "end", class: "chart-axis" }, max - min < 12 ? v.toLocaleString("es-AR", { maximumFractionDigits: 1 }) : Math.round(v)));
   }
+  return y;
+}
+
+export function lineChart({ labels, series, label, area = true }) {
+  const values = series.flatMap((s) => s.values).filter((v) => v !== null && v !== undefined);
+  const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": label });
+  if (!values.length) {
+    root.append(svg("text", { x: W / 2, y: H / 2, "text-anchor": "middle", class: "chart-empty" }, "Sin datos en este período"));
+    return root;
+  }
+  const y = valueAxis(root, values);
+  const x = (i) => PAD.left + (labels.length === 1 ? (W - PAD.left - PAD.right) / 2 : (i * (W - PAD.left - PAD.right)) / (labels.length - 1));
   const step = Math.ceil(labels.length / 6);
   labels.forEach((text, i) => {
     if (i % step === 0 || i === labels.length - 1) {

@@ -39,12 +39,14 @@ def test_compare_max_weight_includes_exercises_without_1rm(client):
     assert next(p for p in body["people"] if p["display_name"] == "ana")["months"][-1] == 15
 
 
-def test_compare_includes_each_session(client):
+def test_compare_includes_the_best_of_each_week(client):
     code, users = setup_group(client)
     squat = exercise_id(client, users["ana"], "Sentadilla")
-    post(client, users["ana"], [{"exercise_id": squat, "weight_kg": 90, "reps": 3}], day=date.today() - timedelta(days=2))
+    last_week = date.today() - timedelta(days=7)
+    post(client, users["ana"], [{"exercise_id": squat, "weight_kg": 90, "reps": 3}], day=last_week)
     post(client, users["ana"], [{"exercise_id": squat, "weight_kg": 95, "reps": 3}])
     body = client.get(f"/api/groups/{code}/compare", params={"metric": "max"}, headers=users["ana"]).json()
     ana = next(p for p in body["people"] if p["display_name"] == "ana")
-    assert [s["value"] for s in ana["sessions"]] == [90, 95]
-    assert ana["sessions"][-1]["day"] == date.today().isoformat()
+    assert len(ana["week_best"]) == len(body["best_weeks"])
+    assert ana["week_best"][-2:] == [90, 95]
+    assert body["best_weeks"][-1] == (date.today() - timedelta(days=date.today().weekday())).isoformat()
