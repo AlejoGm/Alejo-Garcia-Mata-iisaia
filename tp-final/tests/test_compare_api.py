@@ -28,3 +28,12 @@ def test_compare_lines_per_member(client):
 def test_compare_rejects_unknown_metric(client):
     code, users = setup_group(client)
     assert client.get(f"/api/groups/{code}/compare", params={"metric": "x"}, headers=users["ana"]).status_code == 422
+
+
+def test_compare_max_weight_includes_exercises_without_1rm(client):
+    code, users = setup_group(client)
+    curl = exercise_id(client, users["ana"], "Curl de bíceps")
+    post(client, users["ana"], [{"exercise_id": curl, "weight_kg": 15, "reps": 15}])
+    body = client.get(f"/api/groups/{code}/compare", params={"metric": "max"}, headers=users["ana"]).json()
+    assert body["exercise_id"] == curl
+    assert next(p for p in body["people"] if p["display_name"] == "ana")["months"][-1] == 15
