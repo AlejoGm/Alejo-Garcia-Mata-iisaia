@@ -46,6 +46,12 @@ Auth0 tiene plan gratis y trae una conexión de Google lista para desarrollo.
 4. **Authentication → Social → google-oauth2**: activarla para la aplicación del paso 2.
 5. Copiar `.env.example` a `.env` y completar `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID` y `AUTH0_AUDIENCE`.
 
+Los usuarios del modo desarrollo (`dev|nombre`) no se pueden usar con Google. Para pasar uno a tu cuenta de Google sin perder su historia, entrá una vez con Google, completá el perfil y corré:
+
+```bash
+uv run python -m scripts.link_account alejo
+```
+
 La validación del token está probada con una clave RSA generada en el test (`tests/test_auth0.py`), no contra un tenant real: crear el tenant requiere una cuenta y queda para hacer a mano.
 
 ## Arquitectura
