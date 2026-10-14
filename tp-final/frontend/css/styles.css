@@ -496,3 +496,11 @@ details.card[open] > summary::after { transform: rotate(-135deg); }
 .pop { animation: pop 0.22s ease-out; }
 @keyframes pop { 50% { transform: scale(1.14); } }
 @media (prefers-reduced-motion: reduce) { .feedback { animation: none; } .confetti { display: none; } }
+
+/* Fin de sesión */
+.score-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-self: stretch; margin-top: 8px; }
+.score-cell { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 6px; border-radius: var(--r-control); background: var(--surface-2); }
+.score-cell strong { font-size: 1.7rem; font-weight: 800; color: var(--lime); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.progress { height: 12px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.progress span { display: block; height: 100%; border-radius: 999px; background: var(--lime); box-shadow: 0 0 12px rgba(200, 245, 59, 0.45); transition: width 0.8s ease-out; }
+.medal-icon.earned { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 999px; background: rgba(200, 245, 59, 0.14); color: var(--lime); }
