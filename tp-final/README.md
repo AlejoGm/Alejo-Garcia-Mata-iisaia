@@ -139,6 +139,7 @@ El sub-agente `gym-bro` usó la app como "Nico": primero en el gimnasio, con el 
 ## Documentos
 
 - [pitch.md](pitch.md) y [pitch.html](pitch.html): la idea como se presentó en clase.
+- [presentacion.html](presentacion.html): la presentación del Demo Day (flechas para avanzar, F pantalla completa, N notas).
 - [docs/prd.md](docs/prd.md): el producto, con releases e historias de usuario.
 - [docs/grill.md](docs/grill.md): las decisiones con su porqué.
 - [docs/spec.md](docs/spec.md): modelo, contrato y fórmulas.

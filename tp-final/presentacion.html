@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gym-bro — Demo Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --ink: #060a07;
+    --surface: #111913;
+    --surface-2: #19241c;
+    --line: #26332a;
+    --text: #eef3ec;
+    --muted: #8f9d92;
+    --lime: #c8f53b;
+    --mint: #34d399;
+    --ember: #ff6b4a;
+    --on-lime: #0d1a05;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; color: var(--text); font-family: Urbanist, system-ui, sans-serif;
+    background: radial-gradient(120vh 80vh at 15% -10%, #1d4a27 0%, transparent 60%), var(--ink); }
+  .slide { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; gap: 3.2vh; padding: 7vh 8vw; }
+  .slide.active { display: flex; }
+  h1 { font-size: 13vh; margin: 0; line-height: 0.95; letter-spacing: -0.03em; font-weight: 800; }
+  h2 { font-size: 6.6vh; margin: 0; line-height: 1.08; letter-spacing: -0.02em; font-weight: 800; max-width: 80vw; }
+  h3 { margin: 0 0 1.2vh; font-size: 3.4vh; font-weight: 800; color: var(--lime); }
+  p, li, td, th { font-size: 3.1vh; line-height: 1.4; }
+  p { margin: 0; }
+  ul { margin: 0; padding-left: 1.1em; }
+  li + li { margin-top: 1vh; }
+  .eyebrow { color: var(--lime); font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; font-size: 2.2vh; }
+  .muted { color: var(--muted); }
+  .big { font-size: 4.4vh; font-weight: 600; }
+  .lime { color: var(--lime); }
+  .mint { color: var(--mint); }
+  .ember { color: var(--ember); }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(24vw, 1fr)); gap: 2vw; }
+  .card { background: rgba(17, 25, 19, 0.92); border-radius: 22px; padding: 3vh 2vw; box-shadow: inset 0 0 0 1px var(--line); }
+  .card p, .card li { font-size: 2.7vh; }
+  .pill { display: inline-block; padding: 0.5vh 1vw; border-radius: 999px; background: var(--lime); color: var(--on-lime); font-weight: 800; font-size: 2.2vh; }
+  /* Capturas */
+  .shots { display: flex; gap: 2.4vw; align-items: flex-start; justify-content: center; }
+  figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 1.6vh; }
+  figure img { height: 62vh; border-radius: 26px; box-shadow: 0 0 0 1px var(--line), 0 30px 80px rgba(0, 0, 0, 0.6); }
+  figure.wide img { height: auto; width: 74vw; border-radius: 18px; }
+  figcaption { font-size: 2.4vh; color: var(--muted); text-align: center; max-width: 20vw; }
+  figure.wide figcaption { max-width: none; }
+  /* Línea de proceso */
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 1vw; }
+  .flow span { padding: 1.4vh 1.4vw; border-radius: 14px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-size: 2.8vh; font-weight: 700; }
+  .flow span.me { box-shadow: inset 0 0 0 2px var(--lime); color: var(--lime); }
+  .flow i { color: var(--muted); font-style: normal; font-size: 3vh; }
+  /* Tabla de decisiones */
+  table { border-collapse: collapse; width: 100%; }
+  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 2.3vh; padding: 0 1.2vw 1vh; text-transform: uppercase; letter-spacing: 0.08em; }
+  td { padding: 1.5vh 1.2vw; border-top: 1px solid var(--line); font-size: 2.7vh; vertical-align: top; }
+  td:first-child { color: var(--muted); }
+  td:nth-child(2) { color: var(--lime); font-weight: 700; }
+  /* Arquitectura */
+  .arch { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 1.4vw; }
+  .arch .box { background: var(--surface); border-radius: 20px; padding: 2.6vh 1.6vw; box-shadow: inset 0 0 0 1px var(--line); }
+  .arch .box.core { box-shadow: inset 0 0 0 2px var(--lime); }
+  .arch .box p { font-size: 2.5vh; }
+  .arch .arrow { color: var(--lime); font-size: 5vh; font-weight: 800; }
+  /* Números */
+  .numbers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6vw; }
+  .numbers div { background: var(--surface); border-radius: 22px; padding: 3vh 1.6vw; box-shadow: inset 0 0 0 1px var(--line); }
+  .numbers strong { display: block; font-size: 9vh; line-height: 1; font-weight: 800; color: var(--lime); letter-spacing: -0.03em; }
+  .numbers span { font-size: 2.5vh; color: var(--muted); }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  pre { margin: 0; padding: 2.4vh 1.8vw; border-radius: 18px; background: #0b110c; box-shadow: inset 0 0 0 1px var(--line);
+    font-size: 2.2vh; line-height: 1.5; color: #d6e3d4; overflow: hidden; }
+  pre .c { color: var(--muted); }
+  pre .k { color: var(--lime); }
+  .lesson { border-radius: 22px; padding: 3vh 2vw; background: rgba(200, 245, 59, 0.08); box-shadow: inset 4px 0 0 var(--lime); }
+  .lesson p { font-size: 3.4vh; font-weight: 700; }
+  /* Notas y navegación */
+  .notes { display: none; }
+  #notes { position: fixed; left: 0; right: 0; bottom: 0; max-height: 34vh; overflow: auto; padding: 2.4vh 4vw 6vh;
+    background: rgba(6, 10, 7, 0.96); border-top: 1px solid var(--line); font-size: 2.4vh; line-height: 1.5; display: none; z-index: 5; }
+  body.show-notes #notes { display: block; }
+  .counter { position: fixed; right: 3vw; bottom: 3vh; color: var(--muted); font-size: 2.1vh; z-index: 6; }
+  .hint { position: fixed; left: 3vw; bottom: 3vh; color: var(--muted); font-size: 1.9vh; opacity: 0.6; z-index: 6; }
+</style>
+</head>
+<body>
+
+<section class="slide active">
+  <p class="eyebrow">Trabajo práctico final · IISAIA · Demo Day</p>
+  <h1>Gym-bro</h1>
+  <p class="big">Cada uno con su rutina. Comparados de forma justa.</p>
+  <p class="muted">Alejo García Mata · Gustavo Campero</p>
+  <div class="notes">Presentarnos. En una frase: una app para que un grupo de amigos que va al gimnasio cargue lo que entrena y compita de forma justa. Lo que quiero mostrar no es solo la app, sino cómo la dirigí: qué decidí yo, qué hizo el agente y dónde se equivocó.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">El problema</p>
+  <h2>Comparar kilos no sirve: el que pesa 95 siempre gana</h2>
+  <div class="cols">
+    <div class="card"><h3>Sin la app</h3><p>Cada uno anota en el celular. La competencia queda en el chat y a ojo.</p></div>
+    <div class="card"><h3>La idea</h3><p>Fuerza relativa con <b class="lime">DOTS</b>, el coeficiente del powerlifting: ajusta la marca por peso corporal y sexo.</p></div>
+    <div class="card"><h3>Ejemplo</h3><p>65 kg que sentadilla 130 → <b>103 DOTS</b>.<br>95 kg que sentadilla 170 → <b class="lime">107 DOTS</b>.<br><span class="muted">Dividir por el peso daba al revés.</span></p></div>
+  </div>
+  <div class="notes">El dato de por qué DOTS y no el ratio es una decisión mía del repaso del grill: el agente propuso 1RM dividido peso, y eso favorece al liviano porque la fuerza no escala lineal con el peso.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Demo · en el gimnasio</p>
+  <div class="shots">
+    <figure><img src="docs/img/carga-en-vivo.png" alt="Carga de una serie con la tarjeta de PR y posición en el grupo"><figcaption>Guardás la serie y ves al instante el PR, a quién pasaste y qué te falta para el siguiente.</figcaption></figure>
+    <figure><img src="docs/img/resumen.png" alt="Resumen de la sesión"><figcaption>El cierre de la sesión: puntaje, lugares que subiste y la semana.</figcaption></figure>
+    <figure><img src="docs/img/cara-a-cara.png" alt="Perfil de un amigo con el cara a cara"><figcaption>Tocás a un bro: su semana y el cara a cara en DOTS.</figcaption></figure>
+  </div>
+  <div class="notes">Acá paso a la demo en vivo. Guion: entro, Entrenar, toco "Toca hoy", cargo una serie con el chip "PR +peso" (dos toques), muestro la tarjeta y el confeti. Termino y muestro el resumen. Después toco a Nacho en el panel y muestro el cara a cara. Si falla la red, estas capturas son el plan B.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Demo · en casa</p>
+  <figure class="wide"><img src="docs/img/comparar.png" alt="Comparar en el panel del grupo"><figcaption>El panel del grupo: las curvas de cada uno, en peso máximo, 1RM estimado o DOTS, por mes o por semana.</figcaption></figure>
+  <div class="notes">Mostrar: prender y apagar personas, cambiar a DOTS (ahí cambia quién va ganando), y a semana a semana. Comentar que "peso máximo" lo pedí yo después: el 1RM es calculado y quería ver el peso real.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Especificación</p>
+  <h2>Todo en disco antes de la primera línea de código</h2>
+  <div class="flow">
+    <span>Pitch</span><i>→</i><span>PRD</span><i>→</i><span>Auto-grill</span><i>→</i><span class="me">Repaso del grill</span><i>→</i><span>Spec</span><i>→</i><span>12 issues</span><i>→</i><span>PR por issue</span>
+  </div>
+  <ul>
+    <li>El agente se hizo las preguntas y propuso respuestas. <b class="lime">Yo las repasé una por una</b> y cambié las importantes.</li>
+    <li>El spec manda: si una regla cambia, cambia el spec en el mismo PR.</li>
+    <li>Cada vuelta nueva (panel, más juego, cuentas) arrancó con otra pasada del grill.</li>
+  </ul>
+  <div class="notes">Los documentos: docs/prd.md, docs/grill.md (con "qué cambió al repasarlo" arriba), docs/spec.md y docs/proceso.md como bitácora. Hubo varias pasadas del grill a lo largo del proyecto.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Decisiones mías, no del agente</p>
+  <table>
+    <tr><th>El agente proponía</th><th>Decidí</th><th>Por qué</th></tr>
+    <tr><td>1RM ÷ peso corporal</td><td>DOTS</td><td>El ratio favorece al liviano.</td></tr>
+    <tr><td>Peso del perfil</td><td>Peso en cada sesión</td><td>Bajar de peso mejoraba marcas viejas.</td></tr>
+    <tr><td>Progreso contra el récord</td><td>Mes contra mes</td><td>El veterano daba siempre negativo.</td></tr>
+    <tr><td>Contar días entrenados</td><td>Objetivo semanal propio</td><td>Premiar al que cumple, no al que más va.</td></tr>
+    <tr><td>"PR de peso" con más reps</td><td>"PR de reps"</td><td>Se leía como un error.</td></tr>
+    <tr><td>Google con Auth0</td><td>Usuario y contraseña</td><td>Google no anda en el celular sin HTTPS.</td></tr>
+  </table>
+  <div class="notes">Esta es la slide de apropiación de decisiones. Las primeras cuatro salieron del repaso del grill. Las dos últimas salieron de usar la app: el gym-bro marcó lo de PR de reps, y lo de Auth0 lo descubrí cuando quise entrar desde el celular.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Arquitectura y contrato</p>
+  <div class="arch">
+    <div class="box"><h3>Frontend</h3><p>HTML, CSS y JS con ES modules. Sin build. Una vista por archivo.</p></div>
+    <span class="arrow">→</span>
+    <div class="box"><h3>API</h3><p>FastAPI + SQLite. 38 endpoints, un router por recurso. 404 / 403 / 409 / 422 según el caso.</p></div>
+    <span class="arrow">→</span>
+    <div class="box core"><h3>backend/stats/</h3><p>Las reglas, como funciones puras: sin base ni HTTP. Con TDD.</p></div>
+  </div>
+  <ul>
+    <li><b class="lime">Todo lo derivable se calcula al leer:</b> PRs, rankings y duelos no se guardan. Borrar una sesión no deja nada inconsistente.</li>
+    <li>Las sesiones son del usuario, no del grupo: lo que entrenás cuenta en todos tus grupos.</li>
+  </ul>
+  <div class="notes">El módulo de stats es el módulo profundo: recibe series y una fecha y devuelve tablas. Por eso pude cambiar reglas con test primero sin tocar las rutas. La única excepción a "calcular al leer" es el ganador de una campaña cerrada, que se congela porque es un premio.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Gestión del contexto</p>
+  <h2>El proyecto creció; el agente no se perdió porque las reglas estaban escritas</h2>
+  <div class="cols">
+    <div class="card"><h3>.claude/ versionado</h3><ul><li><code>CLAUDE.md</code>: dónde está el spec y los límites (300 líneas por archivo).</li><li>Reglas por path: backend, frontend, tests.</li><li>Permisos: push y merge piden ok; <code>.env</code> no se lee.</li></ul></div>
+    <div class="card"><h3>Herramientas propias</h3><ul><li>Skill <code>nuevo-ranking</code>: regla del spec → test → función.</li><li>Sub-agente <code>gym-bro</code>: prueba la app como usuario.</li></ul></div>
+    <div class="card"><h3>Cuando algo creció</h3><ul><li><code>stats.py</code> y <code>schemas.py</code> pasaron a paquetes.</li><li>La pantalla de carga se partió tres veces en vez de subir el límite.</li></ul></div>
+  </div>
+  <div class="notes">La regla de "no cambies una decisión del grill sin preguntar" en CLAUDE.md funcionó: cuando el gym-bro pidió "PR de reps", el agente no lo cambió solo, me preguntó.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Evidencia en el repo</p>
+  <div class="numbers">
+    <div><strong>48</strong><span>PRs, uno por issue o arreglo</span></div>
+    <div><strong>31</strong><span>issues, de cortes verticales a devoluciones</span></div>
+    <div><strong>18</strong><span>commits de test en rojo antes del código</span></div>
+    <div><strong>164</strong><span>tests en verde</span></div>
+  </div>
+  <p class="muted">Tres semanas, del pitch (22/9) al Demo Day. Branch por cambio, PR que cierra su issue y merge a main.</p>
+  <div class="notes">Si da el tiempo, abrir GitHub y mostrar un PR con su commit de test en rojo y después el de implementación. Por ejemplo el de "posición en vivo".</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Deriva del agente · 1</p>
+  <h2>Tres reglas del spec estaban mal, y los tests pasaban</h2>
+  <ul>
+    <li><b>Constancia</b> salía siempre "sin datos": el primer objetivo regía recién desde la semana del registro.</li>
+    <li><b>Progreso</b> en 6 meses o "Todo" quedaba vacío: comparaba contra un mes sin datos.</li>
+    <li><b>PRs:</b> la primera sesión tiraba cuatro y llenaba el feed.</li>
+  </ul>
+  <div class="lesson"><p>Las encontró el gym-bro usando la app, no los tests. Un test verde dice que el código cumple la regla, no que la regla sirva.</p></div>
+  <div class="notes">Los tests verificaban exactamente lo que decía el spec: el error estaba en el spec. Corregí las tres con test primero y lo anoté en el spec. Esta es probablemente la lección más importante del proyecto.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Deriva del agente · 2</p>
+  <h2>Lo que vi yo al usarla</h2>
+  <div class="cols">
+    <div class="card"><h3 class="ember">"¿Terminar qué?"</h3><p>La carga tenía muchos botones, y "Terminar (1)" estaba al lado de "Guardar serie". Rediseño: <b>una sola acción grande por momento</b>, "✓ Hice la serie 2 de 5".</p></div>
+    <div class="card"><h3 class="ember">Datos que se duplicaban</h3><p>Correr dos veces el script de datos de prueba inventaba días nuevos. Restauré el backup y lo hice repetible.</p></div>
+    <div class="card"><h3 class="ember">Google en el celular</h3><p>Auth0 no corre sin HTTPS fuera de localhost. Lo apagué y sumé usuario y contraseña propios, con la contraseña hasheada.</p></div>
+  </div>
+  <div class="notes">Ninguno de estos lo hubiera detectado un test. El de la UX lo marqué yo con una captura. El del script lo vio el agente al revisar los números (319 sesiones cuando esperaba 100). Lo de Auth0 lo entendí recién cuando quise entrar desde el celular.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Prueba con un agente usuario</p>
+  <h2>El gym-bro: el celular en una mano y el gimnasio lleno</h2>
+  <div class="cols">
+    <div class="card"><h3>Cómo</h3><p>Un sub-agente que no lee el código. Carga sesiones con errores a propósito, recarga a mitad de carga y después revisa todo en casa, en el celular y en escritorio.</p></div>
+    <div class="card"><h3>Tres pasadas</h3><p>Cada una con su devolución por gravedad, en <code>docs/devolucion-gym-bro.md</code>, y los arreglos en el PR siguiente.</p></div>
+    <div class="card"><h3>Medido</h3><p>Toques por serie: <b class="lime">2,6 → 1,8</b> con "Para PR".<br>Peso de 2260 kg por un campo que no seleccionaba: corregido.</p></div>
+  </div>
+  <div class="notes">El agente está definido en .claude/agents/gym-bro.md. Lo valioso fue pedirle mediciones concretas (toques, qué leyó dos veces, qué quedó lejos del pulgar) en vez de una opinión general.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Apropiación</p>
+  <h2>Lo puedo explicar, corregir y extender</h2>
+  <div class="cols">
+    <pre><span class="c"># PR: contra las sesiones anteriores,
+# a lo sumo uno por ejercicio y sesión</span>
+<span class="k">if</span> load &gt; best_load:      pr = <span class="k">"weight"</span>
+<span class="k">elif</span> load == best_load:   pr = <span class="k">"reps"</span>
+<span class="k">elif</span> 1rm &gt; best_1rm:      pr = <span class="k">"1rm"</span>
+
+<span class="c"># 1RM estimado (Epley), hasta 10 reps</span>
+1rm = load × (1 + reps / 30)</pre>
+    <div class="card"><h3>Ejemplo: "Pasar a Nacho"</h3><p>Tomo el DOTS de Nacho, lo paso a kilos con tu peso del día y despejo Epley a tus mismas reps. Redondeo hacia arriba a discos de 2,5 kg hasta superarlo.</p><p class="muted" style="margin-top:1.6vh">Está en <code>backend/stats/standing.py</code>, con su test.</p></div>
+  </div>
+  <div class="notes">Si preguntan por algo puntual, saber explicar: DOTS (polinomio por sexo, peso acotado), la regla de PRs, por qué se calcula al leer, y cómo funciona el token de sesión (se guarda el sha256, no el token).</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Qué me llevo</p>
+  <div class="cols">
+    <div class="card"><h3>Repasar el grill</h3><p>Las mejores decisiones salieron de corregir lo que el agente proponía, no de pedirle algo nuevo.</p></div>
+    <div class="card"><h3>Probar como usuario</h3><p>Los tests protegen las reglas; un agente usuario (o yo con el celular) encuentra si las reglas sirven.</p></div>
+    <div class="card"><h3>Escribir los límites</h3><p>CLAUDE.md, reglas y permisos hicieron que el proyecto creciera sin que el agente se desordenara.</p></div>
+  </div>
+  <div class="notes">Si hubiera que hacerlo de nuevo: correr el gym-bro antes, apenas hubo una primera versión, en vez de después de los 12 issues.</div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Gracias</p>
+  <h1>¿Preguntas?</h1>
+  <p class="big">github.com/AlejoGm/Alejo-Garcia-Mata-iisaia <span class="muted">· tp-final/</span></p>
+  <p class="muted">README como informe · docs/grill.md · docs/spec.md · docs/proceso.md · docs/devolucion-gym-bro.md</p>
+  <div class="notes">Dejar abierta la app en el celular y en la compu para las preguntas.</div>
+</section>
+
+<div id="notes"></div>
+<div class="counter" id="counter"></div>
+<div class="hint">← → avanzar · F pantalla completa · N notas</div>
+
+<script>
+  const slides = [...document.querySelectorAll(".slide")];
+  const notes = document.getElementById("notes");
+  let current = 0;
+  function show(i) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, j) => s.classList.toggle("active", j === current));
+    document.getElementById("counter").textContent = `${current + 1} / ${slides.length}`;
+    notes.textContent = slides[current].querySelector(".notes")?.textContent ?? "";
+  }
+  document.addEventListener("keydown", (e) => {
+    if (["ArrowRight", "ArrowDown", " ", "PageDown"].includes(e.key)) show(current + 1);
+    if (["ArrowLeft", "ArrowUp", "PageUp"].includes(e.key)) show(current - 1);
+    if (e.key === "f" || e.key === "F") document.documentElement.requestFullscreen?.();
+    if (e.key === "n" || e.key === "N") document.body.classList.toggle("show-notes");
+  });
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("#notes")) return;
+    show(current + (e.clientX < window.innerWidth / 3 ? -1 : 1));
+  });
+  show(0);
+</script>
+</body>
+</html>
