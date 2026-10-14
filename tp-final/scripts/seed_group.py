@@ -1,10 +1,11 @@
 """Puebla un grupo que ya existe con participantes de mentira, campañas y duelos. Solo en modo dev.
 
-    uv run python -m scripts.seed_group CODIGO --as alejo [--weeks 26]
+    uv run python -m scripts.seed_group CODIGO --as alejo [--weeks 26] [--me]
 
 `--as` es el nombre (dev) de un miembro del grupo; si es admin, también crea campañas. Los participantes siguen
 la primera rutina del grupo y entrenan sus días en orden; sin rutina, hacen los desafíos. Se puede correr de
-nuevo: los que ya están no se vuelven a sumar y no se cargan sesiones en días que ya entrenaron.
+nuevo: los que ya están no se vuelven a sumar y no se cargan sesiones en días que ya entrenaron. Con `--me`, el
+que corre el script también recibe historia, con su peso y su objetivo, sin tocarle el perfil.
 """
 import argparse
 import random
@@ -97,13 +98,15 @@ def plans_for(client: TestClient, code: str, reader: dict, group: dict) -> tuple
     return [[(exercises[c["id"]], 3) for c in group["challenges"]]], [None], None
 
 
-def seed_person(client: TestClient, code: str, fake: tuple, position: int, plans: tuple, weeks: int) -> int:
+def seed_person(client: TestClient, code: str, fake: tuple, position: int, plans: tuple, weeks: int,
+                profile: bool = True) -> int:
     name, bodyweight, goal, factor, skip, history = fake
     plan_days, day_ids, routine_id = plans
     rng = random.Random(f"{code}-{name}")
     headers = auth(name)
-    client.put("/api/me", headers=headers, json={"display_name": name, "sex": "M", "weekly_goal": goal})
-    client.post(f"/api/groups/{code}/join", headers=headers)
+    if profile:
+        client.put("/api/me", headers=headers, json={"display_name": name, "sex": "M", "weekly_goal": goal})
+        client.post(f"/api/groups/{code}/join", headers=headers)
     if routine_id:
         client.put(f"/api/groups/{code}/members/me/routine", headers=headers, json={"routine_id": routine_id})
     trained = {d["day"] for d in client.get("/api/me/stats", headers=headers).json()["calendar"]}
@@ -118,12 +121,12 @@ def seed_person(client: TestClient, code: str, fake: tuple, position: int, plans
         for day in training_days(rng, goal, this_monday - timedelta(weeks=week), today):
             slot = day_index % len(plan_days)
             day_index += 1
-            if day.isoformat() in trained:
-                continue
-            client.post("/api/me/sessions", headers=headers, json={
-                "date": day.isoformat(), "bodyweight_kg": round(bodyweight + rng.uniform(-1.2, 1.2), 1),
-                "routine_day_id": day_ids[slot], "sets": session_sets(rng, plan_days[slot], factor, level)})
-            added += 1
+            # Se arma igual aunque el día ya esté cargado: así el azar no se desfasa y repetir no agrega días nuevos.
+            body = {"date": day.isoformat(), "bodyweight_kg": round(bodyweight + rng.uniform(-1.2, 1.2), 1),
+                    "routine_day_id": day_ids[slot], "sets": session_sets(rng, plan_days[slot], factor, level)}
+            if day.isoformat() not in trained:
+                client.post("/api/me/sessions", headers=headers, json=body)
+                added += 1
     return added
 
 
@@ -177,7 +180,7 @@ def campaigns(client: TestClient, code: str, reader: dict, catalog: dict[str, in
     return created
 
 
-def seed(code: str, reader_name: str, weeks: int) -> None:
+def seed(code: str, reader_name: str, weeks: int, me: bool) -> None:
     reader = auth(reader_name)
     with TestClient(app) as client:
         group = client.get(f"/api/groups/{code}", headers=reader)
@@ -186,6 +189,10 @@ def seed(code: str, reader_name: str, weeks: int) -> None:
         group = group.json()
         plans = plans_for(client, code, reader, group)
         sessions = sum(seed_person(client, code, fake, i, plans, weeks) for i, fake in enumerate(FAKES))
+        if me:
+            profile = client.get("/api/me", headers=reader).json()
+            mine = (reader_name, profile["last_bodyweight_kg"] or 80, profile["weekly_goal"] or 4, 1.05, 0.08, weeks)
+            sessions += seed_person(client, code, mine, len(FAKES), plans, weeks, profile=False)
         react(client, code, random.Random(code))
         catalog = {e["name"]: e["id"] for e in client.get("/api/exercises", headers=reader).json()}
         detail = client.get(f"/api/groups/{code}", headers=reader).json()
@@ -202,8 +209,9 @@ def main() -> None:
     parser.add_argument("code", help="código del grupo")
     parser.add_argument("--as", dest="reader", required=True, help="nombre dev de un miembro del grupo")
     parser.add_argument("--weeks", type=int, default=26, help="semanas de historia (por defecto 26)")
+    parser.add_argument("--me", action="store_true", help="cargarle historia también al que corre el script")
     args = parser.parse_args()
-    seed(args.code.upper(), args.reader, args.weeks)
+    seed(args.code.upper(), args.reader, args.weeks, args.me)
 
 
 if __name__ == "__main__":
