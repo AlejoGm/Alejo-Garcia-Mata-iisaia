@@ -83,3 +83,23 @@ def training_calendar(records: list[SetRecord], today: date, weeks: int = 26) ->
     start = monday(today) - timedelta(weeks=weeks - 1)
     counts = Counter(r.date for r in in_range(records, start, today))
     return [DayCount(day, sets) for day, sets in sorted(counts.items())]
+
+
+@dataclass(frozen=True)
+class MuscleSets:
+    muscle: str
+    this_week: int
+    average: float
+
+
+def muscle_sets(records: list[SetRecord], muscles: dict[int, str], today: date, weeks: int = 4) -> list[MuscleSets]:
+    """Series por músculo: promedio semanal de las últimas `weeks` semanas cerradas y lo que va de esta."""
+    this_monday = monday(today)
+    start = this_monday - timedelta(weeks=weeks)
+    past: Counter = Counter()
+    current: Counter = Counter()
+    for r in in_range(records, start, today):
+        muscle = muscles.get(r.exercise_id, "Otros")
+        (current if r.date >= this_monday else past)[muscle] += 1
+    result = [MuscleSets(m, current[m], round(past[m] / weeks, 1)) for m in set(past) | set(current)]
+    return sorted(result, key=lambda m: (-m.average, -m.this_week, m.muscle))

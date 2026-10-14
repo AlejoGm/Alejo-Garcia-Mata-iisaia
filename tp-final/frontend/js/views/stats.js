@@ -3,7 +3,7 @@ import { setChrome, state } from "../app.js";
 import { heatmap, lineChart } from "../charts.js";
 import { icon } from "../icons.js";
 import { medalsCard } from "../medals.js";
-import { el, errorBox, storageGet, storageSet, toDisplay, weight } from "../ui.js";
+import { el, errorBox, num, storageGet, storageSet, toDisplay, weight } from "../ui.js";
 
 const PERIODS = [["6m", "6 meses"], ["12m", "12 meses"], ["all", "Todo"]];
 const PREFS = "gymbro.statsPrefs";
@@ -20,6 +20,23 @@ function dayShort(iso) {
 
 function legend(items) {
   return el("div", { class: "legend" }, items.map(([cls, text]) => el("span", { class: `legend-item ${cls}` }, text)));
+}
+
+// Guía común de hipertrofia: entre 10 y 20 series por semana por músculo.
+const GUIDE = [10, 20];
+
+function musclesCard(muscles) {
+  const max = Math.max(GUIDE[1], ...muscles.map((m) => Math.max(m.average, m.this_week)));
+  const pct = (v) => `${(100 * v) / max}%`;
+  return el("div", { class: "card" }, el("h3", {}, "Series por músculo"),
+    el("p", { class: "muted small" }, "Promedio por semana de las últimas 4 semanas cerradas. La franja marca la guía común de 10 a 20 series para ganar músculo; la línea, lo que llevás esta semana."),
+    muscles.length ? el("ul", { class: "muscles" }, muscles.map((m) => el("li", {},
+      el("span", { class: "muscle-name" }, m.muscle),
+      el("span", { class: "muscle-track", style: `--guide-from:${pct(GUIDE[0])};--guide-to:${pct(GUIDE[1])}` },
+        el("span", { class: "muscle-bar", style: `width:${pct(m.average)}` }),
+        m.this_week ? el("span", { class: "muscle-now", style: `left:${pct(m.this_week)}`, title: `Esta semana: ${m.this_week}` }) : ""),
+      el("span", { class: "muscle-value" }, el("strong", {}, num(m.average)), el("span", { class: "muted small" }, `esta sem. ${m.this_week}`)))))
+      : el("p", { class: "muted" }, "Todavía no hay series en las últimas semanas."));
 }
 
 export async function statsView(app) {
@@ -73,6 +90,7 @@ export async function statsView(app) {
       el("div", { class: "card" }, el("h3", {}, `Peso corporal (${unit})`),
         lineChart({ label: "Peso corporal por semana", labels: data.bodyweight.map((p) => dayShort(p.week)),
           series: [{ className: "bw", values: data.bodyweight.map((p) => conv(p.kg)) }] })),
+      musclesCard(data.muscles),
       el("div", { class: "card" }, el("h3", {}, "Constancia"),
         el("p", { class: "muted small" }, `${data.calendar.length} días entrenados en las últimas 26 semanas. Más series, más verde.`),
         heatmap(data.calendar),
