@@ -37,3 +37,14 @@ def test_compare_max_weight_includes_exercises_without_1rm(client):
     body = client.get(f"/api/groups/{code}/compare", params={"metric": "max"}, headers=users["ana"]).json()
     assert body["exercise_id"] == curl
     assert next(p for p in body["people"] if p["display_name"] == "ana")["months"][-1] == 15
+
+
+def test_compare_includes_each_session(client):
+    code, users = setup_group(client)
+    squat = exercise_id(client, users["ana"], "Sentadilla")
+    post(client, users["ana"], [{"exercise_id": squat, "weight_kg": 90, "reps": 3}], day=date.today() - timedelta(days=2))
+    post(client, users["ana"], [{"exercise_id": squat, "weight_kg": 95, "reps": 3}])
+    body = client.get(f"/api/groups/{code}/compare", params={"metric": "max"}, headers=users["ana"]).json()
+    ana = next(p for p in body["people"] if p["display_name"] == "ana")
+    assert [s["value"] for s in ana["sessions"]] == [90, 95]
+    assert ana["sessions"][-1]["day"] == date.today().isoformat()

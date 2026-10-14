@@ -3,7 +3,8 @@ from datetime import date, timedelta
 import pytest
 
 from backend.stats import (
-    bodyweight_series, monthly_best_by_user, monthly_series, muscle_sets, training_calendar, weekly_days_by_user,
+    bodyweight_series, monthly_best_by_user, monthly_series, muscle_sets, session_best_by_user, training_calendar,
+    weekly_days_by_user,
     weekly_series,
 )
 from tests.test_stats import rec
@@ -105,3 +106,16 @@ def test_monthly_best_by_user_max_weight_is_raw_and_counts_any_reps():
                rec(60, 15, day=date(2026, 9, 9), user=2)]  # 15 reps: sin 1RM, pero el peso cuenta
     result = monthly_best_by_user(records, 1, date(2026, 9, 1), date(2026, 9, 30), {1: "M", 2: "M"}, "max")
     assert result == {1: [120], 2: [60]}
+
+
+def test_session_best_by_user_one_point_per_session_in_order():
+    records = [
+        rec(100, 5, day=date(2026, 9, 3), user=1, session=1), rec(110, 1, day=date(2026, 9, 3), user=1, session=1),
+        rec(105, 2, day=date(2026, 9, 10), user=1, session=2),
+        rec(60, 15, day=date(2026, 9, 5), user=2, session=3),
+        rec(70, 5, day=date(2026, 8, 30), user=2, session=4),  # fuera del período
+    ]
+    sexes = {1: "M", 2: "M"}
+    result = session_best_by_user(records, 1, date(2026, 9, 1), date(2026, 9, 30), sexes, "max")
+    assert result == {1: [(date(2026, 9, 3), 110), (date(2026, 9, 10), 105)], 2: [(date(2026, 9, 5), 60)]}
+    assert session_best_by_user(records, 1, date(2026, 9, 1), date(2026, 9, 30), sexes, "1rm")[2] == []
