@@ -3,6 +3,8 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field, field_validator
 
+from backend.schemas.common import Person
+
 
 class SetInput(BaseModel):
     exercise_id: int
@@ -62,3 +64,29 @@ class LastOut(BaseModel):
     mine: LastSet | None
     others: list[LastSet]
     targets: list[TargetOut]
+
+
+class StandingInput(BaseModel):
+    exercise_id: int
+    weight_kg: Annotated[float, Field(ge=0, le=500)]
+    reps: Annotated[int, Field(ge=1, le=50)]
+    bodyweight_kg: Annotated[float, Field(ge=30, le=300)]
+
+
+class NextRivalOut(BaseModel):
+    user_id: int
+    display_name: str
+    dots: float
+    weight_kg: float | None
+    reps: int
+
+
+class StandingOut(BaseModel):
+    pr: str | None
+    estimated_1rm: float | None
+    dots: float | None
+    position_before: int | None
+    position: int | None
+    total: int
+    passed: list[Person]
+    next: NextRivalOut | None

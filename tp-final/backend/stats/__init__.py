@@ -20,6 +20,7 @@ from backend.stats.personal import (
     training_calendar, weekly_series,
 )
 from backend.stats.achievements import ACHIEVEMENTS, Achievement, achievements
+from backend.stats.standing import Standing, set_for_1rm, standing
 from backend.stats.targets import PRTarget, pr_targets
 from backend.stats.dashboard import (
     DayActivity, WeekActivity, WeekAwards, day_activity, goal_progress, session_count, volume, week_awards,

@@ -478,3 +478,21 @@ details.card[open] > summary::after { transform: rotate(-135deg); }
 .muscle-now { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1px; border-radius: 2px; background: var(--text); }
 .muscle-value { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; }
 .muscle-value strong { font-variant-numeric: tabular-nums; }
+
+/* Posición en vivo */
+.feedback { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: var(--r-control); background: var(--surface-2); box-shadow: inset 3px 0 0 var(--mint); animation: rise 0.25s ease-out; }
+.feedback.hot { box-shadow: inset 3px 0 0 var(--lime), 0 0 24px rgba(200, 245, 59, 0.25); }
+.feedback .chip { align-self: flex-start; }
+.feedback-pr { font-size: 1.25rem; font-weight: 800; color: var(--lime); }
+.feedback-place { font-weight: 700; }
+.feedback-passed { color: var(--mint); }
+.chip.target.rival { color: var(--mint); box-shadow: inset 0 0 0 1px var(--mint); }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Confeti y rebote */
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; overflow: hidden; }
+.confetti span { position: absolute; top: -16px; left: var(--x); width: 8px; height: 13px; border-radius: 2px; background: var(--c); animation: fall var(--d) ease-in var(--delay) forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(var(--r)); } }
+.pop { animation: pop 0.22s ease-out; }
+@keyframes pop { 50% { transform: scale(1.14); } }
+@media (prefers-reduced-motion: reduce) { .feedback { animation: none; } .confetti { display: none; } }
