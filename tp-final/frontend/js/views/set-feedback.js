@@ -56,10 +56,3 @@ export function feedbackCard(result, exercise, unit, onPick) {
   lines.push(rivalButton(result.next, unit, onPick));
   return el("div", { class: `feedback${result.pr ? " hot" : ""}`, role: "status" }, lines);
 }
-
-/** En la tarjeta del ejercicio: tu lugar actual y el botón para pasar al siguiente. */
-export function standingRow(tracked, unit, onPick) {
-  if (!tracked || tracked.after === null) return "";
-  return el("div", { class: "targets" }, el("span", { class: "muted small" }, `Vas ${tracked.after}º de ${tracked.total}.`),
-    rivalButton(tracked.next, unit, onPick));
-}

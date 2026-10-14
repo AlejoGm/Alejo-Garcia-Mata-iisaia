@@ -1,3 +1,4 @@
+import { setsDone } from "../draft.js";
 import { pop, vibrate } from "../juice.js";
 import { dayLabel, el, num, toDisplay, weight } from "../ui.js";
 
@@ -109,15 +110,48 @@ export function platesText(total, unit) {
   return `Por lado: ${result.plates.map((p) => num(p, 2)).join(" + ")}${rest}.`;
 }
 
-/** Botones del objetivo para PR. Si una serie de hoy ya lo alcanzó, lo festeja en vez de sugerir. */
-export function targetButtons(targets, todaySets, unit, onPick, isPicked = () => false) {
-  if (!targets.length) return "";
+/**
+ * Una sola fila de sugerencias que se cargan con un toque: romper tu marca y pasar al siguiente del grupo.
+ * Si una serie de hoy ya rompió la marca, lo dice en vez de sugerirla.
+ */
+export function suggestionRow(targets, todaySets, rival, unit, onPick, isPicked) {
   const reached = targets.some((t) => todaySets.some((s) => s.weight_kg >= t.weight_kg - 0.01 && s.reps >= t.reps));
-  if (reached) return el("p", { class: "notice" }, "Ya rompiste tu marca hoy.");
-  return el("div", { class: "targets" }, el("span", { class: "muted small" }, "Para PR:"),
-    targets.map((t) => el("button", { type: "button", class: `chip target${isPicked(t) ? " active" : ""}`, onclick: () => onPick(t),
-      "aria-label": `Cargar ${num(toDisplay(t.weight_kg, unit))} ${unit} por ${t.reps}` },
-    `${t.kind === "reps" ? "+1 rep" : "+peso"}: ${num(toDisplay(t.weight_kg, unit))} × ${t.reps}`)));
+  const chip = (t, text, cls) => el("button", { type: "button", class: `chip target ${cls}${isPicked(t) ? " active" : ""}`,
+    onclick: () => onPick(t), "aria-label": `Cargar ${num(toDisplay(t.weight_kg, unit))} ${unit} por ${t.reps}` },
+  `${text} · ${num(toDisplay(t.weight_kg, unit))} × ${t.reps}`);
+  const chips = reached ? [] : targets.map((t) => chip(t, t.kind === "reps" ? "PR +1 rep" : "PR +peso", ""));
+  if (rival?.weight_kg) chips.push(chip(rival, `Pasar a ${rival.display_name}`, "rival"));
+  if (!chips.length && !reached) return "";
+  return el("div", { class: "suggestions" },
+    reached ? el("p", { class: "notice" }, "Ya rompiste tu marca hoy.") : "",
+    chips.length ? el("span", { class: "muted small" }, "Tocá para cargar") : "",
+    chips.length ? el("div", { class: "targets" }, chips) : "");
+}
+
+/** Cuántas series del plan van hechas, sin contar las extra. */
+export function planProgress(draft) {
+  const total = draft.plan.reduce((sum, item) => sum + item.sets, 0);
+  const done = draft.plan.reduce((sum, item) => sum + Math.min(item.sets, draft.sets.filter((s) => s.exercise_id === item.exercise_id).length), 0);
+  return { done, total, complete: total > 0 && done >= total };
+}
+
+/** Arriba de todo: cuánto falta del entrenamiento y el único botón para terminarlo. */
+export function sessionStrip(draft, onFinish, details) {
+  const { done, total } = planProgress(draft);
+  const text = total ? `${done} de ${total} series` : `${draft.sets.length} ${draft.sets.length === 1 ? "serie" : "series"}`;
+  const title = draft.title.split(" · ").at(-1);
+  return el("div", { class: "card session-strip" },
+    el("div", { class: "spread" }, el("span", { class: "person-text" }, el("strong", {}, title), el("span", { class: "muted small" }, text)),
+      el("button", { type: "button", class: "ghost finish-link", disabled: !draft.sets.length, onclick: (event) => onFinish(event.currentTarget) },
+        "Terminar entrenamiento")),
+    total ? el("div", { class: "progress" }, el("span", { style: `width:${(100 * done) / total}%` })) : "", details);
+}
+
+/** Un punto por serie del ejercicio: lleno las hechas, marcado el que estás por hacer. */
+export function setDots(done, planned) {
+  const count = Math.max(planned, done + 1);
+  return el("div", { class: "set-dots", "aria-hidden": "true" }, Array.from({ length: count }, (_, i) =>
+    el("span", { class: i < done ? "done" : i === done ? "current" : i >= planned ? "extra" : "" })));
 }
 
 /** Selector de ejercicio: primero los desafíos del grupo, después el resto del catálogo. */
@@ -135,13 +169,34 @@ export function pickerSelect(exercises, group, selectedId, onChoose) {
 /** Fecha y peso corporal de la sesión, plegados cuando ya están; abiertos si falta el peso. */
 export function sessionDetails(draft, unit, persist, onDiscard) {
   const summary = el("summary", {});
-  const describe = () => { summary.textContent = `${draft.title} · ${dayLabel(draft.date)} · ${draft.bodyweight ? `${num(draft.bodyweight)} ${unit}` : "falta tu peso"}`; };
+  const describe = () => { summary.textContent = `${dayLabel(draft.date)} · ${draft.bodyweight ? `${num(draft.bodyweight)} ${unit}` : "falta tu peso corporal"}`; };
   describe();
   const date = el("input", { type: "date", value: draft.date, max: new Date().toLocaleDateString("en-CA") });
   date.addEventListener("change", () => { draft.date = date.value; persist(); describe(); });
   const bodyweight = el("input", { type: "number", inputmode: "decimal", value: String(draft.bodyweight ?? "") });
   bodyweight.addEventListener("input", () => { draft.bodyweight = Number(bodyweight.value) || null; persist(); describe(); });
   const discard = el("button", { type: "button", class: "danger", onclick: onDiscard }, "Descartar sesión");
-  return el("details", { class: "card", open: !draft.bodyweight }, summary,
+  return el("details", { class: "session-details", open: !draft.bodyweight }, summary,
     el("div", { class: "row" }, el("label", {}, "Fecha", date), el("label", {}, `Peso corporal (${unit})`, bodyweight)), discard);
+}
+
+/** Los ejercicios del plan como pestañas, con cuántas series lleva cada uno. */
+export function planChipRow(draft, onChoose) {
+  if (!draft.plan.length) return "";
+  return el("div", { class: "chips" }, draft.plan.map((item, index) => {
+    const done = setsDone(draft, item.exercise_id);
+    return el("button", { type: "button", class: `chip${index === draft.step ? " active" : ""}${done >= item.sets ? " done" : ""}`,
+      onclick: () => onChoose(index, item.exercise_id) }, `${item.name} ${done}/${item.sets}`);
+  }));
+}
+
+/** Las series ya hechas: tocar una la corrige, la cruz la borra (con deshacer). */
+export function setsList(draft, byId, unit, editing, onEdit, onRemove) {
+  if (!draft.sets.length) return "";
+  const items = draft.sets.map((s, index) => el("li", { class: index === editing ? "editing" : null },
+    el("button", { type: "button", class: "set-edit", onclick: () => onEdit(index), "aria-label": "Corregir serie" },
+      `${index + 1}. ${byId.get(s.exercise_id)?.name ?? "?"} · ${loadText(s.weight_kg, unit, byId.get(s.exercise_id)?.bodyweight)} × ${s.reps}`),
+    el("button", { type: "button", class: "secondary", style: "flex:0", "aria-label": "Borrar serie", onclick: () => onRemove(index) }, "×")));
+  return el("div", { class: "card" }, el("h3", {}, `Series hechas (${draft.sets.length})`),
+    el("p", { class: "muted small" }, "Tocá una serie para corregirla."), el("ul", { class: "list" }, items));
 }
