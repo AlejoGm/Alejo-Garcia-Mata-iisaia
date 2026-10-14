@@ -559,7 +559,7 @@ button.link:disabled, button.ghost:disabled { color: var(--muted); }
 .compare-controls { display: flex; flex-direction: column; gap: 10px; }
 .compare-charts { display: grid; gap: 18px; }
 @media (min-width: 900px) {
-  .compare-controls { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; align-items: center; }
+  .compare-controls { display: grid; grid-template-columns: 1fr 1.5fr 1fr; align-items: center; }
   .compare-charts { grid-template-columns: 1.4fr 1fr; }
   .dash > .span-12 { grid-column: span 12; }
 }
