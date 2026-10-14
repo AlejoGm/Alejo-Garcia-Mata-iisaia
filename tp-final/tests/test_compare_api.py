@@ -1,0 +1,30 @@
+from datetime import date, timedelta
+
+from tests.conftest import exercise_id
+from tests.test_rankings_api import setup_group
+from tests.test_sessions import post
+
+
+def test_compare_lines_per_member(client):
+    code, users = setup_group(client)
+    squat = exercise_id(client, users["ana"], "Sentadilla")
+    post(client, users["ana"], [{"exercise_id": squat, "weight_kg": 100, "reps": 1}], bodyweight=90)
+    post(client, users["beto"], [{"exercise_id": squat, "weight_kg": 90, "reps": 1}], bodyweight=60)
+    post(client, users["beto"], [{"exercise_id": squat, "weight_kg": 80, "reps": 1}],
+         day=date.today() - timedelta(days=7), bodyweight=60)
+
+    body = client.get(f"/api/groups/{code}/compare", params={"metric": "1rm"}, headers=users["ana"]).json()
+
+    assert body["exercise_id"] == squat  # el más cargado del grupo
+    assert [e["name"] for e in body["exercises"]] == ["Sentadilla"]
+    assert len(body["months"]) == 6
+    lines = {p["display_name"]: p for p in body["people"]}
+    assert lines["ana"]["months"][-1] == 100
+    assert lines["caro"]["months"] == [None] * 6
+    assert len(body["weeks"]) == 12
+    assert lines["beto"]["days"][-1] == 1
+
+
+def test_compare_rejects_unknown_metric(client):
+    code, users = setup_group(client)
+    assert client.get(f"/api/groups/{code}/compare", params={"metric": "x"}, headers=users["ana"]).status_code == 422
