@@ -97,3 +97,8 @@ def test_manifest_and_icons_are_served(client):
     assert manifest.headers["content-type"].startswith("application/manifest+json")
     for icon in manifest.json()["icons"]:
         assert client.get(f"/{icon['src']}").status_code == 200
+
+
+def test_every_catalog_exercise_has_a_muscle():
+    from backend.catalog import EXERCISES, MUSCLES
+    assert {name for name, _ in EXERCISES} == set(MUSCLES)
