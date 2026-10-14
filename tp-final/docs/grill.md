@@ -286,3 +286,10 @@ Pedido: que la app se sienta más como un juego. No con features nuevas, sino co
 Con "reducir movimiento" activado en el sistema, no hay animaciones.
 
 **¿Qué queda afuera?** Puntos de experiencia, niveles y sonidos. Son features nuevas con reglas propias, y el pedido es que lo que ya existe se sienta mejor.
+
+**Después de probarlo, Alejo marcó que la carga confundía:** muchos botones, y no se sabía si "Terminar" terminaba la serie o el entrenamiento. Se rehízo con una regla: una sola acción grande por momento.
+- **El botón principal dice qué hace:** "✓ Hice la serie 2 de 5". Pasa a "Confirmar 110 kg" con un peso raro, a "Guardar corrección" al editar, y a "Terminar entrenamiento" recién cuando la rutina está completa.
+- **"Terminar entrenamiento" vive arriba,** junto al progreso ("6 de 22 series"), y pide confirmación si faltan series. Ya no está al lado de guardar.
+- **Modo foco:** mientras cargás se esconde la barra de pestañas, para que no compitan dos botones verdes.
+- **El descanso es un texto, no un botón:** "Descanso 1:28", con "+30 s" y "Saltar" como enlaces.
+- **Una sola fila "Tocá para cargar"** con los objetivos de PR y el de pasar al siguiente, y puntos que muestran qué series del ejercicio ya hiciste.

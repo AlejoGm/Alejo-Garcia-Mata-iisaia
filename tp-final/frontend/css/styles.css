@@ -506,3 +506,32 @@ details.card[open] > summary::after { transform: rotate(-135deg); }
 .medal-icon.earned { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 999px; background: rgba(200, 245, 59, 0.14); color: var(--lime); }
 .save-set.saved { animation: pop 0.22s ease-out; box-shadow: 0 0 26px rgba(200, 245, 59, 0.55); }
 @media (prefers-reduced-motion: reduce) { .pop, .save-set.saved { animation: none; } }
+
+/* Carga clara: una acción principal, el resto se lee como estado o como enlace */
+body.with-logger-bar .tabs { display: none; }
+body.with-logger-bar { padding-bottom: calc(var(--logger-bar-h, 120px) + 40px + env(safe-area-inset-bottom)); }
+body.with-logger-bar .logger-bar { bottom: calc(12px + env(safe-area-inset-bottom)); }
+.logger-bar .save-set { width: 100%; min-height: 68px; font-size: 1.2rem; font-weight: 800; }
+button.link, button.ghost { background: transparent; box-shadow: none; min-height: 40px; padding: 6px 4px; color: var(--lime); font-weight: 700; flex: none; }
+button.link:disabled, button.ghost:disabled { color: var(--muted); }
+.rest-line { display: flex; align-items: center; gap: 14px; padding: 0 6px; font-weight: 700; color: var(--lime); font-variant-numeric: tabular-nums; }
+.rest-line span { flex: 1; }
+.rest-line[hidden] { display: none; }
+.session-strip { display: flex; flex-direction: column; gap: 8px; padding: 2px 4px; }
+.session-strip .progress { height: 8px; }
+.finish-link { font-size: 0.92rem; }
+.exercise-head { display: flex; flex-direction: column; gap: 6px; }
+.set-label { font-weight: 700; color: var(--lime); }
+.set-dots { display: flex; gap: 6px; }
+.set-dots span { width: 22px; height: 8px; border-radius: 999px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+.set-dots span.done { background: var(--lime); box-shadow: none; }
+.set-dots span.current { box-shadow: inset 0 0 0 2px var(--lime); }
+.set-dots span.extra { opacity: 0.5; }
+.suggestions { display: flex; flex-direction: column; gap: 6px; }
+.quiet-actions { justify-content: space-between; align-items: center; }
+.quiet-actions details.change summary { color: var(--muted); font-weight: 600; }
+.session-strip { padding: 12px 16px; }
+.session-details summary { min-height: 30px; color: var(--muted); font-weight: 600; font-size: 0.88rem; justify-content: space-between; }
+.session-details summary::after { content: ""; width: 7px; height: 7px; margin-right: 4px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); }
+.session-details[open] summary::after { transform: rotate(-135deg); }
+.session-details[open] { display: flex; flex-direction: column; gap: 10px; }

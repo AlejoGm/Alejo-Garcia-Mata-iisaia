@@ -3,10 +3,11 @@ import { loadMe, state } from "../app.js";
 import { clearDraft, loadDraft, saveDraft, setsDone } from "../draft.js";
 import { el, errorBox, toDisplay, toKg, weight } from "../ui.js";
 import {
-  clock, lastLine, loadText, pickerSelect, platesText, restTimer, sessionDetails, stepper, suspicious, targetButtons,
+  clock, lastLine, pickerSelect, planProgress, platesText, restTimer, sessionDetails, sessionStrip, setDots, stepper,
+  planChipRow, setsList, suggestionRow, suspicious,
 } from "./logger-parts.js";
 import { earnedMedals, sessionSummary } from "./session-summary.js";
-import { feedbackCard, fetchStanding, standingRow, track } from "./set-feedback.js";
+import { feedbackCard, fetchStanding, track } from "./set-feedback.js";
 import { celebrate, vibrate } from "../juice.js";
 
 export async function loggerView(app, group) {
@@ -20,12 +21,16 @@ export async function loggerView(app, group) {
   const byId = new Map(exercises.map((e) => [e.id, e]));
   const lastCache = new Map();
   const entry = { weight: null, reps: null, confirm: false, limit: false, editing: null };
-  const bar = { timer: el("button", { type: "button", class: "rest", hidden: true }), toast: el("div", { class: "toast", hidden: true }) };
+  // El descanso es un estado, no un botón: un texto con dos acciones chicas al lado.
+  const restText = el("span", {});
+  const more = el("button", { type: "button", class: "link", onclick: () => timer.add(30) }, "+30 s");
+  const bar = { timer: el("div", { class: "rest-line", hidden: true }, restText, more,
+    el("button", { type: "button", class: "link", onclick: () => timer.stop() }, "Saltar")), toast: el("div", { class: "toast", hidden: true }) };
   const timer = restTimer((left) => {
     bar.timer.hidden = left === null;
-    bar.timer.textContent = left === 0 ? "¡Descanso terminado!" : `Descanso ${clock(left ?? 0)} · +30 s`;
+    more.hidden = left === 0;
+    restText.textContent = left === 0 ? "Descanso terminado" : `Descanso ${clock(left ?? 0)}`;
   });
-  bar.timer.addEventListener("click", () => (timer.running() ? timer.add(30) : timer.stop()));
   let undo = null;
   let feedback = null;
   let justSaved = null;
@@ -179,27 +184,22 @@ export async function loggerView(app, group) {
 
   const exercisePicker = () => pickerSelect(exercises, group, draft.exerciseId, chooseExercise);
 
-  function planChips() {
-    if (!draft.plan.length) return "";
-    return el("div", { class: "chips" }, draft.plan.map((item, index) => {
-      const done = setsDone(draft, item.exercise_id);
-      return el("button", { type: "button", class: `chip${index === draft.step ? " active" : ""}${done >= item.sets ? " done" : ""}`,
-        onclick: () => { draft.step = index; chooseExercise(item.exercise_id); } }, `${item.name} ${done}/${item.sets}`);
-    }));
-  }
+  const planChips = () => planChipRow(draft, (index, exerciseId) => { draft.step = index; chooseExercise(exerciseId); });
 
   async function exerciseCard() {
     const item = planItem();
     const exercise = byId.get(draft.exerciseId);
     if (!exercise) {
       return el("div", { class: "card logger" },
-        el("h3", {}, draft.plan.length ? "Rutina completa" : "¿Qué ejercicio hacés?"),
-        draft.plan.length ? el("p", { class: "muted small" }, "Sumá otro ejercicio o terminá la sesión.") : "",
+        el("h3", {}, draft.plan.length ? "¡Rutina completa!" : "¿Qué ejercicio hacés?"),
+        draft.plan.length ? el("p", { class: "muted small" }, "Tocá «Terminar entrenamiento» para ver tu resumen, o sumá un ejercicio extra.") : "",
         exercisePicker());
     }
     const done = setsDone(draft, exercise.id);
-    const label = entry.editing !== null ? `Editando serie ${entry.editing + 1}` : item && item.exercise_id === exercise.id
-      ? (done < item.sets ? `Serie ${done + 1} de ${item.sets}` : `Serie ${done + 1} (extra)`) : `Serie ${done + 1}`;
+    const planned = item && item.exercise_id === exercise.id ? item.sets : 0;
+    const label = entry.editing !== null ? `Editando la serie ${entry.editing + 1}` : planned
+      ? (done < planned ? `Serie ${done + 1} de ${planned}` : `Serie ${done + 1}, extra`) : `Serie ${done + 1}`;
+    const tracked = draft.standings?.[exercise.id];
     const last = await lastFor(exercise.id);
     const editing = entry.editing !== null
       ? el("div", { class: "notice spread" }, el("span", {}, `Editando la serie ${entry.editing + 1}`),
@@ -209,7 +209,11 @@ export async function loggerView(app, group) {
     const showPlates = () => { if (plates) plates.textContent = platesText(entry.weight, unit); };
     showPlates();
     return el("div", { class: "card logger" },
-      el("div", { class: "spread" }, el("h3", { class: "exercise-name" }, exercise.name), el("span", { class: "pill accent" }, label)),
+      el("div", { class: "exercise-head" },
+        el("h3", { class: "exercise-name" }, exercise.name),
+        el("div", { class: "spread" }, el("span", { class: "set-label" }, label),
+          tracked?.after ? el("span", { class: "muted small" }, `${tracked.after}º de ${tracked.total} en el grupo`) : ""),
+        setDots(done, planned)),
       editing,
       el("div", { class: "steppers" },
         stepper(exercise.bodyweight ? `Lastre (${unit})` : `Peso (${unit})`, entry.weight, unit === "lb" ? 5 : 2.5,
@@ -217,25 +221,16 @@ export async function loggerView(app, group) {
         stepper("Reps", entry.reps, 1, (v) => { const warned = entry.confirm; entry.reps = v; entry.confirm = false; if (warned) renderBar(); })),
       plates,
       // Debajo de los números, cerca del pulgar: lo que ayuda a decidir la serie.
-      targetButtons(last?.targets ?? [], draft.sets.filter((s) => s.exercise_id === exercise.id), unit, pickTarget,
-        (t) => toKg(entry.weight, unit) === t.weight_kg && entry.reps === t.reps),
-      standingRow(draft.standings?.[exercise.id], unit, pickTarget),
+      suggestionRow(last?.targets ?? [], draft.sets.filter((s) => s.exercise_id === exercise.id), tracked?.next, unit,
+        pickTarget, (t) => toKg(entry.weight, unit) === t.weight_kg && entry.reps === t.reps),
       el("p", { class: "muted small" }, last ? lastLine(last, unit, exercise.bodyweight) : ""),
       exercise.bodyweight ? el("p", { class: "muted small" }, "Ejercicio con tu peso: cargá solo el lastre. El 1RM suma tu peso corporal.") : "",
-      el("div", { class: "row" },
-        item ? el("button", { type: "button", class: "secondary", onclick: async () => { advanceToNextIncomplete(); if (draft.exerciseId) await prefill(); persist(); render(); } }, "Siguiente ejercicio") : "",
+      el("div", { class: "row quiet-actions" },
+        item ? el("button", { type: "button", class: "link", onclick: async () => { advanceToNextIncomplete(); if (draft.exerciseId) await prefill(); persist(); render(); } }, "Saltar ejercicio") : "",
         el("details", { class: "change" }, el("summary", {}, "Cambiar ejercicio"), exercisePicker())));
   }
 
-  function setsCard() {
-    if (!draft.sets.length) return "";
-    const items = draft.sets.map((s, index) => el("li", { class: index === entry.editing ? "editing" : null },
-      el("button", { type: "button", class: "set-edit", onclick: () => editSet(index), "aria-label": "Corregir serie" },
-        `${index + 1}. ${byId.get(s.exercise_id)?.name ?? "?"} · ${loadText(s.weight_kg, unit, byId.get(s.exercise_id)?.bodyweight)} × ${s.reps}`),
-      el("button", { type: "button", class: "secondary", style: "flex:0", "aria-label": "Borrar serie", onclick: () => removeSet(index) }, "×")));
-    return el("div", { class: "card" }, el("h3", {}, `Series de hoy (${draft.sets.length})`),
-      el("p", { class: "muted small" }, "Tocá una serie para corregirla."), el("ul", { class: "list" }, items));
-  }
+  const setsCard = () => setsList(draft, byId, unit, entry.editing, editSet, removeSet);
 
   const sessionCard = () => sessionDetails(draft, unit, persist, () => {
     if (draft.sets.length && !window.confirm("¿Descartar las series de esta sesión?")) return;
@@ -248,16 +243,29 @@ export async function loggerView(app, group) {
   const slot = el("div");
   const barNode = el("div", { class: "logger-bar" });
 
+  function nextLabel() {
+    const item = planItem();
+    const done = setsDone(draft, draft.exerciseId);
+    return item && item.exercise_id === draft.exerciseId && done < item.sets ? `serie ${done + 1} de ${item.sets}` : `serie ${done + 1}`;
+  }
+
+  function finishEarly(button) {
+    const { done, total } = planProgress(draft);
+    if (total && done < total && !window.confirm(`Te faltan ${total - done} series de la rutina. ¿Terminar igual?`)) return;
+    finish(button, slot);
+  }
+
   function renderBar() {
-    const save = el("button", { type: "button", class: "primary big save-set", disabled: !draft.exerciseId, onclick: saveSet },
-      entry.confirm ? `Confirmar ${weight(toKg(entry.weight, unit), unit)}` : entry.editing !== null ? "Guardar cambio"
-        : justSaved ? "✓ Guardada" : "Guardar serie");
+    // Una sola acción grande por momento: hacer la serie, confirmar un peso raro, guardar una corrección o terminar.
+    const complete = planProgress(draft).complete && !draft.exerciseId;
+    const save = el("button", { type: "button", class: "primary big save-set", disabled: !draft.exerciseId && !complete,
+      onclick: complete ? (event) => finish(event.currentTarget, slot) : saveSet },
+    complete ? "Terminar entrenamiento" : entry.confirm ? `Confirmar ${weight(toKg(entry.weight, unit), unit)}`
+      : entry.editing !== null ? "Guardar corrección" : justSaved ? "✓ Serie guardada" : draft.exerciseId ? `✓ Hice la ${nextLabel()}` : "Elegí un ejercicio");
     if (justSaved) save.classList.add("saved");
     const warning = entry.limit ? el("p", { class: "notice" }, `El máximo es ${weight(500, unit)}. Revisá el peso.`)
       : entry.confirm ? el("p", { class: "notice" }, `¿Seguro ${weight(toKg(entry.weight, unit), unit)}? Es mucho más que tu referencia. Tocá de nuevo para confirmar.`)
         : "";
-    const finishButton = el("button", { type: "button", class: "secondary finish", disabled: draft.sets.length === 0 }, `Terminar (${draft.sets.length})`);
-    finishButton.addEventListener("click", () => finish(finishButton, slot));
     bar.toast.hidden = !undo;
     if (undo) {
       bar.toast.replaceChildren(el("span", {}, "Serie borrada"), el("button", { type: "button", class: "secondary", onclick: () => {
@@ -269,11 +277,11 @@ export async function loggerView(app, group) {
       } }, "Deshacer"));
     }
     const card = feedback ? feedbackCard(feedback.result, feedback.exercise, unit, pickTarget) : "";
-    barNode.replaceChildren(slot, warning, card, bar.toast, bar.timer, el("div", { class: "bar-row" }, finishButton, save));
+    barNode.replaceChildren(slot, warning, card, bar.toast, bar.timer, save);
   }
 
   async function render() {
-    app.replaceChildren(sessionCard(), planChips(), await exerciseCard(), setsCard());
+    app.replaceChildren(sessionStrip(draft, finishEarly, sessionCard()), planChips(), await exerciseCard(), setsCard());
     renderBar();
     app.append(barNode);
   }
