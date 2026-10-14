@@ -3,7 +3,7 @@ import { loadMe, state } from "../app.js";
 import { clearDraft, loadDraft, saveDraft, setsDone } from "../draft.js";
 import { dayLabel, el, errorBox, num, toDisplay, toKg, weight } from "../ui.js";
 import { clock, lastLine, loadText, pickerSelect, platesText, restTimer, stepper, suspicious, targetButtons } from "./logger-parts.js";
-import { sessionSummary } from "./session-summary.js";
+import { earnedMedals, sessionSummary } from "./session-summary.js";
 import { feedbackCard, fetchStanding, standingRow, track } from "./set-feedback.js";
 import { celebrate } from "../juice.js";
 
@@ -163,7 +163,7 @@ export async function loggerView(app, group) {
       timer.stop();
       document.body.classList.remove("with-logger-bar");
       await loadMe(true);
-      sessionSummary(app, group, saved, unit);
+      await sessionSummary(app, group, saved, unit, draft);
     } catch (err) {
       slot.replaceChildren(errorBox(`${err.message} La sesión quedó guardada en este celular: probá de nuevo.`));
       button.disabled = false;
@@ -285,6 +285,8 @@ export async function loggerView(app, group) {
   // La barra crece con el descanso, los avisos o el deshacer: el fondo de la página crece con ella.
   const resize = new ResizeObserver(() => document.body.style.setProperty("--logger-bar-h", `${barNode.offsetHeight}px`));
   resize.observe(barNode);
+  // Las medallas de antes de la sesión, para festejar al final las que se ganen.
+  if (!draft.medalsBefore) earnedMedals(group).then(({ keys }) => { draft.medalsBefore = keys; persist(); }).catch(() => {});
   document.body.classList.add("with-logger-bar");
   window.addEventListener("hashchange", () => { timer.stop(); resize.disconnect(); document.body.classList.remove("with-logger-bar"); }, { once: true });
   if (draft.exerciseId) await prefill();
