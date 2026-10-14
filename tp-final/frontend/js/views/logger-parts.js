@@ -116,3 +116,15 @@ export function targetButtons(targets, todaySets, unit, onPick, isPicked = () =>
       "aria-label": `Cargar ${num(toDisplay(t.weight_kg, unit))} ${unit} por ${t.reps}` },
     `${t.kind === "reps" ? "+1 rep" : "+peso"}: ${num(toDisplay(t.weight_kg, unit))} × ${t.reps}`)));
 }
+
+/** Selector de ejercicio: primero los desafíos del grupo, después el resto del catálogo. */
+export function pickerSelect(exercises, group, selectedId, onChoose) {
+  const option = (e) => el("option", { value: String(e.id), selected: e.id === selectedId }, e.name);
+  const challengeIds = new Set(group.challenges.map((c) => c.id));
+  const select = el("select", { "aria-label": "Ejercicio" },
+    el("option", { value: "" }, "Elegí un ejercicio"),
+    el("optgroup", { label: "Desafíos del grupo" }, exercises.filter((e) => challengeIds.has(e.id)).map(option)),
+    el("optgroup", { label: "Todos" }, exercises.filter((e) => !challengeIds.has(e.id)).map(option)));
+  select.addEventListener("change", () => select.value && onChoose(Number(select.value)));
+  return select;
+}

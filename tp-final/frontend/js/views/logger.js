@@ -2,8 +2,10 @@ import { api } from "../api.js";
 import { loadMe, state } from "../app.js";
 import { clearDraft, loadDraft, saveDraft, setsDone } from "../draft.js";
 import { dayLabel, el, errorBox, num, toDisplay, toKg, weight } from "../ui.js";
-import { clock, lastLine, loadText, platesText, restTimer, stepper, suspicious, targetButtons } from "./logger-parts.js";
+import { clock, lastLine, loadText, pickerSelect, platesText, restTimer, stepper, suspicious, targetButtons } from "./logger-parts.js";
 import { sessionSummary } from "./session-summary.js";
+import { feedbackCard, fetchStanding, standingRow, track } from "./set-feedback.js";
+import { celebrate } from "../juice.js";
 
 export async function loggerView(app, group) {
   const draft = loadDraft();
@@ -23,6 +25,8 @@ export async function loggerView(app, group) {
   });
   bar.timer.addEventListener("click", () => (timer.running() ? timer.add(30) : timer.stop()));
   let undo = null;
+  let feedback = null;
+  let feedbackTimer = null;
 
   const lastFor = async (exerciseId) => {
     if (!lastCache.has(exerciseId)) {
@@ -85,6 +89,7 @@ export async function loggerView(app, group) {
       return;
     }
     draft.sets.push(set);
+    showStanding(set);
     const item = planItem();
     const justCompleted = item && item.exercise_id === draft.exerciseId && setsDone(draft, item.exercise_id) === item.sets;
     if (justCompleted) {
@@ -95,6 +100,27 @@ export async function loggerView(app, group) {
     persist();
     timer.start();
     render();
+  }
+
+  function pickTarget(t) {
+    entry.weight = toDisplay(t.weight_kg, unit);
+    entry.reps = t.reps;
+    entry.confirm = false;
+    render();
+  }
+
+  function showStanding(set) {
+    const exercise = byId.get(set.exercise_id)?.name ?? "";
+    fetchStanding(group.code, set, draft.bodyweight ? toKg(draft.bodyweight, unit) : null).then((result) => {
+      if (!result) return;
+      track(draft, set.exercise_id, result);
+      persist();
+      if (result.pr) celebrate();
+      feedback = { result, exercise };
+      clearTimeout(feedbackTimer);
+      feedbackTimer = setTimeout(() => { feedback = null; renderBar(); }, 9000);
+      render();
+    });
   }
 
   function removeSet(index) {
@@ -145,16 +171,7 @@ export async function loggerView(app, group) {
     }
   }
 
-  function exercisePicker() {
-    const option = (e) => el("option", { value: String(e.id), selected: e.id === draft.exerciseId }, e.name);
-    const challengeIds = new Set(group.challenges.map((c) => c.id));
-    const select = el("select", { "aria-label": "Ejercicio" },
-      el("option", { value: "" }, "Elegí un ejercicio"),
-      el("optgroup", { label: "Desafíos del grupo" }, exercises.filter((e) => challengeIds.has(e.id)).map(option)),
-      el("optgroup", { label: "Todos" }, exercises.filter((e) => !challengeIds.has(e.id)).map(option)));
-    select.addEventListener("change", () => select.value && chooseExercise(Number(select.value)));
-    return select;
-  }
+  const exercisePicker = () => pickerSelect(exercises, group, draft.exerciseId, chooseExercise);
 
   function planChips() {
     if (!draft.plan.length) return "";
@@ -185,7 +202,6 @@ export async function loggerView(app, group) {
     const plates = exercise.barbell ? el("p", { class: "muted small plates" }) : "";
     const showPlates = () => { if (plates) plates.textContent = platesText(entry.weight, unit); };
     showPlates();
-    const pickTarget = (t) => { entry.weight = toDisplay(t.weight_kg, unit); entry.reps = t.reps; entry.confirm = false; render(); };
     return el("div", { class: "card logger" },
       el("div", { class: "spread" }, el("h3", { class: "exercise-name" }, exercise.name), el("span", { class: "pill accent" }, label)),
       editing,
@@ -197,6 +213,7 @@ export async function loggerView(app, group) {
       // Debajo de los números, cerca del pulgar: lo que ayuda a decidir la serie.
       targetButtons(last?.targets ?? [], draft.sets.filter((s) => s.exercise_id === exercise.id), unit, pickTarget,
         (t) => toKg(entry.weight, unit) === t.weight_kg && entry.reps === t.reps),
+      standingRow(draft.standings?.[exercise.id], unit, pickTarget),
       el("p", { class: "muted small" }, last ? lastLine(last, unit, exercise.bodyweight) : ""),
       exercise.bodyweight ? el("p", { class: "muted small" }, "Ejercicio con tu peso: cargá solo el lastre. El 1RM suma tu peso corporal.") : "",
       el("div", { class: "row" },
@@ -255,7 +272,8 @@ export async function loggerView(app, group) {
         render();
       } }, "Deshacer"));
     }
-    barNode.replaceChildren(slot, warning, bar.toast, bar.timer, el("div", { class: "bar-row" }, finishButton, save));
+    const card = feedback ? feedbackCard(feedback.result, feedback.exercise, unit, pickTarget) : "";
+    barNode.replaceChildren(slot, warning, card, bar.toast, bar.timer, el("div", { class: "bar-row" }, finishButton, save));
   }
 
   async function render() {
