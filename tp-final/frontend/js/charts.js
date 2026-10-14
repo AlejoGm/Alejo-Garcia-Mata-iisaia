@@ -24,7 +24,7 @@ function smooth(points) {
   return d;
 }
 
-export function lineChart({ labels, series, label }) {
+export function lineChart({ labels, series, label, area = true }) {
   const values = series.flatMap((s) => s.values).filter((v) => v !== null && v !== undefined);
   const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": label });
   if (!values.length) {
@@ -76,12 +76,12 @@ export function lineChart({ labels, series, label }) {
     const isMain = order === series.length - 1;
     for (const points of segments) {
       const d = smooth(points);
-      if (isMain && points.length > 1) {
+      if (area && isMain && points.length > 1) {
         const area = `${d} L${points[points.length - 1][0].toFixed(1)},${H - PAD.bottom} L${points[0][0].toFixed(1)},${H - PAD.bottom} Z`;
         root.append(svg("path", { d: area, class: "chart-area", fill: `url(#${gradient.getAttribute("id")})` }));
       }
       root.append(svg("path", { d, class: `chart-line ${s.className}` }));
-      for (const [px, py] of points) root.append(svg("circle", { cx: px, cy: py, r: 6, class: `chart-dot ${s.className}` }));
+      for (const [px, py] of points) root.append(svg("circle", { cx: px, cy: py, r: area ? 6 : 5, class: `chart-dot ${s.className}` }));
     }
   }
   return root;

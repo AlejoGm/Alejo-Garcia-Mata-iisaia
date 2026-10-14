@@ -81,14 +81,14 @@ def test_muscle_sets_average_closed_weeks_and_this_week():
 def test_monthly_best_by_user_in_kg_and_dots():
     records = [
         rec(100, 1, day=date(2026, 9, 3), user=1, bw=100), rec(110, 1, day=date(2026, 9, 20), user=1, bw=100),
-        rec(80, 1, day=date(2026, 10, 2), user=2, bw=60),
+        rec(85, 1, day=date(2026, 10, 2), user=2, bw=60),
         rec(50, 12, day=date(2026, 10, 2), user=2),  # sin 1RM estimable
     ]
     sexes = {1: "M", 2: "M", 3: "M"}
     kg = monthly_best_by_user(records, 1, date(2026, 9, 1), date(2026, 10, 31), sexes, "1rm")
-    assert kg == {1: [110, None], 2: [None, 80], 3: [None, None]}
+    assert kg == {1: [110, None], 2: [None, 85], 3: [None, None]}
     dots_values = monthly_best_by_user(records, 1, date(2026, 9, 1), date(2026, 10, 31), sexes, "dots")
-    assert dots_values[2][1] > dots_values[1][0]  # 80 con 60 kg de peso vale más que 110 con 100
+    assert dots_values[2][1] > dots_values[1][0]  # 85 con 60 kg de peso vale más que 110 con 100
 
 
 def test_weekly_days_by_user_counts_distinct_days():

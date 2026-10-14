@@ -6,6 +6,7 @@ import { icon } from "../icons.js";
 import { shortDate } from "../medals.js";
 import { broLink } from "../group-shell.js";
 import { el, errorBox, num, toDisplay } from "../ui.js";
+import { compareSection } from "./compare.js";
 import { campaignBanner } from "./rankings.js";
 import { nextRoutineDay, startDraft } from "./train.js";
 
@@ -144,6 +145,7 @@ export async function dashboardView(app, group) {
       weekCard(data.days),
       goalCard(data.goal_pct),
       await todayCard(group),
+      compareSection(group),
       leadersCard(data.leaders),
       el("div", { class: "span-4 stack" }, campaign),
       prsCard(group, feed, unit),
