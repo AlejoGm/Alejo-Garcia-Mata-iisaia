@@ -162,7 +162,7 @@
     <div class="card"><h3>Herramientas propias</h3><ul><li>Skill <code>nuevo-ranking</code>: regla del spec → test → función.</li><li>Sub-agente <code>gym-bro</code>: prueba la app como usuario.</li></ul></div>
     <div class="card"><h3>Cuando algo creció</h3><ul><li><code>stats.py</code> y <code>schemas.py</code> pasaron a paquetes.</li><li>La pantalla de carga se partió tres veces en vez de subir el límite.</li></ul></div>
   </div>
-  <div class="notes">La regla de "no cambies una decisión del grill sin preguntar" en CLAUDE.md funcionó: cuando el gym-bro pidió "PR de reps", el agente no lo cambió solo, nos preguntó.</div>
+  <div class="notes">La regla de "no cambies una decisión del grill sin preguntar" en CLAUDE.md funcionó: cuando hubo que cambiar "PR de peso" por "PR de reps", el agente no lo cambió solo, nos preguntó.</div>
 </section>
 
 <section class="slide">
@@ -185,7 +185,7 @@
     <li><b>Progreso</b> en 6 meses o "Todo" quedaba vacío: comparaba contra un mes sin datos.</li>
     <li><b>PRs:</b> la primera sesión tiraba cuatro y llenaba el feed.</li>
   </ul>
-  <div class="lesson"><p>Las encontró el gym-bro usando la app, no los tests. Un test verde dice que el código cumple la regla, no que la regla sirva.</p></div>
+  <div class="lesson"><p>Aparecieron al usar la app, no en los tests. Un test verde dice que el código cumple la regla, no que la regla sirva.</p></div>
   <div class="notes">Los tests verificaban exactamente lo que decía el spec: el error estaba en el spec. Corregimos las tres con test primero y lo anotamos en el spec. Esta es probablemente la lección más importante del proyecto.</div>
 </section>
 
@@ -202,12 +202,9 @@
 
 <section class="slide">
   <p class="eyebrow">Prueba con un agente usuario</p>
-  <h2>El gym-bro: el celular en una mano y el gimnasio lleno</h2>
-  <div class="cols">
-    <div class="card"><h3>Cómo</h3><p>Un sub-agente que no lee el código. Carga sesiones con errores a propósito, recarga a mitad de carga y después revisa todo en casa, en el celular y en escritorio.</p></div>
-    <div class="card"><h3>Tres pasadas</h3><p>Cada una con su devolución por gravedad, en <code>docs/devolucion-gym-bro.md</code>, y los arreglos en el PR siguiente.</p></div>
-    <div class="card"><h3>Medido</h3><p>Toques por serie: <b class="lime">2,6 → 1,8</b> con "Para PR".<br>Peso de 2260 kg por un campo que no seleccionaba: corregido.</p></div>
-  </div>
+  <h2>Un sub-agente que usa la app como un pibe en el gimnasio</h2>
+  <p class="big">Celular en una mano, sin leer el código, con errores a propósito. Después revisa todo en casa.</p>
+  <p class="muted">Lo corrimos tres veces durante el proyecto. Con los cambios que salieron, cargar una serie pasó de 2,6 a 1,8 toques.</p>
   <div class="notes">El agente está definido en .claude/agents/gym-bro.md. Lo valioso fue pedirle mediciones concretas (toques, qué leyó dos veces, qué quedó lejos del pulgar) en vez de una opinión general.</div>
 </section>
 
@@ -232,10 +229,10 @@
   <p class="eyebrow">Qué nos llevamos</p>
   <div class="cols">
     <div class="card"><h3>Decidir en el grill</h3><p>Las mejores decisiones salieron de discutir y corregir lo que el agente proponía, antes de escribir código.</p></div>
-    <div class="card"><h3>Probar como usuario</h3><p>Los tests protegen las reglas; un agente usuario (o nosotros con el celular) encuentra si las reglas sirven.</p></div>
+    <div class="card"><h3>Probar como usuario</h3><p>Los tests protegen las reglas; usar la app de verdad encuentra si las reglas sirven.</p></div>
     <div class="card"><h3>Escribir los límites</h3><p>CLAUDE.md, reglas y permisos hicieron que el proyecto creciera sin que el agente se desordenara.</p></div>
   </div>
-  <div class="notes">Si hubiera que hacerlo de nuevo: correr el gym-bro antes, apenas hubo una primera versión, en vez de después de los 12 issues.</div>
+  <div class="notes">Si hubiera que hacerlo de nuevo: probar la app como usuario apenas hubo una primera versión, en vez de después de los 12 issues.</div>
 </section>
 
 <section class="slide">
