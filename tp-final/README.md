@@ -24,7 +24,7 @@ uv run python -m scripts.seed_demo
 
 Entrando como `gustavo`, `mati` o `caro` se ve el grupo desde adentro. Con cualquier otro nombre se entra como alguien nuevo y uno se une con el código.
 
-Para llenar un grupo que ya existe, el otro script suma ocho participantes de mentira. Siguen la primera rutina del grupo con 26 semanas de historia, que incluyen progreso, semanas de descarga, cortes, PRs y reacciones. También agrega duelos terminados, en curso y pendientes, y, si el que corre el script es admin, dos campañas cerradas con ganador y la del mes. `--as` es el nombre de un miembro del grupo, y `--weeks` cambia la cantidad de semanas:
+Para llenar un grupo que ya existe, el otro script suma ocho participantes de mentira. Siguen la primera rutina del grupo con 26 semanas de historia, que incluyen progreso, semanas de descarga, cortes, PRs y reacciones. También agrega duelos terminados, en curso y pendientes, y, si el que corre el script es admin, dos campañas cerradas con ganador y la del mes. `--as` es el nombre de un miembro del grupo, `--weeks` cambia la cantidad de semanas y `--me` le carga historia también a ese miembro, sin tocarle el perfil. Se puede correr de nuevo sin duplicar:
 
 ```bash
 uv run python -m scripts.seed_group CODIGO --as tu-nombre
