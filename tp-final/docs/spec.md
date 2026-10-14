@@ -215,6 +215,15 @@ Cada ejercicio del catálogo tiene un músculo principal (`MUSCLES` en `backend/
 
 Ordenados por promedio y después por esta semana. Un músculo sin series en ese rango no aparece.
 
+### Posición en vivo
+
+Para una serie todavía no guardada (ejercicio, peso, reps y peso corporal del día):
+- **PR:** el que daría según la regla de PRs contra el historial guardado del usuario.
+- **Valor:** el DOTS del 1RM estimado de la serie. Con más de 10 reps no hay valor, ni posición.
+- **Posición:** sobre el mejor DOTS del mes en curso de cada miembro en ese ejercicio, sin las series dudosas. Mi valor es el mayor entre mi mejor del mes y el de la serie. La posición es 1 más la cantidad de miembros con un valor estrictamente mayor, así que un empate comparte el lugar. También se devuelve la posición antes de la serie (vacía si no tenía valor).
+- **A quién pasé:** los miembros cuyo valor era mayor o igual que el mío antes de la serie y queda por debajo del de la serie.
+- **El siguiente:** el miembro con el menor valor que siga por encima del mío. Para pasarlo, a mis mismas reps: el 1RM que hace falta es `dots_siguiente × poly(bw) / 500`, y el peso es `1RM / (1 + reps / 30)` (igual al 1RM con 1 rep), redondeado hacia arriba al salto de discos (2,5 kg o 5 lb) hasta superarlo. En ejercicios con tu peso no se calcula el peso.
+
 ### Duelos
 
 - **Plazo.** Va de `start` a `start + days − 1`. `start` es el día en que el retado acepta.
@@ -273,6 +282,7 @@ Todo bajo `/api`, con el token. Los grupos se identifican por `code`.
 | `DELETE` | `/groups/{code}/members/{user_id}` | sacar a un miembro, solo el admin · `204` · `403` · `404` |
 | `PUT` | `/groups/{code}/challenges` | `{"exercise_ids": [...]}`, solo el admin · `422` si son más de 4 |
 | `GET` | `/groups/{code}/last?exercise_id` | mi última serie, la de hasta 2 miembros más y mi objetivo para PR |
+| `POST` | `/groups/{code}/standing` | `{exercise_id, weight_kg, reps, bodyweight_kg}`: PR, posición antes y después, a quién pasé y la serie para pasar al siguiente, sin guardar nada · `200` · `422` |
 | `GET` | `/groups/{code}/members/{user_id}` | perfil de un miembro: semana, racha, medallas, cara a cara conmigo y últimas sesiones · `404` si no es miembro |
 | `GET` | `/groups/{code}/rankings?period&month&from&to` | fuerza, progreso, semana y constancia |
 | `GET` | `/groups/{code}/dashboard` | indicadores, series de 8 semanas, días de la semana, objetivo del grupo, líderes, semana pasada y medallas recientes |
@@ -303,7 +313,7 @@ Una sola página con vistas por hash, en ES modules y sin build. Primero está p
 | `#/perfil` | nombre, sexo, objetivo semanal y unidad; obligatorio en el primer login |
 | `#/` | mis grupos, crear grupo, unirse con código |
 | `#/g/CODE/entrenar` | elegir día de rutina o carga libre |
-| `#/g/CODE/carga` | carga guiada o libre, con borrador en `localStorage` |
+| `#/g/CODE/carga` | carga guiada o libre, con borrador en `localStorage`; al guardar cada serie, PR y posición en vivo |
 | `#/g/CODE/rankings` | selector de período, desafíos con DOTS/absoluto, progreso, semana y constancia |
 | `#/g/CODE/panel` | portada del grupo: indicadores, gráficos, "Hoy toca", líderes, campaña y últimos PRs |
 | `#/g/CODE/feed` | PRs agrupados por sesión, con reacciones (desde "Ver todo" del panel) |
@@ -316,6 +326,7 @@ Una sola página con vistas por hash, en ES modules y sin build. Primero está p
 - **Polling.** Cada 30 segundos en rankings, feed y duelos, solo con la pestaña visible.
 - **Discos.** En ejercicios con barra, debajo del peso: los discos por lado con barra de 20 kg (25, 20, 15, 10, 5, 2,5 y 1,25) o de 45 lb (45, 35, 25, 10, 5 y 2,5).
 - **Instalable.** `manifest.webmanifest` con ícono y color de tema. Sin service worker.
+- **Animaciones.** Rebote de números, tilde al guardar, confeti con PR o medalla nueva, y vibración. Con `prefers-reduced-motion` no hay animación.
 - **Libras.** Se convierten en la vista con `1 lb = 0,45359237 kg`. Lo que se manda a la API va siempre en kg.
 
 ## Tests
