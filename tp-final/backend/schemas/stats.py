@@ -26,6 +26,12 @@ class DayCountOut(BaseModel):
     sets: int
 
 
+class MuscleSetsOut(BaseModel):
+    muscle: str
+    this_week: int
+    average: float
+
+
 class AchievementOut(BaseModel):
     key: str
     title: str
@@ -54,6 +60,7 @@ class PersonalStatsOut(BaseModel):
     sessions: int  # sesiones del período con este ejercicio
     achievements: list[AchievementOut]
     calendar: list[DayCountOut]
+    muscles: list[MuscleSetsOut]
 
 
 class WeekActivityOut(BaseModel):

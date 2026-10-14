@@ -2,7 +2,7 @@ from datetime import date, timedelta
 
 import pytest
 
-from backend.stats import bodyweight_series, monthly_series, training_calendar, weekly_series
+from backend.stats import bodyweight_series, monthly_series, muscle_sets, training_calendar, weekly_series
 from tests.test_stats import rec
 
 
@@ -52,3 +52,22 @@ def test_calendar_counts_sets_per_day_within_26_weeks():
     days = training_calendar(records, today)
 
     assert [(d.day, d.sets) for d in days] == [(first_monday, 1), (date(2026, 10, 1), 1), (today, 2)]
+
+
+# Series por músculo
+
+def test_muscle_sets_average_closed_weeks_and_this_week():
+    today = date(2026, 10, 14)  # semana del lunes 12
+    muscles = {1: "Pecho", 2: "Espalda"}
+    records = [
+        rec(80, 5, day=date(2026, 10, 13), exercise=1), rec(80, 5, day=date(2026, 10, 13), exercise=1),
+        *[rec(80, 5, day=date(2026, 10, 5), exercise=1) for _ in range(4)],    # semana anterior: 4
+        *[rec(60, 8, day=date(2026, 9, 21), exercise=2) for _ in range(8)],    # hace 3 semanas: 8
+        rec(60, 8, day=date(2026, 9, 7), exercise=2),                          # fuera de las 4 semanas
+        rec(20, 10, day=date(2026, 10, 13), exercise=9),                        # sin músculo: Otros
+    ]
+
+    result = muscle_sets(records, muscles, today)
+
+    assert [(m.muscle, m.this_week, m.average) for m in result] == [
+        ("Espalda", 0, 2.0), ("Pecho", 2, 1.0), ("Otros", 1, 0.0)]

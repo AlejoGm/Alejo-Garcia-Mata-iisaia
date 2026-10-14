@@ -207,6 +207,14 @@ Cada premio lista a todos los empatados en el máximo, y queda vacío si el máx
 
 Los días con series de las últimas 26 semanas, de lunes a la semana en curso, con la cantidad de series de cada día.
 
+### Series por músculo
+
+Cada ejercicio del catálogo tiene un músculo principal (`MUSCLES` en `backend/catalog.py`); los que agrega un usuario cuentan como "Otros". Para cada músculo:
+- **Promedio:** series de las últimas 4 semanas cerradas, dividido 4, con un decimal.
+- **Esta semana:** series de lunes a hoy.
+
+Ordenados por promedio y después por esta semana. Un músculo sin series en ese rango no aparece.
+
 ### Duelos
 
 - **Plazo.** Va de `start` a `start + days − 1`. `start` es el día en que el retado acepta.
@@ -255,7 +263,7 @@ Todo bajo `/api`, con el token. Los grupos se identifican por `code`.
 | `GET` | `/me/sessions?limit=20` | mis sesiones con series, de la más nueva a la más vieja |
 | `POST` | `/me/sessions` | `201` con 1RM, DOTS y PR por serie · `422` |
 | `DELETE` | `/me/sessions/{id}` | `204` · `404` si no existe o no es mía |
-| `GET` | `/me/stats?exercise_id&period…` | stats personales, series para gráficos, calendario y medallas |
+| `GET` | `/me/stats?exercise_id&period…` | stats personales, series para gráficos, calendario, medallas y series por músculo |
 | `GET` | `/exercises` | catálogo, con `barbell` según el catálogo |
 | `POST` | `/exercises` | `201` · `409` nombre repetido · `422` |
 | `POST` | `/groups` | crea, y quien lo crea queda como admin · `201` |
@@ -303,7 +311,7 @@ Una sola página con vistas por hash, en ES modules y sin build. Primero está p
 | `#/g/CODE/duelos` | duelos, retar y aceptar |
 | `#/g/CODE/campanas` | campañas y su tabla |
 | `#/g/CODE/grupo` | miembros, código, desafíos y rutinas (lo de admin, solo para el admin) |
-| `#/stats` | mis gráficos por ejercicio, calendario y medallas, en SVG propio |
+| `#/stats` | mis gráficos por ejercicio, series por músculo, calendario y medallas, en SVG propio |
 
 - **Polling.** Cada 30 segundos en rankings, feed y duelos, solo con la pestaña visible.
 - **Discos.** En ejercicios con barra, debajo del peso: los discos por lado con barra de 20 kg (25, 20, 15, 10, 5, 2,5 y 1,25) o de 45 lb (45, 35, 25, 10, 5 y 2,5).

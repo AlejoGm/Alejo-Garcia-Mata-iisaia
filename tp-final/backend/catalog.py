@@ -32,6 +32,39 @@ EXERCISES = [
     ("Core", True), ("Plancha con lastre", True),
 ]
 
+# El músculo principal de cada ejercicio, para las series por músculo. Uno que agrega un usuario cae en "Otros".
+MUSCLES = {
+    # Pecho
+    "Press banca": "Pecho", "Press inclinado": "Pecho", "Press con mancuernas": "Pecho", "Aperturas": "Pecho",
+    "Fondos": "Pecho", "Flexiones": "Pecho", "Press inclinado con mancuernas": "Pecho", "Press declinado": "Pecho",
+    "Máquina convergente": "Pecho", "Aperturas en polea": "Pecho", "Pec deck": "Pecho",
+    # Espalda
+    "Dominadas": "Espalda", "Jalón al pecho": "Espalda", "Remo con barra": "Espalda", "Remo con mancuerna": "Espalda",
+    "Remo en polea": "Espalda", "Jalón neutro": "Espalda", "Remo pecho apoyado unilateral": "Espalda",
+    "Pullover en polea": "Espalda", "Remo Hammer": "Espalda", "Remo en máquina": "Espalda",
+    # Hombros
+    "Press militar": "Hombros", "Vuelos laterales": "Hombros", "Face pull": "Hombros", "Press de hombros": "Hombros",
+    "Press Arnold": "Hombros", "Elevaciones laterales en polea": "Hombros", "Reverse pec deck": "Hombros",
+    # Bíceps
+    "Curl de bíceps": "Bíceps", "Curl martillo": "Bíceps", "Curl con mancuernas": "Bíceps", "Curl en polea": "Bíceps",
+    "Curl inclinado": "Bíceps", "Preacher unilateral": "Bíceps", "Hammer preacher": "Bíceps",
+    # Tríceps
+    "Extensión de tríceps": "Tríceps", "Press francés": "Tríceps", "Pushdown": "Tríceps",
+    "Overhead rope extension": "Tríceps", "Single arm extension": "Tríceps",
+    # Cuádriceps
+    "Sentadilla": "Cuádriceps", "Sentadilla frontal": "Cuádriceps", "Sentadilla búlgara": "Cuádriceps",
+    "Prensa": "Cuádriceps", "Zancadas": "Cuádriceps", "Extensión de cuádriceps": "Cuádriceps",
+    "Hack squat": "Cuádriceps", "Sentadilla en Smith": "Cuádriceps", "Aductores": "Cuádriceps",
+    # Isquios y glúteos
+    "Peso muerto": "Isquios y glúteos", "Peso muerto rumano": "Isquios y glúteos",
+    "Peso muerto sumo": "Isquios y glúteos", "Hip thrust": "Isquios y glúteos", "Curl femoral": "Isquios y glúteos",
+    "Abductores": "Isquios y glúteos",
+    # Gemelos
+    "Elevación de talones": "Gemelos",
+    # Core
+    "Abdominales en polea": "Core", "Core": "Core", "Plancha con lastre": "Core",
+}
+
 # Los que se hacen con barra olímpica: muestran los discos por lado.
 BARBELL = {
     "Sentadilla", "Press banca", "Peso muerto", "Press militar", "Press inclinado", "Remo con barra",

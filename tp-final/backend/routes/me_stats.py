@@ -6,14 +6,18 @@ from sqlmodel import Session, select
 
 from backend import stats
 from backend.auth import SessionDep, UserDep
-from backend.catalog import lift_ids
+from backend.catalog import MUSCLES, lift_ids
 from backend.models import Exercise
 from backend.queries import goal_changes, set_records
 from backend.schemas import (
-    AchievementOut, BodyweightPointOut, DayCountOut, ExerciseOut, MonthPointOut, PeriodOut, PersonalStatsOut, WeekPointOut,
+    AchievementOut, BodyweightPointOut, DayCountOut, ExerciseOut, MuscleSetsOut, MonthPointOut, PeriodOut, PersonalStatsOut, WeekPointOut,
 )
 
 router = APIRouter(prefix="/api")
+
+
+def muscle_ids(session: Session) -> dict[int, str]:
+    return {e.id: MUSCLES[e.name] for e in session.exec(select(Exercise)) if e.name in MUSCLES}
 
 
 def achievements_of(session: Session, user_ids: list[int], today: date) -> dict[int, list[stats.Achievement]]:
@@ -59,4 +63,5 @@ def personal_stats(user: UserDep, session: SessionDep, exercise_id: int | None =
         sessions=len({r.session_id for r in stats.in_range(mine, low, high)}),
         achievements=achievements_out(achievements_of(session, [user.id], date.today())[user.id]),
         calendar=[DayCountOut(day=d.day, sets=d.sets) for d in stats.training_calendar(records, date.today())],
+        muscles=[MuscleSetsOut(**m.__dict__) for m in stats.muscle_sets(records, muscle_ids(session), date.today())],
     )

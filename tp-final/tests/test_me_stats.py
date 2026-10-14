@@ -55,3 +55,12 @@ def test_personal_stats_include_the_training_calendar(client):
 
     calendar = client.get("/api/me/stats", headers=ana).json()["calendar"]
     assert calendar == [{"day": date.today().isoformat(), "sets": 2}]
+
+
+def test_personal_stats_include_sets_per_muscle(client):
+    ana = register(client, "ana")
+    bench = exercise_id(client, ana, "Press banca")
+    post(client, ana, [{"exercise_id": bench, "weight_kg": 60, "reps": 5}, {"exercise_id": bench, "weight_kg": 60, "reps": 5}])
+
+    muscles = client.get("/api/me/stats", headers=ana).json()["muscles"]
+    assert muscles == [{"muscle": "Pecho", "this_week": 2, "average": 0.0}]

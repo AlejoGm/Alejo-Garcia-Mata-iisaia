@@ -243,7 +243,10 @@ Un empate muestra a todos los empatados. No suma puntos a nada: es para el chat.
 
 **¿Calendario?** En mis stats, las últimas 26 semanas en una grilla de días, con la intensidad según la cantidad de series. Es lo que más rápido muestra si uno viene constante.
 
-**¿Volumen por músculo?** Sigue afuera, como en el panel. Haría falta asignarle músculo a cada ejercicio, y es una decisión aparte.
+**¿Volumen por músculo?** Al principio quedó afuera, como en el panel, porque hacía falta asignarle un músculo a cada ejercicio. Después Alejo pidió sumarlo:
+- **Músculo de cada ejercicio.** Uno solo, el principal, asignado en el catálogo con nueve grupos: pecho, espalda, hombros, bíceps, tríceps, cuádriceps, isquios y glúteos, gemelos y core. Va en el código y no en una columna, así una base existente sigue sirviendo. Un ejercicio que agrega un usuario cae en "Otros".
+- **Qué se mide.** Series por semana de cada músculo, que es como se cuenta el volumen para ganar músculo. Se muestra el promedio de las últimas 4 semanas cerradas y lo que va de la semana en curso.
+- **Dónde.** En mis stats, con la guía común de 10 a 20 series por semana como referencia.
 
 **¿Feed agrupado?** Una tarjeta por sesión: la persona, el día, y cada PR en su línea con sus reacciones. Las reacciones siguen siendo por PR, porque el "dudoso" excluye una serie, no una sesión.
 
