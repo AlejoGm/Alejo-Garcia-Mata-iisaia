@@ -81,7 +81,7 @@ async function start() {
   try {
     await initAuth();
   } catch (err) {
-    app.replaceChildren(errorBox(err.message));
+    app.replaceChildren(el("div", { class: "card" }, errorBox(err.message), el("a", { class: "button primary", href: "/" }, "Probar de nuevo")));
     return;
   }
   window.addEventListener("hashchange", render);
