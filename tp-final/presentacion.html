@@ -209,23 +209,6 @@
 </section>
 
 <section class="slide">
-  <p class="eyebrow">Apropiación</p>
-  <h2>Lo podemos explicar, corregir y extender</h2>
-  <div class="cols">
-    <pre><span class="c"># PR: contra las sesiones anteriores,
-# a lo sumo uno por ejercicio y sesión</span>
-<span class="k">if</span> load &gt; best_load:      pr = <span class="k">"weight"</span>
-<span class="k">elif</span> load == best_load:   pr = <span class="k">"reps"</span>
-<span class="k">elif</span> 1rm &gt; best_1rm:      pr = <span class="k">"1rm"</span>
-
-<span class="c"># 1RM estimado (Epley), hasta 10 reps</span>
-1rm = load × (1 + reps / 30)</pre>
-    <div class="card"><h3>Ejemplo: "Pasar a Nacho"</h3><p>Se toma el DOTS de Nacho, se pasa a kilos con tu peso del día y se despeja Epley a tus mismas reps. Se redondea hacia arriba a discos de 2,5 kg hasta superarlo.</p><p class="muted" style="margin-top:1.6vh">Está en <code>backend/stats/standing.py</code>, con su test.</p></div>
-  </div>
-  <div class="notes">Si preguntan por algo puntual, saber explicar: DOTS (polinomio por sexo, peso acotado), la regla de PRs, por qué se calcula al leer, y cómo funciona el token de sesión (se guarda el sha256, no el token).</div>
-</section>
-
-<section class="slide">
   <p class="eyebrow">Qué nos llevamos</p>
   <div class="cols">
     <div class="card"><h3>Decidir en el grill</h3><p>Las mejores decisiones salieron de discutir y corregir lo que el agente proponía, antes de escribir código.</p></div>
