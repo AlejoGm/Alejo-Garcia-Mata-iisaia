@@ -94,7 +94,7 @@
   <h1>Gym-bro</h1>
   <p class="big">Cada uno con su rutina. Comparados de forma justa.</p>
   <p class="muted">Alejo García Mata · Gustavo Campero</p>
-  <div class="notes">Presentarnos. En una frase: una app para que un grupo de amigos que va al gimnasio cargue lo que entrena y compita de forma justa. Lo que quiero mostrar no es solo la app, sino cómo la dirigí: qué decidí yo, qué hizo el agente y dónde se equivocó.</div>
+  <div class="notes">Presentarnos. En una frase: una app para que un grupo de amigos que va al gimnasio cargue lo que entrena y compita de forma justa. Lo que queremos mostrar no es solo la app, sino cómo la dirigimos: qué decidimos nosotros, qué hizo el agente y dónde se equivocó.</div>
 </section>
 
 <section class="slide">
@@ -105,7 +105,7 @@
     <div class="card"><h3>La idea</h3><p>Fuerza relativa con <b class="lime">DOTS</b>, el coeficiente del powerlifting: ajusta la marca por peso corporal y sexo.</p></div>
     <div class="card"><h3>Ejemplo</h3><p>65 kg que sentadilla 130 → <b>103 DOTS</b>.<br>95 kg que sentadilla 170 → <b class="lime">107 DOTS</b>.<br><span class="muted">Dividir por el peso daba al revés.</span></p></div>
   </div>
-  <div class="notes">El dato de por qué DOTS y no el ratio es una decisión mía del repaso del grill: el agente propuso 1RM dividido peso, y eso favorece al liviano porque la fuerza no escala lineal con el peso.</div>
+  <div class="notes">El dato de por qué DOTS y no el ratio es una decisión nuestra del repaso del grill: el agente propuso 1RM dividido peso, y eso favorece al liviano porque la fuerza no escala lineal con el peso.</div>
 </section>
 
 <section class="slide">
@@ -121,7 +121,7 @@
 <section class="slide">
   <p class="eyebrow">Demo · en casa</p>
   <figure class="wide"><img src="docs/img/comparar.png" alt="Comparar en el panel del grupo"><figcaption>El panel del grupo: las curvas de cada uno, en peso máximo, 1RM estimado o DOTS, por mes o por semana.</figcaption></figure>
-  <div class="notes">Mostrar: prender y apagar personas, cambiar a DOTS (ahí cambia quién va ganando), y a semana a semana. Comentar que "peso máximo" lo pedí yo después: el 1RM es calculado y quería ver el peso real.</div>
+  <div class="notes">Mostrar: prender y apagar personas, cambiar a DOTS (ahí cambia quién va ganando), y a semana a semana. Comentar que "peso máximo" lo pedimos después: el 1RM es calculado y queríamos ver el peso real.</div>
 </section>
 
 <section class="slide">
@@ -162,7 +162,7 @@
     <div class="card"><h3>Herramientas propias</h3><ul><li>Skill <code>nuevo-ranking</code>: regla del spec → test → función.</li><li>Sub-agente <code>gym-bro</code>: prueba la app como usuario.</li></ul></div>
     <div class="card"><h3>Cuando algo creció</h3><ul><li><code>stats.py</code> y <code>schemas.py</code> pasaron a paquetes.</li><li>La pantalla de carga se partió tres veces en vez de subir el límite.</li></ul></div>
   </div>
-  <div class="notes">La regla de "no cambies una decisión del grill sin preguntar" en CLAUDE.md funcionó: cuando el gym-bro pidió "PR de reps", el agente no lo cambió solo, me preguntó.</div>
+  <div class="notes">La regla de "no cambies una decisión del grill sin preguntar" en CLAUDE.md funcionó: cuando el gym-bro pidió "PR de reps", el agente no lo cambió solo, nos preguntó.</div>
 </section>
 
 <section class="slide">
@@ -186,18 +186,18 @@
     <li><b>PRs:</b> la primera sesión tiraba cuatro y llenaba el feed.</li>
   </ul>
   <div class="lesson"><p>Las encontró el gym-bro usando la app, no los tests. Un test verde dice que el código cumple la regla, no que la regla sirva.</p></div>
-  <div class="notes">Los tests verificaban exactamente lo que decía el spec: el error estaba en el spec. Corregí las tres con test primero y lo anoté en el spec. Esta es probablemente la lección más importante del proyecto.</div>
+  <div class="notes">Los tests verificaban exactamente lo que decía el spec: el error estaba en el spec. Corregimos las tres con test primero y lo anotamos en el spec. Esta es probablemente la lección más importante del proyecto.</div>
 </section>
 
 <section class="slide">
   <p class="eyebrow">Deriva del agente · 2</p>
-  <h2>Lo que vi yo al usarla</h2>
+  <h2>Lo que vimos al usarla</h2>
   <div class="cols">
     <div class="card"><h3 class="ember">"¿Terminar qué?"</h3><p>La carga tenía muchos botones, y "Terminar (1)" estaba al lado de "Guardar serie". Rediseño: <b>una sola acción grande por momento</b>, "✓ Hice la serie 2 de 5".</p></div>
-    <div class="card"><h3 class="ember">Datos que se duplicaban</h3><p>Correr dos veces el script de datos de prueba inventaba días nuevos. Restauré el backup y lo hice repetible.</p></div>
-    <div class="card"><h3 class="ember">Google en el celular</h3><p>Auth0 no corre sin HTTPS fuera de localhost. Lo apagué y sumé usuario y contraseña propios, con la contraseña hasheada.</p></div>
+    <div class="card"><h3 class="ember">Datos que se duplicaban</h3><p>Correr dos veces el script de datos de prueba inventaba días nuevos. Restauramos el backup y lo hicimos repetible.</p></div>
+    <div class="card"><h3 class="ember">Google en el celular</h3><p>Auth0 no corre sin HTTPS fuera de localhost. Lo apagamos y sumamos usuario y contraseña propios, con la contraseña hasheada.</p></div>
   </div>
-  <div class="notes">Ninguno de estos lo hubiera detectado un test. El de la UX lo marqué yo con una captura. El del script lo vio el agente al revisar los números (319 sesiones cuando esperaba 100). Lo de Auth0 lo entendí recién cuando quise entrar desde el celular.</div>
+  <div class="notes">Ninguno de estos lo hubiera detectado un test. El de la UX lo marcamos nosotros con una captura. El del script lo vio el agente al revisar los números (319 sesiones cuando esperaba 100). Lo de Auth0 lo entendimos recién cuando quisimos entrar desde el celular.</div>
 </section>
 
 <section class="slide">
@@ -213,7 +213,7 @@
 
 <section class="slide">
   <p class="eyebrow">Apropiación</p>
-  <h2>Lo puedo explicar, corregir y extender</h2>
+  <h2>Lo podemos explicar, corregir y extender</h2>
   <div class="cols">
     <pre><span class="c"># PR: contra las sesiones anteriores,
 # a lo sumo uno por ejercicio y sesión</span>
@@ -223,16 +223,16 @@
 
 <span class="c"># 1RM estimado (Epley), hasta 10 reps</span>
 1rm = load × (1 + reps / 30)</pre>
-    <div class="card"><h3>Ejemplo: "Pasar a Nacho"</h3><p>Tomo el DOTS de Nacho, lo paso a kilos con tu peso del día y despejo Epley a tus mismas reps. Redondeo hacia arriba a discos de 2,5 kg hasta superarlo.</p><p class="muted" style="margin-top:1.6vh">Está en <code>backend/stats/standing.py</code>, con su test.</p></div>
+    <div class="card"><h3>Ejemplo: "Pasar a Nacho"</h3><p>Se toma el DOTS de Nacho, se pasa a kilos con tu peso del día y se despeja Epley a tus mismas reps. Se redondea hacia arriba a discos de 2,5 kg hasta superarlo.</p><p class="muted" style="margin-top:1.6vh">Está en <code>backend/stats/standing.py</code>, con su test.</p></div>
   </div>
   <div class="notes">Si preguntan por algo puntual, saber explicar: DOTS (polinomio por sexo, peso acotado), la regla de PRs, por qué se calcula al leer, y cómo funciona el token de sesión (se guarda el sha256, no el token).</div>
 </section>
 
 <section class="slide">
-  <p class="eyebrow">Qué me llevo</p>
+  <p class="eyebrow">Qué nos llevamos</p>
   <div class="cols">
     <div class="card"><h3>Decidir en el grill</h3><p>Las mejores decisiones salieron de discutir y corregir lo que el agente proponía, antes de escribir código.</p></div>
-    <div class="card"><h3>Probar como usuario</h3><p>Los tests protegen las reglas; un agente usuario (o yo con el celular) encuentra si las reglas sirven.</p></div>
+    <div class="card"><h3>Probar como usuario</h3><p>Los tests protegen las reglas; un agente usuario (o nosotros con el celular) encuentra si las reglas sirven.</p></div>
     <div class="card"><h3>Escribir los límites</h3><p>CLAUDE.md, reglas y permisos hicieron que el proyecto creciera sin que el agente se desordenara.</p></div>
   </div>
   <div class="notes">Si hubiera que hacerlo de nuevo: correr el gym-bro antes, apenas hubo una primera versión, en vez de después de los 12 issues.</div>
