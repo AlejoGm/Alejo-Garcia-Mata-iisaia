@@ -7,6 +7,7 @@ import { el, errorBox, storageGet, storageSet, toDisplay } from "../ui.js";
 const COLORS = 10;  // p0..p9 en el CSS: cada miembro tiene siempre el mismo color
 const PERIODS = [["6m", "6 meses"], ["12m", "12 meses"], ["all", "Todo"]];
 const METRICS = [["max", "Peso máximo"], ["1rm", "1RM estimado"], ["dots", "DOTS"]];
+const VIEWS = [["month", "Mejor del mes"], ["week", "Mejor de la semana"]];
 
 function monthShort(iso) {
   const [y, m] = iso.split("-").map(Number);
@@ -33,7 +34,7 @@ function defaultSelection(data, me) {
 export function compareSection(group) {
   const box = el("section", { class: "card span-12 compare" }, el("p", { class: "muted" }, "Cargando..."));
   const key = `gymbro.compare.${group.code}`;
-  const prefs = { metric: "dots", period: "6m", exercise_id: null, selected: null, ...storageGet(key, {}) };
+  const prefs = { metric: "dots", period: "6m", view: "month", exercise_id: null, selected: null, ...storageGet(key, {}) };
   const save = () => storageSet(key, prefs);
   const color = new Map(group.members.map((m, i) => [m.user_id, `p${i % COLORS}`]));
 
@@ -56,6 +57,7 @@ export function compareSection(group) {
     const shown = data.people.filter((p) => selected.has(p.user_id));
     const exercise = data.exercises.find((e) => e.id === data.exercise_id);
     const unit = state.me.unit;
+    const byWeek = prefs.view === "week";
     const value = (v) => (v === null ? null : prefs.metric === "dots" ? v : toDisplay(v, unit));
 
     const select = el("select", { "aria-label": "Ejercicio" }, data.exercises.map((e) =>
@@ -84,10 +86,12 @@ export function compareSection(group) {
       el("div", { class: "compare-controls" }, select, segmented("compare-metric", METRICS, prefs.metric, (v) => { prefs.metric = v; save(); render(); }),
         segmented("compare-period", PERIODS, prefs.period, (v) => { prefs.period = v; save(); render(); })),
       el("div", { class: "compare-charts" },
-        el("div", {}, el("h4", {}, `${exercise?.name ?? ""}: ${what}, por mes`),
+        el("div", {}, el("h4", {}, `${exercise?.name ?? ""}: ${what}, ${byWeek ? "semana a semana" : "por mes"}`),
           el("p", { class: "muted small" }, note),
-          lineChart({ label: `${exercise?.name}, ${what} por mes`, area: false, labels: data.months.map(monthShort),
-            series: shown.map((p) => ({ className: color.get(p.user_id), values: p.months.map(value) })) })),
+          segmented("compare-view", VIEWS, prefs.view, (v) => { prefs.view = v; save(); render(); }),
+          lineChart({ label: `${exercise?.name}, ${what} ${byWeek ? "por semana" : "por mes"}`, area: false,
+            labels: byWeek ? data.best_weeks.map(dayShort) : data.months.map(monthShort),
+            series: shown.map((p) => ({ className: color.get(p.user_id), values: (byWeek ? p.week_best : p.months).map(value) })) })),
         el("div", {}, el("h4", {}, "Días entrenados por semana"),
           el("p", { class: "muted small" }, "Las últimas 12 semanas; la actual va en curso."),
           lineChart({ label: "Días entrenados por semana", area: false, labels: data.weeks.map(dayShort),

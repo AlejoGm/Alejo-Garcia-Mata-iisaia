@@ -150,6 +150,7 @@ class ComparePerson(BaseModel):
     display_name: str
     months: list[float | None]  # mejor del mes, alineado con CompareOut.months
     days: list[int]  # días entrenados por semana, alineado con CompareOut.weeks
+    week_best: list[float | None]  # lo mejor de cada semana, alineado con CompareOut.best_weeks
     goal: int | None
 
 
@@ -160,4 +161,5 @@ class CompareOut(BaseModel):
     exercises: list[ExerciseOut]
     months: list[date]
     weeks: list[date]
+    best_weeks: list[date]  # las semanas del período, para la vista semana a semana
     people: list[ComparePerson]

@@ -237,6 +237,7 @@ Para una serie todavía no guardada (ejercicio, peso, reps y peso corporal del d
 
 Para un ejercicio y un período, sin las series dudosas del grupo:
 - **Fuerza por mes:** para cada miembro y cada mes del período, la carga más alta levantada con cualquier cantidad de reps (`max`), el mejor 1RM estimado (`1rm`) o su DOTS (`dots`). Sin dato ese mes, `null`.
+- **Fuerza por semana:** lo mismo, pero para cada semana (de lunes a domingo) del período hasta hoy, para la vista "Mejor de la semana".
 - **Días por semana:** para cada miembro, los días distintos entrenados en cada una de las últimas 12 semanas, de la más vieja a la actual.
 - **Ejercicios:** del más cargado en el grupo al menos; con `1rm` o `dots`, solo los que tienen 1RM estimable. Si no se pide uno, el primero.
 

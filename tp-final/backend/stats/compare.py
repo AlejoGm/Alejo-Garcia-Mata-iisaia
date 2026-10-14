@@ -14,6 +14,15 @@ def month_list(start: date, end: date) -> list[date]:
     return months
 
 
+def set_value(record: SetRecord, sex: str, metric: str) -> float | None:
+    """La carga tal cual ("max"), el 1RM estimado ("1rm") o su DOTS ("dots"). Sin 1RM estimable, solo "max"."""
+    if metric == "max":
+        return record.load
+    if record.estimated_1rm is None:
+        return None
+    return record.estimated_1rm if metric == "1rm" else set_dots(record, sex)
+
+
 def monthly_best_by_user(records: list[SetRecord], exercise_id: int, start: date, end: date, sexes: dict[int, str],
                          metric: str) -> dict[int, list[float | None]]:
     """Por miembro, lo mejor de cada mes del período: la carga más alta levantada ("max", sin cálculos y con
@@ -22,14 +31,9 @@ def monthly_best_by_user(records: list[SetRecord], exercise_id: int, start: date
     index = {m: i for i, m in enumerate(months)}
     lines: dict[int, list[float | None]] = {uid: [None] * len(months) for uid in sexes}
     for r in in_range(records, start, end):
-        if r.exercise_id != exercise_id or r.user_id not in lines:
+        value = set_value(r, sexes[r.user_id], metric) if r.exercise_id == exercise_id and r.user_id in lines else None
+        if value is None:
             continue
-        if metric == "max":
-            value = r.load
-        elif r.estimated_1rm is None:
-            continue
-        else:
-            value = r.estimated_1rm if metric == "1rm" else set_dots(r, sexes[r.user_id])
         slot = index[month_start(r.date)]
         current = lines[r.user_id][slot]
         lines[r.user_id][slot] = value if current is None else max(current, value)
@@ -51,3 +55,22 @@ def weekly_days_by_user(records: list[SetRecord], user_ids: list[int], today: da
         for day in trained:
             counts[uid][index[monday(day)]] += 1
     return starts, counts
+
+
+def weekly_best_by_user(records: list[SetRecord], exercise_id: int, start: date, end: date, sexes: dict[int, str],
+                       metric: str) -> tuple[list[date], dict[int, list[float | None]]]:
+    """Las semanas (lunes) de [start, end] y, por miembro, lo mejor de cada una en ese ejercicio. None sin dato."""
+    weeks, week = [], monday(start)
+    while week <= end:
+        weeks.append(week)
+        week += timedelta(weeks=1)
+    index = {w: i for i, w in enumerate(weeks)}
+    lines: dict[int, list[float | None]] = {uid: [None] * len(weeks) for uid in sexes}
+    for r in in_range(records, weeks[0] if weeks else start, end):
+        value = set_value(r, sexes[r.user_id], metric) if r.exercise_id == exercise_id and r.user_id in lines else None
+        if value is None:
+            continue
+        slot = index[monday(r.date)]
+        current = lines[r.user_id][slot]
+        lines[r.user_id][slot] = value if current is None else max(current, value)
+    return weeks, {uid: [None if v is None else round(v, 1) for v in values] for uid, values in lines.items()}
