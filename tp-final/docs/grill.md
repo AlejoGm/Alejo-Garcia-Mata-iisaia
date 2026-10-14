@@ -253,3 +253,36 @@ Un empate muestra a todos los empatados. No suma puntos a nada: es para el chat.
 **¿Cancelar un reto?** Pide un segundo toque, como "Confirmar" en un peso sospechoso.
 
 **¿Instalable?** Un manifest con ícono y color, para "Agregar a la pantalla de inicio" y abrirla sin la barra del navegador. Sin service worker: el borrador local ya cubre cortes de señal, y el PRD deja afuera la sincronización en segundo plano.
+
+## Más juego (sexta pasada)
+
+Pedido: que la app se sienta más como un juego. No con features nuevas, sino con experiencia de uso. El ejemplo de Alejo: que al cargar una serie te muestre cómo te fue contra el resto del grupo. Lo cerré con un auto-grill.
+
+**¿Qué hace que algo se sienta juego?** Respuesta inmediata a lo que hacés, saber contra quién vas, y un cierre que celebra. Hoy todo eso pasa tarde: la posición en el grupo se ve en Rankings, el PR aparece recién al terminar y el resumen es una lista. La idea es llevar esa respuesta al momento de cargar.
+
+**¿Qué ves al guardar una serie?** Una tarjeta corta, abajo y cerca del pulgar, que dura unos segundos:
+- **PR:** si la serie es un récord, se celebra al instante con animación y vibración, en lugar de esperar al final.
+- **Tu lugar en el grupo** en ese ejercicio: "3º de 7 en Press banca este mes".
+- **A quién pasaste** con esa serie: "¡Pasaste a Tomi!".
+- **A quién tenés adelante y qué serie te falta** para pasarlo, a tus mismas reps: "Para pasar a Nacho: 85 × 6". Un toque la carga en los campos, como "Para PR".
+- **Si sos el primero:** "Primero del grupo en Press banca".
+
+**¿Contra qué se compara?** Contra el ranking de fuerza del mes en DOTS: el mismo de Rankings y de "Líderes del mes", así la tarjeta no contradice a las tablas. Lo que te falta se dice en kilos y reps, a tu peso del día, porque nadie piensa en DOTS en el gimnasio. Con más de 10 reps no hay 1RM estimado y no hay comparación; la tarjeta lo dice.
+
+**¿Dónde se calcula?** En el servidor, con un endpoint que recibe la serie sin guardarla y devuelve el PR, el lugar antes y después, a quién pasaste y la serie para pasar al siguiente. Las reglas (posición, inversa de Epley para la serie objetivo) van a `backend/stats/` con TDD. El cliente no duplica fórmulas. Si no hay señal, la serie se guarda igual en el borrador y la tarjeta no aparece.
+
+**¿Cómo cierra la sesión?** Como el final de un nivel:
+- los números (series, volumen, PRs) suben animados;
+- **"Subiste en el grupo":** por ejercicio, de qué lugar a qué lugar pasaste y a quién pasaste en la sesión;
+- **medalla nueva**, si la sesión desbloqueó alguna;
+- tu semana: "Día 3 de 4" y la racha.
+
+**¿Animaciones?** Cortas y con sentido:
+- los números rebotan al tocar + o −;
+- "Guardar serie" muestra un tilde;
+- un PR o una medalla nueva largan papelitos (confeti);
+- el celular vibra en los mismos casos.
+
+Con "reducir movimiento" activado en el sistema, no hay animaciones.
+
+**¿Qué queda afuera?** Puntos de experiencia, niveles y sonidos. Son features nuevas con reglas propias, y el pedido es que lo que ya existe se sienta mejor.
